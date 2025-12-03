@@ -462,7 +462,6 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
       </Modal>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>SimBaseBall v1.0.0</Text>
         <TouchableOpacity 
           style={styles.debugButton} 
           onPress={() => navigation.navigate('Debug')}

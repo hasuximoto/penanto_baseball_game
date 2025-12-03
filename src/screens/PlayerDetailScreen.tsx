@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Player } from '../types';
+import { Player, YearlyStats } from '../types';
+import { dbManager } from '../services/databaseManager';
 
-type Tab = 'stats' | 'abilities';
+type Tab = 'stats' | 'abilities' | 'yearlyStats';
 
 export const PlayerDetailScreen = ({ route }: any) => {
   const { player } = route.params as { player: Player };
   const [activeTab, setActiveTab] = useState<Tab>('stats');
+  const [yearlyStats, setYearlyStats] = useState<YearlyStats[]>([]);
+
+  useEffect(() => {
+    const loadYearlyStats = async () => {
+      const stats = await dbManager.getYearlyStats(player.id);
+      setYearlyStats(stats);
+    };
+    loadYearlyStats();
+  }, [player.id]);
 
   const renderStats = () => {
     const stats = player.stats;
@@ -44,6 +54,7 @@ export const PlayerDetailScreen = ({ route }: any) => {
           <View style={styles.statRow}><Text style={styles.statLabel}>奪三振率</Text><Text style={styles.statValue}>{stats.k9?.toFixed(2) || 0}</Text></View>
           <View style={styles.statRow}><Text style={styles.statLabel}>与四球率</Text><Text style={styles.statValue}>{stats.bb9?.toFixed(2) || 0}</Text></View>
           <View style={styles.statRow}><Text style={styles.statLabel}>WHIP</Text><Text style={styles.statValue}>{stats.whip?.toFixed(2) || 0}</Text></View>
+          <View style={styles.statRow}><Text style={styles.statLabel}>WAR</Text><Text style={styles.statValue}>{stats.war?.toFixed(1) || '0.0'}</Text></View>
         </View>
       );
     } else {
@@ -88,6 +99,9 @@ export const PlayerDetailScreen = ({ route }: any) => {
           <View style={styles.statRow}><Text style={styles.statLabel}>出塁率</Text><Text style={styles.statValue}>{stats.obp?.toFixed(3) || obp.toFixed(3)}</Text></View>
           <View style={styles.statRow}><Text style={styles.statLabel}>長打率</Text><Text style={styles.statValue}>{stats.slugging?.toFixed(3) || slugging.toFixed(3)}</Text></View>
           <View style={styles.statRow}><Text style={styles.statLabel}>OPS</Text><Text style={styles.statValue}>{stats.ops?.toFixed(3) || ops.toFixed(3)}</Text></View>
+          <View style={styles.statRow}><Text style={styles.statLabel}>UZR</Text><Text style={styles.statValue}>{stats.uzr?.toFixed(1) || '0.0'}</Text></View>
+          <View style={styles.statRow}><Text style={styles.statLabel}>UBR</Text><Text style={styles.statValue}>{stats.ubr?.toFixed(1) || '0.0'}</Text></View>
+          <View style={styles.statRow}><Text style={styles.statLabel}>WAR</Text><Text style={styles.statValue}>{stats.war?.toFixed(1) || '0.0'}</Text></View>
         </View>
       );
     }
@@ -250,6 +264,289 @@ export const PlayerDetailScreen = ({ route }: any) => {
     );
   };
 
+  const renderYearlyStats = () => {
+    if (yearlyStats.length === 0) {
+      return (
+        <View style={styles.statsContainer}>
+          <Text style={{ textAlign: 'center', color: '#666', marginTop: 20 }}>過去の成績データはありません</Text>
+        </View>
+      );
+    }
+
+    const isPitcher = player.position === 'P';
+
+    // Calculate Totals
+    const total = yearlyStats.reduce((acc, curr) => {
+      const s = curr.stats;
+      if (isPitcher) {
+        acc.gamesPitched = (acc.gamesPitched || 0) + (s.gamesPitched || 0);
+        acc.inningsPitched = (acc.inningsPitched || 0) + (s.inningsPitched || 0);
+        acc.earnedRuns = (acc.earnedRuns || 0) + (s.earnedRuns || 0);
+        acc.pitchingHits = (acc.pitchingHits || 0) + (s.pitchingHits || 0);
+        acc.pitchingHomeRuns = (acc.pitchingHomeRuns || 0) + (s.pitchingHomeRuns || 0);
+        acc.strikeOuts = (acc.strikeOuts || 0) + (s.strikeOuts || 0);
+        acc.pitchingWalks = (acc.pitchingWalks || 0) + (s.pitchingWalks || 0);
+        acc.pitchingHitByPitch = (acc.pitchingHitByPitch || 0) + (s.pitchingHitByPitch || 0);
+        acc.completeGames = (acc.completeGames || 0) + (s.completeGames || 0);
+        acc.shutouts = (acc.shutouts || 0) + (s.shutouts || 0);
+        acc.wins = (acc.wins || 0) + (s.wins || 0);
+        acc.losses = (acc.losses || 0) + (s.losses || 0);
+        acc.saves = (acc.saves || 0) + (s.saves || 0);
+        acc.gamesStarted = (acc.gamesStarted || 0) + (s.gamesStarted || 0);
+        acc.qualityStarts = (acc.qualityStarts || 0) + (s.qualityStarts || 0);
+        acc.war = (acc.war || 0) + (s.war || 0);
+      } else {
+        acc.gamesPlayed = (acc.gamesPlayed || 0) + (s.gamesPlayed || 0);
+        acc.plateAppearances = (acc.plateAppearances || 0) + (s.plateAppearances || 0);
+        acc.atBats = (acc.atBats || 0) + (s.atBats || 0);
+        acc.hits = (acc.hits || 0) + (s.hits || 0);
+        acc.doubles = (acc.doubles || 0) + (s.doubles || 0);
+        acc.triples = (acc.triples || 0) + (s.triples || 0);
+        acc.homeRuns = (acc.homeRuns || 0) + (s.homeRuns || 0);
+        acc.rbi = (acc.rbi || 0) + (s.rbi || 0);
+        acc.batterStrikeouts = (acc.batterStrikeouts || 0) + (s.batterStrikeouts || s.strikeOuts || 0);
+        acc.walks = (acc.walks || 0) + (s.walks || 0);
+        acc.hitByPitch = (acc.hitByPitch || 0) + (s.hitByPitch || 0);
+        acc.sacrificeBunts = (acc.sacrificeBunts || 0) + (s.sacrificeBunts || 0);
+        acc.sacrificeFlies = (acc.sacrificeFlies || 0) + (s.sacrificeFlies || 0);
+        acc.stolenBases = (acc.stolenBases || 0) + (s.stolenBases || 0);
+        acc.caughtStealing = (acc.caughtStealing || 0) + (s.caughtStealing || 0);
+        acc.doublePlays = (acc.doublePlays || 0) + (s.doublePlays || 0);
+        acc.errors = (acc.errors || 0) + (s.errors || 0);
+        acc.uzr = (acc.uzr || 0) + (s.uzr || 0);
+        acc.ubr = (acc.ubr || 0) + (s.ubr || 0);
+        acc.war = (acc.war || 0) + (s.war || 0);
+      }
+      return acc;
+    }, {} as any);
+
+    // Calculate Averages for Total
+    if (isPitcher) {
+        const ip = total.inningsPitched || 0;
+        total.era = ip > 0 ? (total.earnedRuns * 9) / ip : 0;
+        total.k9 = ip > 0 ? (total.strikeOuts * 9) / ip : 0;
+        total.bb9 = ip > 0 ? (total.pitchingWalks * 9) / ip : 0;
+        total.whip = ip > 0 ? (total.pitchingWalks + total.pitchingHits) / ip : 0;
+    } else {
+        const ab = total.atBats || 0;
+        const pa = total.plateAppearances || 0;
+        const hits = total.hits || 0;
+        const walks = total.walks || 0;
+        const hbp = total.hitByPitch || 0;
+        const sf = total.sacrificeFlies || 0;
+        
+        total.average = ab > 0 ? hits / ab : 0;
+        total.obp = (ab + walks + hbp + sf) > 0 ? (hits + walks + hbp) / (ab + walks + hbp + sf) : 0;
+        
+        const singles = hits - (total.doubles || 0) - (total.triples || 0) - (total.homeRuns || 0);
+        const totalBases = singles + (total.doubles || 0) * 2 + (total.triples || 0) * 3 + (total.homeRuns || 0) * 4;
+        total.slugging = ab > 0 ? totalBases / ab : 0;
+        total.ops = total.obp + total.slugging;
+    }
+
+    const formatInnings = (innings: number) => {
+        const rounded = Math.round(innings * 3) / 3;
+        const integerPart = Math.floor(rounded);
+        const decimalPart = rounded - integerPart;
+        if (decimalPart > 0.6) return `${integerPart > 0 ? integerPart + ' ' : ''}2/3`;
+        if (decimalPart > 0.3) return `${integerPart > 0 ? integerPart + ' ' : ''}1/3`;
+        return integerPart.toString();
+    };
+
+    const renderHeaderCell = (label: string, width: number) => (
+        <View style={[styles.headerCell, { width }]}>
+            <Text style={styles.headerText}>{label}</Text>
+        </View>
+    );
+
+    const renderCell = (value: any, width: number) => (
+        <View style={[styles.cell, { width }]}>
+            <Text style={styles.cellText}>{value}</Text>
+        </View>
+    );
+
+    return (
+      <View style={styles.statsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+          <View>
+            {/* Header */}
+            <View style={styles.headerRow}>
+                {renderHeaderCell('年度', 60)}
+                {renderHeaderCell('球団', 60)}
+                {isPitcher ? (
+                    <>
+                        {renderHeaderCell('登板', 50)}
+                        {renderHeaderCell('投球回', 60)}
+                        {renderHeaderCell('自責点', 50)}
+                        {renderHeaderCell('被安打', 50)}
+                        {renderHeaderCell('被本塁打', 60)}
+                        {renderHeaderCell('奪三振', 50)}
+                        {renderHeaderCell('与四球', 50)}
+                        {renderHeaderCell('与死球', 50)}
+                        {renderHeaderCell('完投', 50)}
+                        {renderHeaderCell('完封', 50)}
+                        {renderHeaderCell('勝', 50)}
+                        {renderHeaderCell('敗', 50)}
+                        {renderHeaderCell('セーブ', 50)}
+                        {renderHeaderCell('先発', 50)}
+                        {renderHeaderCell('QS', 50)}
+                        {renderHeaderCell('防御率', 60)}
+                        {renderHeaderCell('奪三振率', 60)}
+                        {renderHeaderCell('与四球率', 60)}
+                        {renderHeaderCell('WHIP', 60)}
+                        {renderHeaderCell('WAR', 60)}
+                    </>
+                ) : (
+                    <>
+                        {renderHeaderCell('試合', 50)}
+                        {renderHeaderCell('打席', 50)}
+                        {renderHeaderCell('打数', 50)}
+                        {renderHeaderCell('安打', 50)}
+                        {renderHeaderCell('二塁打', 50)}
+                        {renderHeaderCell('三塁打', 50)}
+                        {renderHeaderCell('本塁打', 50)}
+                        {renderHeaderCell('打点', 50)}
+                        {renderHeaderCell('三振', 50)}
+                        {renderHeaderCell('四球', 50)}
+                        {renderHeaderCell('死球', 50)}
+                        {renderHeaderCell('犠打', 50)}
+                        {renderHeaderCell('犠飛', 50)}
+                        {renderHeaderCell('盗塁', 50)}
+                        {renderHeaderCell('盗塁死', 50)}
+                        {renderHeaderCell('併殺', 50)}
+                        {renderHeaderCell('失策', 50)}
+                        {renderHeaderCell('打率', 60)}
+                        {renderHeaderCell('出塁率', 60)}
+                        {renderHeaderCell('長打率', 60)}
+                        {renderHeaderCell('OPS', 60)}
+                        {renderHeaderCell('UZR', 60)}
+                        {renderHeaderCell('UBR', 60)}
+                        {renderHeaderCell('WAR', 60)}
+                    </>
+                )}
+            </View>
+
+            {/* Data Rows */}
+            {yearlyStats.map((stat, index) => (
+                <View key={index} style={styles.row}>
+                    {renderCell(stat.year, 60)}
+                    {renderCell(stat.teamId.toUpperCase(), 60)}
+                    {isPitcher ? (
+                        <>
+                            {renderCell(stat.stats.gamesPitched || 0, 50)}
+                            {renderCell(formatInnings(stat.stats.inningsPitched || 0), 60)}
+                            {renderCell(stat.stats.earnedRuns || 0, 50)}
+                            {renderCell(stat.stats.pitchingHits || 0, 50)}
+                            {renderCell(stat.stats.pitchingHomeRuns || 0, 60)}
+                            {renderCell(stat.stats.strikeOuts || 0, 50)}
+                            {renderCell(stat.stats.pitchingWalks || 0, 50)}
+                            {renderCell(stat.stats.pitchingHitByPitch || 0, 50)}
+                            {renderCell(stat.stats.completeGames || 0, 50)}
+                            {renderCell(stat.stats.shutouts || 0, 50)}
+                            {renderCell(stat.stats.wins || 0, 50)}
+                            {renderCell(stat.stats.losses || 0, 50)}
+                            {renderCell(stat.stats.saves || 0, 50)}
+                            {renderCell(stat.stats.gamesStarted || 0, 50)}
+                            {renderCell(stat.stats.qualityStarts || 0, 50)}
+                            {renderCell(stat.stats.era?.toFixed(2), 60)}
+                            {renderCell(stat.stats.k9?.toFixed(2), 60)}
+                            {renderCell(stat.stats.bb9?.toFixed(2), 60)}
+                            {renderCell(stat.stats.whip?.toFixed(2), 60)}
+                            {renderCell(stat.stats.war?.toFixed(2), 60)}
+                        </>
+                    ) : (
+                        <>
+                            {renderCell(stat.stats.gamesPlayed || 0, 50)}
+                            {renderCell(stat.stats.plateAppearances || 0, 50)}
+                            {renderCell(stat.stats.atBats || 0, 50)}
+                            {renderCell(stat.stats.hits || 0, 50)}
+                            {renderCell(stat.stats.doubles || 0, 50)}
+                            {renderCell(stat.stats.triples || 0, 50)}
+                            {renderCell(stat.stats.homeRuns || 0, 50)}
+                            {renderCell(stat.stats.rbi || 0, 50)}
+                            {renderCell(stat.stats.batterStrikeouts || stat.stats.strikeOuts || 0, 50)}
+                            {renderCell(stat.stats.walks || 0, 50)}
+                            {renderCell(stat.stats.hitByPitch || 0, 50)}
+                            {renderCell(stat.stats.sacrificeBunts || 0, 50)}
+                            {renderCell(stat.stats.sacrificeFlies || 0, 50)}
+                            {renderCell(stat.stats.stolenBases || 0, 50)}
+                            {renderCell(stat.stats.caughtStealing || 0, 50)}
+                            {renderCell(stat.stats.doublePlays || 0, 50)}
+                            {renderCell(stat.stats.errors || 0, 50)}
+                            {renderCell(stat.stats.average?.toFixed(3), 60)}
+                            {renderCell(stat.stats.obp?.toFixed(3), 60)}
+                            {renderCell(stat.stats.slugging?.toFixed(3), 60)}
+                            {renderCell(stat.stats.ops?.toFixed(3), 60)}
+                            {renderCell(stat.stats.uzr?.toFixed(2), 60)}
+                            {renderCell(stat.stats.ubr?.toFixed(2), 60)}
+                            {renderCell(stat.stats.war?.toFixed(2), 60)}
+                        </>
+                    )}
+                </View>
+            ))}
+
+            {/* Total Row */}
+            <View style={[styles.row, styles.totalRow]}>
+                {renderCell('通算', 60)}
+                {renderCell('-', 60)}
+                {isPitcher ? (
+                    <>
+                        {renderCell(total.gamesPitched || 0, 50)}
+                        {renderCell(formatInnings(total.inningsPitched || 0), 60)}
+                        {renderCell(total.earnedRuns || 0, 50)}
+                        {renderCell(total.pitchingHits || 0, 50)}
+                        {renderCell(total.pitchingHomeRuns || 0, 60)}
+                        {renderCell(total.strikeOuts || 0, 50)}
+                        {renderCell(total.pitchingWalks || 0, 50)}
+                        {renderCell(total.pitchingHitByPitch || 0, 50)}
+                        {renderCell(total.completeGames || 0, 50)}
+                        {renderCell(total.shutouts || 0, 50)}
+                        {renderCell(total.wins || 0, 50)}
+                        {renderCell(total.losses || 0, 50)}
+                        {renderCell(total.saves || 0, 50)}
+                        {renderCell(total.gamesStarted || 0, 50)}
+                        {renderCell(total.qualityStarts || 0, 50)}
+                        {renderCell(total.era?.toFixed(2), 60)}
+                        {renderCell(total.k9?.toFixed(2), 60)}
+                        {renderCell(total.bb9?.toFixed(2), 60)}
+                        {renderCell(total.whip?.toFixed(2), 60)}
+                        {renderCell(total.war?.toFixed(2), 60)}
+                    </>
+                ) : (
+                    <>
+                        {renderCell(total.gamesPlayed || 0, 50)}
+                        {renderCell(total.plateAppearances || 0, 50)}
+                        {renderCell(total.atBats || 0, 50)}
+                        {renderCell(total.hits || 0, 50)}
+                        {renderCell(total.doubles || 0, 50)}
+                        {renderCell(total.triples || 0, 50)}
+                        {renderCell(total.homeRuns || 0, 50)}
+                        {renderCell(total.rbi || 0, 50)}
+                        {renderCell(total.batterStrikeouts || 0, 50)}
+                        {renderCell(total.walks || 0, 50)}
+                        {renderCell(total.hitByPitch || 0, 50)}
+                        {renderCell(total.sacrificeBunts || 0, 50)}
+                        {renderCell(total.sacrificeFlies || 0, 50)}
+                        {renderCell(total.stolenBases || 0, 50)}
+                        {renderCell(total.caughtStealing || 0, 50)}
+                        {renderCell(total.doublePlays || 0, 50)}
+                        {renderCell(total.errors || 0, 50)}
+                        {renderCell(total.average?.toFixed(3), 60)}
+                        {renderCell(total.obp?.toFixed(3), 60)}
+                        {renderCell(total.slugging?.toFixed(3), 60)}
+                        {renderCell(total.ops?.toFixed(3), 60)}
+                        {renderCell(total.uzr?.toFixed(2), 60)}
+                        {renderCell(total.ubr?.toFixed(2), 60)}
+                        {renderCell(total.war?.toFixed(2), 60)}
+                    </>
+                )}
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -262,7 +559,13 @@ export const PlayerDetailScreen = ({ route }: any) => {
           style={[styles.tab, activeTab === 'stats' && styles.activeTab]} 
           onPress={() => setActiveTab('stats')}
         >
-          <Text style={[styles.tabText, activeTab === 'stats' && styles.activeTabText]}>成績</Text>
+          <Text style={[styles.tabText, activeTab === 'stats' && styles.activeTabText]}>今季成績</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'yearlyStats' && styles.activeTab]} 
+          onPress={() => setActiveTab('yearlyStats')}
+        >
+          <Text style={[styles.tabText, activeTab === 'yearlyStats' && styles.activeTabText]}>年度別</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tab, activeTab === 'abilities' && styles.activeTab]} 
@@ -273,7 +576,9 @@ export const PlayerDetailScreen = ({ route }: any) => {
       </View>
 
       <ScrollView style={styles.content}>
-        {activeTab === 'stats' ? renderStats() : renderAbilities()}
+        {activeTab === 'stats' && renderStats()}
+        {activeTab === 'yearlyStats' && renderYearlyStats()}
+        {activeTab === 'abilities' && renderAbilities()}
       </ScrollView>
     </View>
   );
@@ -351,5 +656,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    backgroundColor: '#e0e0e0',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  headerCell: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 2,
+  },
+  headerText: {
+    fontWeight: 'bold',
+    fontSize: 12,
+    color: '#333',
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  cell: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 2,
+  },
+  cellText: {
+    fontSize: 13,
+    color: '#333',
+    textAlign: 'center',
+  },
+  totalRow: {
+    backgroundColor: '#f9f9f9',
+    borderTopWidth: 2,
+    borderTopColor: '#ccc',
   },
 });
