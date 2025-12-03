@@ -1,0 +1,5150 @@
+[
+  {
+    "date": "2026-03-27",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-27",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-27",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-27",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-27",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-27",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-28",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-28",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-28",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-28",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-28",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-28",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-29",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-29",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-29",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-29",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-29",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-29",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-31",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-31",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-31",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-31",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-31",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-03-31",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-01",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-01",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-01",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-01",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-01",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-01",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-02",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-02",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-02",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-02",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-02",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-02",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-03",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-03",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-03",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-03",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-03",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-03",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-04",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-04",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-04",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-04",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-04",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-04",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-05",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-05",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-05",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-05",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-05",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-05",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-07",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-07",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-07",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-07",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-07",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-07",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-08",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-08",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-08",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-08",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-08",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-08",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-09",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-09",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-09",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-09",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-09",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-09",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-10",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-10",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-10",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-10",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-10",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-10",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-11",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-11",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-11",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-11",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-11",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-11",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-12",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-12",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-12",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-12",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-12",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-12",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-14",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-14",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-14",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-14",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-14",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-14",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-15",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-15",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-15",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-15",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-15",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-15",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-16",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-16",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-16",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-16",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-16",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-16",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-17",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-17",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-17",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-17",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-17",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-17",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-18",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-18",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-18",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-18",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-18",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-18",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-19",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-19",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-19",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-19",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-19",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-19",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-21",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-21",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-21",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-21",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-21",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-21",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-22",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-22",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-22",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-22",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-22",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-22",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-23",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-23",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-23",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-23",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-23",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-23",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-24",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-24",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-24",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-24",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-24",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-24",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-25",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-25",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-25",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-25",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-25",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-25",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-26",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-26",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-26",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-26",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-26",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-26",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-28",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-28",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-28",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-28",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-28",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-28",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-29",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-29",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-29",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-29",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-29",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-29",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-30",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-30",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-30",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-30",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-30",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-04-30",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-01",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-01",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-01",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-01",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-01",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-01",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-02",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-02",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-02",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-02",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-02",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-02",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-03",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-03",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-03",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-03",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-03",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-03",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-05",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-05",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-05",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-05",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-05",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-05",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-06",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-06",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-06",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-06",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-06",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-06",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-07",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-07",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-07",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-07",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-07",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-07",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-08",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-08",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-08",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-08",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-08",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-08",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-09",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-09",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-09",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-09",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-09",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-09",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-10",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-10",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-10",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-10",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-10",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-10",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-12",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-12",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-12",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-12",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-12",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-12",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-13",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-13",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-13",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-13",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-13",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-13",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-14",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-14",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-14",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-14",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-14",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-14",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-15",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-15",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-15",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-15",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-15",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-15",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-16",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-16",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-16",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-16",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-16",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-16",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-17",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-17",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-17",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-17",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-17",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-17",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-05-19",
+    "home": "giants",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-19",
+    "home": "tigers",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-19",
+    "home": "dragons",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-19",
+    "home": "baystars",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-19",
+    "home": "carp",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-19",
+    "home": "swallows",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-20",
+    "home": "giants",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-20",
+    "home": "tigers",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-20",
+    "home": "dragons",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-20",
+    "home": "baystars",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-20",
+    "home": "carp",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-20",
+    "home": "swallows",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-21",
+    "home": "giants",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-21",
+    "home": "tigers",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-21",
+    "home": "dragons",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-21",
+    "home": "baystars",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-21",
+    "home": "carp",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-21",
+    "home": "swallows",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-22",
+    "home": "marines",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-22",
+    "home": "hawks",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-22",
+    "home": "lions",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-22",
+    "home": "fighters",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-22",
+    "home": "buffaloes",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-22",
+    "home": "eagles",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-23",
+    "home": "marines",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-23",
+    "home": "hawks",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-23",
+    "home": "lions",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-23",
+    "home": "fighters",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-23",
+    "home": "buffaloes",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-23",
+    "home": "eagles",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-24",
+    "home": "marines",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-24",
+    "home": "hawks",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-24",
+    "home": "lions",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-24",
+    "home": "fighters",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-24",
+    "home": "buffaloes",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-24",
+    "home": "eagles",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-26",
+    "home": "giants",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-26",
+    "home": "tigers",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-26",
+    "home": "dragons",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-26",
+    "home": "baystars",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-26",
+    "home": "carp",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-26",
+    "home": "swallows",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-27",
+    "home": "giants",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-27",
+    "home": "tigers",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-27",
+    "home": "dragons",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-27",
+    "home": "baystars",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-27",
+    "home": "carp",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-27",
+    "home": "swallows",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-28",
+    "home": "giants",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-28",
+    "home": "tigers",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-28",
+    "home": "dragons",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-28",
+    "home": "baystars",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-28",
+    "home": "carp",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-28",
+    "home": "swallows",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-29",
+    "home": "buffaloes",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-29",
+    "home": "eagles",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-29",
+    "home": "marines",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-29",
+    "home": "hawks",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-29",
+    "home": "lions",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-29",
+    "home": "fighters",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-30",
+    "home": "buffaloes",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-30",
+    "home": "eagles",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-30",
+    "home": "marines",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-30",
+    "home": "hawks",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-30",
+    "home": "lions",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-30",
+    "home": "fighters",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-31",
+    "home": "buffaloes",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-31",
+    "home": "eagles",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-31",
+    "home": "marines",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-31",
+    "home": "hawks",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-31",
+    "home": "lions",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-05-31",
+    "home": "fighters",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-02",
+    "home": "giants",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-02",
+    "home": "tigers",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-02",
+    "home": "dragons",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-02",
+    "home": "baystars",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-02",
+    "home": "carp",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-02",
+    "home": "swallows",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-03",
+    "home": "giants",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-03",
+    "home": "tigers",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-03",
+    "home": "dragons",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-03",
+    "home": "baystars",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-03",
+    "home": "carp",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-03",
+    "home": "swallows",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-04",
+    "home": "giants",
+    "away": "fighters",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-04",
+    "home": "tigers",
+    "away": "buffaloes",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-04",
+    "home": "dragons",
+    "away": "eagles",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-04",
+    "home": "baystars",
+    "away": "marines",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-04",
+    "home": "carp",
+    "away": "hawks",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-04",
+    "home": "swallows",
+    "away": "lions",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-05",
+    "home": "lions",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-05",
+    "home": "fighters",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-05",
+    "home": "buffaloes",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-05",
+    "home": "eagles",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-05",
+    "home": "marines",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-05",
+    "home": "hawks",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-06",
+    "home": "lions",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-06",
+    "home": "fighters",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-06",
+    "home": "buffaloes",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-06",
+    "home": "eagles",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-06",
+    "home": "marines",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-06",
+    "home": "hawks",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-07",
+    "home": "lions",
+    "away": "giants",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-07",
+    "home": "fighters",
+    "away": "tigers",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-07",
+    "home": "buffaloes",
+    "away": "dragons",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-07",
+    "home": "eagles",
+    "away": "baystars",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-07",
+    "home": "marines",
+    "away": "carp",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-07",
+    "home": "hawks",
+    "away": "swallows",
+    "isInterleague": true
+  },
+  {
+    "date": "2026-06-09",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-09",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-09",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-09",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-09",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-09",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-10",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-10",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-10",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-10",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-10",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-10",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-11",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-11",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-11",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-11",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-11",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-11",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-12",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-12",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-12",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-12",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-12",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-12",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-13",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-13",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-13",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-13",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-13",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-13",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-14",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-14",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-14",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-14",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-14",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-14",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-16",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-16",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-16",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-16",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-16",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-16",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-17",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-17",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-17",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-17",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-17",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-17",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-18",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-18",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-18",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-18",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-18",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-18",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-19",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-19",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-19",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-19",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-19",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-19",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-20",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-20",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-20",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-20",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-20",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-20",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-21",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-21",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-21",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-21",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-21",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-21",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-23",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-23",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-23",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-23",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-23",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-23",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-24",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-24",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-24",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-24",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-24",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-24",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-25",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-25",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-25",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-25",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-25",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-25",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-26",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-26",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-26",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-26",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-26",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-26",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-27",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-27",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-27",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-27",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-27",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-27",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-28",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-28",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-28",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-28",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-28",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-28",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-30",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-30",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-30",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-30",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-30",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-06-30",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-01",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-01",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-01",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-01",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-01",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-01",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-02",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-02",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-02",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-02",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-02",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-02",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-03",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-03",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-03",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-03",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-03",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-03",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-04",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-04",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-04",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-04",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-04",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-04",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-05",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-05",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-05",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-05",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-05",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-05",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-07",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-07",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-07",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-07",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-07",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-07",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-08",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-08",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-08",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-08",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-08",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-08",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-09",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-09",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-09",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-09",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-09",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-09",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-10",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-10",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-10",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-10",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-10",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-10",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-11",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-11",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-11",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-11",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-11",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-11",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-12",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-12",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-12",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-12",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-12",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-12",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-14",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-14",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-14",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-14",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-14",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-14",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-15",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-15",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-15",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-15",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-15",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-15",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-16",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-16",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-16",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-16",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-16",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-16",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-17",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-17",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-17",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-17",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-17",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-17",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-18",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-18",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-18",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-18",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-18",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-18",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-19",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-19",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-19",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-19",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-19",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-19",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-21",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-21",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-21",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-21",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-21",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-21",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-22",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-22",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-22",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-22",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-22",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-22",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-23",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-23",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-23",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-23",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-23",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-23",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-24",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-24",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-24",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-24",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-24",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-24",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-25",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-25",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-25",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-25",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-25",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-25",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-26",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-26",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-26",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-26",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-26",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-26",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-28",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-28",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-28",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-28",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-28",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-28",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-29",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-29",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-29",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-29",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-29",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-29",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-30",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-30",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-30",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-30",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-30",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-30",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-31",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-31",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-31",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-31",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-31",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-07-31",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-01",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-01",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-01",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-01",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-01",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-01",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-02",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-02",
+    "home": "tigers",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-02",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-02",
+    "home": "hawks",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-02",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-02",
+    "home": "marines",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-04",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-04",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-04",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-04",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-04",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-04",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-05",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-05",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-05",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-05",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-05",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-05",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-06",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-06",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-06",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-06",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-06",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-06",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-07",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-07",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-07",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-07",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-07",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-07",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-08",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-08",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-08",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-08",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-08",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-08",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-09",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-09",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-09",
+    "home": "tigers",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-09",
+    "home": "hawks",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-09",
+    "home": "buffaloes",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-09",
+    "home": "eagles",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-11",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-11",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-11",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-11",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-11",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-11",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-12",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-12",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-12",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-12",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-12",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-12",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-13",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-13",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-13",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-13",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-13",
+    "home": "lions",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-13",
+    "home": "fighters",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-14",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-14",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-14",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-14",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-14",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-14",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-15",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-15",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-15",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-15",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-15",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-15",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-16",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-16",
+    "home": "baystars",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-16",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-16",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-16",
+    "home": "marines",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-16",
+    "home": "lions",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-18",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-18",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-18",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-18",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-18",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-18",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-19",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-19",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-19",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-19",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-19",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-19",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-20",
+    "home": "swallows",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-20",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-20",
+    "home": "baystars",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-20",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-20",
+    "home": "fighters",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-20",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-21",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-21",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-21",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-21",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-21",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-21",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-22",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-22",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-22",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-22",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-22",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-22",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-23",
+    "home": "dragons",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-23",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-23",
+    "home": "swallows",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-23",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-23",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-23",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-25",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-25",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-25",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-25",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-25",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-25",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-26",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-26",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-26",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-26",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-26",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-26",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-27",
+    "home": "tigers",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-27",
+    "home": "swallows",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-27",
+    "home": "carp",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-27",
+    "home": "marines",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-27",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-27",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-28",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-28",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-28",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-28",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-28",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-28",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-29",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-29",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-29",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-29",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-29",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-29",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-30",
+    "home": "baystars",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-30",
+    "home": "dragons",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-30",
+    "home": "tigers",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-30",
+    "home": "eagles",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-30",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-08-30",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-01",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-01",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-01",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-01",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-01",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-01",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-02",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-02",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-02",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-02",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-02",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-02",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-03",
+    "home": "carp",
+    "away": "giants",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-03",
+    "home": "baystars",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-03",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-03",
+    "home": "lions",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-03",
+    "home": "marines",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-03",
+    "home": "eagles",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-04",
+    "home": "giants",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-04",
+    "home": "carp",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-04",
+    "home": "dragons",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-04",
+    "home": "fighters",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-04",
+    "home": "lions",
+    "away": "buffaloes",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-04",
+    "home": "marines",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-05",
+    "home": "giants",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-05",
+    "home": "dragons",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-05",
+    "home": "baystars",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-05",
+    "home": "hawks",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-05",
+    "home": "eagles",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-05",
+    "home": "buffaloes",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-06",
+    "home": "giants",
+    "away": "carp",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-06",
+    "home": "swallows",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-06",
+    "home": "dragons",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-06",
+    "home": "hawks",
+    "away": "eagles",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-06",
+    "home": "buffaloes",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-06",
+    "home": "fighters",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-08",
+    "home": "giants",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-08",
+    "home": "carp",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-08",
+    "home": "swallows",
+    "away": "tigers",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-08",
+    "home": "buffaloes",
+    "away": "hawks",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-08",
+    "home": "eagles",
+    "away": "fighters",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-08",
+    "home": "lions",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-09",
+    "home": "giants",
+    "away": "dragons",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-09",
+    "home": "tigers",
+    "away": "baystars",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-09",
+    "home": "carp",
+    "away": "swallows",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-09",
+    "home": "hawks",
+    "away": "lions",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-09",
+    "home": "fighters",
+    "away": "marines",
+    "isInterleague": false
+  },
+  {
+    "date": "2026-09-09",
+    "home": "buffaloes",
+    "away": "eagles",
+    "isInterleague": false
+  }
+]

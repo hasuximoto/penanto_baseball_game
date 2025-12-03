@@ -1,0 +1,86 @@
+[
+  {
+    "id": "hawks",
+    "name": "ソフトバンクホークス",
+    "league": "pacific",
+    "budget": 100000000,
+    "payroll": 0
+  },
+  {
+    "id": "lions",
+    "name": "埼玉西武ライオンズ",
+    "league": "pacific",
+    "budget": 95000000,
+    "payroll": 0
+  },
+  {
+    "id": "fighters",
+    "name": "北海道日本ハムファイターズ",
+    "league": "pacific",
+    "budget": 90000000,
+    "payroll": 0
+  },
+  {
+    "id": "buffaloes",
+    "name": "オリックスバファローズ",
+    "league": "pacific",
+    "budget": 85000000,
+    "payroll": 0
+  },
+  {
+    "id": "eagles",
+    "name": "東北楽天ゴールデンイーグルス",
+    "league": "pacific",
+    "budget": 80000000,
+    "payroll": 0
+  },
+  {
+    "id": "marines",
+    "name": "千葉ロッテマリーンズ",
+    "league": "pacific",
+    "budget": 75000000,
+    "payroll": 0
+  },
+  {
+    "id": "giants",
+    "name": "読売ジャイアンツ",
+    "league": "central",
+    "budget": 100000000,
+    "payroll": 0
+  },
+  {
+    "id": "tigers",
+    "name": "阪神タイガース",
+    "league": "central",
+    "budget": 95000000,
+    "payroll": 0
+  },
+  {
+    "id": "dragons",
+    "name": "中日ドラゴンズ",
+    "league": "central",
+    "budget": 90000000,
+    "payroll": 0
+  },
+  {
+    "id": "baystars",
+    "name": "横浜DeNAベイスターズ",
+    "league": "central",
+    "budget": 85000000,
+    "payroll": 0
+  },
+  {
+    "id": "carp",
+    "name": "広島東洋カープ",
+    "league": "central",
+    "budget": 80000000,
+    "payroll": 0
+  },
+  {
+    "id": "swallows",
+    "name": "東京ヤクルトスワローズ",
+    "league": "central",
+    "budget": 75000000,
+    "payroll": 0
+  }
+]
