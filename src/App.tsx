@@ -30,7 +30,9 @@ const styles = StyleSheet.create({
  * メインアプリケーション
  */
 export default function App() {
-  const [fontsLoaded, fontError] = useFonts(Ionicons.font);
+  const [fontsLoaded, fontError] = useFonts({
+    Ionicons: require('../assets/fonts/Ionicons.ttf'),
+  });
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
 
