@@ -40,4 +40,4 @@ dist/
 coverage/
 .nyc_output
 
-unit_xml/CellBall.xml
+unit_xml/
