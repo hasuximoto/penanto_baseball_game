@@ -10,7 +10,7 @@
     "ios": "npx expo start --ios",
     "web": "npx expo start --web",
     "type-check": "tsc --noEmit --skipLibCheck",
-    "predeploy": "npx expo export -p web",
+    "predeploy": "npx expo export -p web && node -e \"require('fs').writeFileSync('dist/.nojekyll', '')\"",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
