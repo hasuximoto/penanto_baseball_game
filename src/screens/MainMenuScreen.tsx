@@ -213,7 +213,7 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
       
       // ポストシーズン生成チェック (autoPlayGames内でもチェックしているが、メッセージ表示のために再確認またはstopReasonを使用)
       // stopReasonがあればそれを使用、なければ念のため再チェック
-      let psStatus = stopReason;
+      let psStatus: string | null | undefined = stopReason;
       if (!psStatus) {
           psStatus = await dbManager.checkAndGeneratePostSeason(nextState.currentDate, nextState.season);
       }
@@ -443,7 +443,7 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{modalConfig.title}</Text>
             <Text style={styles.modalMessage}>{modalConfig.message}</Text>
-            <View style={styles.modalButtons}>
+            <View style={styles.modalButtons2}>
               {modalConfig.buttons.map((btn, index) => (
                 <TouchableOpacity
                   key={index}
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333',
   },
-  modalButtons: {
+  modalButtons2: {
     flexDirection: 'row',
     justifyContent: 'space-around',
   },

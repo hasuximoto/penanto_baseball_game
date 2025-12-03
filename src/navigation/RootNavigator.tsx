@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 // スクリーンはここにインポートします
+// Re-trigger bundle
 import { MainMenuScreen } from '../screens/MainMenuScreen';
 import { PlayerListScreen } from '../screens/PlayerListScreen';
 import { PlayerAbilityScreen } from '../screens/PlayerAbilityScreen';
