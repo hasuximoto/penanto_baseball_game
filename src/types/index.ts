@@ -1,5 +1,5 @@
 /**
- * CellBall Game - TypeScript Type Definitions
+ * SimBaseBall Game - TypeScript Type Definitions
  * VBA データモデルから抽出した型定義
  */
 

@@ -1,6 +1,6 @@
 /**
  * Excel 数式から変換された具体的なゲームロジック
- * CellBall.xml の複雑な数式を実装
+ * SimBaseBall.xml の複雑な数式を実装
  */
 
 import { Player, PlayerStats, GameState } from '../types';
