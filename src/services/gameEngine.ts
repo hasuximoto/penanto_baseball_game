@@ -755,7 +755,7 @@ export class GameEngine {
 
   /**
    * 投手交代が必要かチェックする
-   * CellBall.xml のロジックを再現
+   * SimBaseBall.xml のロジックを再現
    * 交代条件: ベンチ投手の評価値 > 現在の投手のスタミナ上限
    * ベンチ評価値 = ベンチ投手のスタミナ / (現在の投手の残りスタミナ/10 + 1)
    */
@@ -1427,7 +1427,7 @@ export class GameEngine {
 
           const speed = runner.abilities.speed || 0;
           
-          // 盗塁判断 (CellBall.xml 試合aシート BQ列参考)
+          // 盗塁判断 (SimBaseBall.xml 試合aシート BQ列参考)
           // 走力8未満は走らない
           if (speed < 8) return;
           
