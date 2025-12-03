@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Provider } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
-import * as Font from 'expo-font';
+import { useFonts } from 'expo-font';
 import { store } from './redux/store';
 import { DataManager } from './services/dataManager';
 import { RootNavigator } from './navigation/RootNavigator';
@@ -30,8 +30,15 @@ const styles = StyleSheet.create({
  * メインアプリケーション
  */
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts(Ionicons.font);
   const [isInitialized, setIsInitialized] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (fontError) {
+      console.error('❌ フォント読み込みエラー:', fontError);
+    }
+  }, [fontError]);
 
   useEffect(() => {
     initializeApp();
@@ -39,9 +46,6 @@ export default function App() {
 
   const initializeApp = async () => {
     try {
-      // アイコンフォントを読み込む
-      await Font.loadAsync(Ionicons.font);
-
       const dataManager = new DataManager();
       await dataManager.initialize();
       setIsInitialized(true);
@@ -52,7 +56,7 @@ export default function App() {
     }
   };
 
-  if (!isInitialized) {
+  if (!isInitialized || (!fontsLoaded && !fontError)) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#4CAF50" />
