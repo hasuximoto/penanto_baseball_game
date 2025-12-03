@@ -30,6 +30,9 @@
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
     },
+    "experiments": {
+      "baseUrl": "/penanto_baseball_game/"
+    },
     "plugins": [
       "expo-asset",
       "expo-font"
