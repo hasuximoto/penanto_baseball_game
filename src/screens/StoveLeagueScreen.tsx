@@ -34,7 +34,7 @@ export const StoveLeagueScreen = () => {
   };
 
   const handleFA = () => {
-    // TODO: Navigate to FA Screen
+    // TODO
     showAlert('FA交渉', 'FA交渉機能はまだ実装されていません');
   };
 
