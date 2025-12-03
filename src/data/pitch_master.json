@@ -1,0 +1,147 @@
+[
+  {
+    "name": "スライダー",
+    "groundBallMod": 3,
+    "whiffMod": 7
+  },
+  {
+    "name": "高速スライダー",
+    "groundBallMod": 4,
+    "whiffMod": 5
+  },
+  {
+    "name": "縦スライダー",
+    "groundBallMod": 3,
+    "whiffMod": 7
+  },
+  {
+    "name": "カットボール",
+    "groundBallMod": 8,
+    "whiffMod": 1
+  },
+  {
+    "name": "カーブ",
+    "groundBallMod": 2,
+    "whiffMod": 8
+  },
+  {
+    "name": "スローカーブ",
+    "groundBallMod": 1,
+    "whiffMod": 7
+  },
+  {
+    "name": "ドロップカーブ",
+    "groundBallMod": 2,
+    "whiffMod": 7
+  },
+  {
+    "name": "ナックルカーブ",
+    "groundBallMod": 3,
+    "whiffMod": 6
+  },
+  {
+    "name": "パワーカーブ",
+    "groundBallMod": 3,
+    "whiffMod": 7
+  },
+  {
+    "name": "スラーブ",
+    "groundBallMod": 3,
+    "whiffMod": 6
+  },
+  {
+    "name": "フォーク",
+    "groundBallMod": 3,
+    "whiffMod": 8
+  },
+  {
+    "name": "スプリット",
+    "groundBallMod": 3,
+    "whiffMod": 7
+  },
+  {
+    "name": "チェンジアップ",
+    "groundBallMod": 5,
+    "whiffMod": 4
+  },
+  {
+    "name": "サークルチェンジ",
+    "groundBallMod": 5,
+    "whiffMod": 4
+  },
+  {
+    "name": "バルカンチェンジ",
+    "groundBallMod": 4,
+    "whiffMod": 4
+  },
+  {
+    "name": "パーム",
+    "groundBallMod": 3,
+    "whiffMod": 6
+  },
+  {
+    "name": "高速パーム",
+    "groundBallMod": 4,
+    "whiffMod": 4
+  },
+  {
+    "name": "シンカー",
+    "groundBallMod": 5,
+    "whiffMod": 4
+  },
+  {
+    "name": "高速シンカー",
+    "groundBallMod": 6,
+    "whiffMod": 3
+  },
+  {
+    "name": "スクリュー",
+    "groundBallMod": 5,
+    "whiffMod": 5
+  },
+  {
+    "name": "シュート",
+    "groundBallMod": 8,
+    "whiffMod": 1
+  },
+  {
+    "name": "高速シュート",
+    "groundBallMod": 7,
+    "whiffMod": 1
+  },
+  {
+    "name": "ツーシーム",
+    "groundBallMod": 6,
+    "whiffMod": 4
+  },
+  {
+    "name": "シンキングファスト",
+    "groundBallMod": 6,
+    "whiffMod": 3
+  },
+  {
+    "name": "0",
+    "groundBallMod": 0,
+    "whiffMod": 0
+  },
+  {
+    "name": "フォーシーム",
+    "groundBallMod": 5,
+    "whiffMod": 5
+  },
+  {
+    "name": "ナックル",
+    "groundBallMod": 6,
+    "whiffMod": 6
+  },
+  {
+    "name": "スローボール",
+    "groundBallMod": 3,
+    "whiffMod": 3
+  },
+  {
+    "name": "ムービングファスト",
+    "groundBallMod": 6,
+    "whiffMod": 3
+  }
+]

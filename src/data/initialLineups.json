@@ -1,0 +1,542 @@
+{
+  "fighters": {
+    "battingOrder": [
+      {
+        "order": 1,
+        "position": "右",
+        "playerId": 48,
+        "name": "K.クラーク"
+      },
+      {
+        "order": 2,
+        "position": "中",
+        "playerId": 383,
+        "name": "楠戸 七生"
+      },
+      {
+        "order": 3,
+        "position": "左",
+        "playerId": 306,
+        "name": "銘苅 能活"
+      },
+      {
+        "order": 4,
+        "position": "一",
+        "playerId": 97,
+        "name": "市之瀬 政宗"
+      },
+      {
+        "order": 5,
+        "position": "三",
+        "playerId": 367,
+        "name": "松永 新弥"
+      },
+      {
+        "order": 6,
+        "position": "捕",
+        "playerId": 208,
+        "name": "丸石 君弘"
+      },
+      {
+        "order": 7,
+        "position": "指",
+        "playerId": 261,
+        "name": "今井 哲彦"
+      },
+      {
+        "order": 8,
+        "position": "二",
+        "playerId": 416,
+        "name": "風早 弘平"
+      },
+      {
+        "order": 9,
+        "position": "遊",
+        "playerId": 464,
+        "name": "平石 大二郎"
+      }
+    ],
+    "pitchingRotation": [
+      {
+        "rotationOrder": 1,
+        "playerId": 104,
+        "name": "桐山 晴貴"
+      },
+      {
+        "rotationOrder": 2,
+        "playerId": 110,
+        "name": "岩田 淳之"
+      },
+      {
+        "rotationOrder": 3,
+        "playerId": 190,
+        "name": "渡辺 智晃"
+      },
+      {
+        "rotationOrder": 4,
+        "playerId": 130,
+        "name": "西ケ谷 侑璃"
+      },
+      {
+        "rotationOrder": 5,
+        "playerId": 112,
+        "name": "川松 千宙"
+      },
+      {
+        "rotationOrder": 6,
+        "playerId": 68,
+        "name": "T.ブーン"
+      }
+    ]
+  },
+  "hawks": {
+    "battingOrder": [
+      {
+        "order": 1,
+        "position": "左",
+        "playerId": 11,
+        "name": "M.スウォープ"
+      },
+      {
+        "order": 2,
+        "position": "遊",
+        "playerId": 529,
+        "name": "笹田 史朗"
+      },
+      {
+        "order": 3,
+        "position": "中",
+        "playerId": 491,
+        "name": "村上 佳伸"
+      },
+      {
+        "order": 4,
+        "position": "捕",
+        "playerId": 292,
+        "name": "築山 征矢"
+      },
+      {
+        "order": 5,
+        "position": "一",
+        "playerId": 293,
+        "name": "椎原 諒穂"
+      },
+      {
+        "order": 6,
+        "position": "右",
+        "playerId": 272,
+        "name": "宇賀神 光也"
+      },
+      {
+        "order": 7,
+        "position": "二",
+        "playerId": 321,
+        "name": "荒川 友樹"
+      },
+      {
+        "order": 8,
+        "position": "指",
+        "playerId": 468,
+        "name": "大本 光雄"
+      },
+      {
+        "order": 9,
+        "position": "三",
+        "playerId": 539,
+        "name": "桂田 郁紀"
+      }
+    ],
+    "pitchingRotation": [
+      {
+        "rotationOrder": 1,
+        "playerId": 347,
+        "name": "村社 通雄"
+      },
+      {
+        "rotationOrder": 2,
+        "playerId": 458,
+        "name": "田路 凌介"
+      },
+      {
+        "rotationOrder": 3,
+        "playerId": 73,
+        "name": "T.オソリオ"
+      },
+      {
+        "rotationOrder": 4,
+        "playerId": 353,
+        "name": "鳴瀬 岳暁"
+      },
+      {
+        "rotationOrder": 5,
+        "playerId": 327,
+        "name": "大井川 康英"
+      },
+      {
+        "rotationOrder": 6,
+        "playerId": 438,
+        "name": "尾崎 幸人"
+      }
+    ]
+  },
+  "marines": {
+    "battingOrder": [
+      {
+        "order": 1,
+        "position": "遊",
+        "playerId": 548,
+        "name": "上竹 淳成"
+      },
+      {
+        "order": 2,
+        "position": "二",
+        "playerId": 304,
+        "name": "麻生 康永"
+      },
+      {
+        "order": 3,
+        "position": "指",
+        "playerId": 201,
+        "name": "嶋 遥久"
+      },
+      {
+        "order": 4,
+        "position": "一",
+        "playerId": 250,
+        "name": "関戸 耀"
+      },
+      {
+        "order": 5,
+        "position": "左",
+        "playerId": 16,
+        "name": "G.リー"
+      },
+      {
+        "order": 6,
+        "position": "三",
+        "playerId": 315,
+        "name": "西端 祥哉"
+      },
+      {
+        "order": 7,
+        "position": "右",
+        "playerId": 24,
+        "name": "B.バワーズ"
+      },
+      {
+        "order": 8,
+        "position": "捕",
+        "playerId": 405,
+        "name": "尾中 成也"
+      },
+      {
+        "order": 9,
+        "position": "中",
+        "playerId": 308,
+        "name": "木下 塁人"
+      }
+    ],
+    "pitchingRotation": [
+      {
+        "rotationOrder": 1,
+        "playerId": 226,
+        "name": "苑田 維吹"
+      },
+      {
+        "rotationOrder": 2,
+        "playerId": 273,
+        "name": "寺垣 勇毅"
+      },
+      {
+        "rotationOrder": 3,
+        "playerId": 395,
+        "name": "河上 光哉"
+      },
+      {
+        "rotationOrder": 4,
+        "playerId": 211,
+        "name": "橘高 壮真"
+      },
+      {
+        "rotationOrder": 5,
+        "playerId": 386,
+        "name": "倉本 青司"
+      },
+      {
+        "rotationOrder": 6,
+        "playerId": 322,
+        "name": "塚本 優史"
+      }
+    ]
+  },
+  "buffaloes": {
+    "battingOrder": [
+      {
+        "order": 1,
+        "position": "中",
+        "playerId": 362,
+        "name": "白松 雅平"
+      },
+      {
+        "order": 2,
+        "position": "遊",
+        "playerId": 376,
+        "name": "詫間 公也"
+      },
+      {
+        "order": 3,
+        "position": "指",
+        "playerId": 328,
+        "name": "小川 隼祐"
+      },
+      {
+        "order": 4,
+        "position": "一",
+        "playerId": 43,
+        "name": "F.ランデ"
+      },
+      {
+        "order": 5,
+        "position": "二",
+        "playerId": 247,
+        "name": "花岡 卓郎"
+      },
+      {
+        "order": 6,
+        "position": "三",
+        "playerId": 20,
+        "name": "A.ハインリヒ"
+      },
+      {
+        "order": 7,
+        "position": "左",
+        "playerId": 58,
+        "name": "E.レーシー"
+      },
+      {
+        "order": 8,
+        "position": "右",
+        "playerId": 453,
+        "name": "深澤 啓徳"
+      },
+      {
+        "order": 9,
+        "position": "捕",
+        "playerId": 270,
+        "name": "新垣 淳之介"
+      }
+    ],
+    "pitchingRotation": [
+      {
+        "rotationOrder": 1,
+        "playerId": 390,
+        "name": "松長 隆晴"
+      },
+      {
+        "rotationOrder": 2,
+        "playerId": 361,
+        "name": "寺田 公希"
+      },
+      {
+        "rotationOrder": 3,
+        "playerId": 507,
+        "name": "神沢 匠悟"
+      },
+      {
+        "rotationOrder": 4,
+        "playerId": 330,
+        "name": "青木 勇陽"
+      },
+      {
+        "rotationOrder": 5,
+        "playerId": 412,
+        "name": "浜部 睦弥"
+      },
+      {
+        "rotationOrder": 6,
+        "playerId": 381,
+        "name": "中務 聡太朗"
+      }
+    ]
+  },
+  "lions": {
+    "battingOrder": [
+      {
+        "order": 1,
+        "position": "一",
+        "playerId": 521,
+        "name": "山田 虎也"
+      },
+      {
+        "order": 2,
+        "position": "捕",
+        "playerId": 365,
+        "name": "星子 要"
+      },
+      {
+        "order": 3,
+        "position": "中",
+        "playerId": 496,
+        "name": "八田 輝太"
+      },
+      {
+        "order": 4,
+        "position": "遊",
+        "playerId": 301,
+        "name": "河 隆生"
+      },
+      {
+        "order": 5,
+        "position": "指",
+        "playerId": 490,
+        "name": "篠永 雅人"
+      },
+      {
+        "order": 6,
+        "position": "二",
+        "playerId": 446,
+        "name": "重松 智造"
+      },
+      {
+        "order": 7,
+        "position": "三",
+        "playerId": 514,
+        "name": "斎藤 健史"
+      },
+      {
+        "order": 8,
+        "position": "左",
+        "playerId": 121,
+        "name": "鈴木 聡哉"
+      },
+      {
+        "order": 9,
+        "position": "右",
+        "playerId": 241,
+        "name": "中出 大成"
+      }
+    ],
+    "pitchingRotation": [
+      {
+        "rotationOrder": 1,
+        "playerId": 55,
+        "name": "O.ウィットソン"
+      },
+      {
+        "rotationOrder": 2,
+        "playerId": 486,
+        "name": "越谷 雅弘"
+      },
+      {
+        "rotationOrder": 3,
+        "playerId": 556,
+        "name": "桐越 拓澄"
+      },
+      {
+        "rotationOrder": 4,
+        "playerId": 417,
+        "name": "神蔵 峻太郎"
+      },
+      {
+        "rotationOrder": 5,
+        "playerId": 482,
+        "name": "安芸 英"
+      },
+      {
+        "rotationOrder": 6,
+        "playerId": 441,
+        "name": "菊池 由記夫"
+      }
+    ]
+  },
+  "eagles": {
+    "battingOrder": [
+      {
+        "order": 1,
+        "position": "右",
+        "playerId": 172,
+        "name": "赤阪 斉"
+      },
+      {
+        "order": 2,
+        "position": "遊",
+        "playerId": 163,
+        "name": "岩木 剛登"
+      },
+      {
+        "order": 3,
+        "position": "指",
+        "playerId": 240,
+        "name": "樫木 公希"
+      },
+      {
+        "order": 4,
+        "position": "三",
+        "playerId": 17,
+        "name": "L.メイド"
+      },
+      {
+        "order": 5,
+        "position": "左",
+        "playerId": 21,
+        "name": "C.ロス"
+      },
+      {
+        "order": 6,
+        "position": "中",
+        "playerId": 364,
+        "name": "管野 隆一"
+      },
+      {
+        "order": 7,
+        "position": "捕",
+        "playerId": 298,
+        "name": "葛西 知彦"
+      },
+      {
+        "order": 8,
+        "position": "二",
+        "playerId": 165,
+        "name": "江戸 慧"
+      },
+      {
+        "order": 9,
+        "position": "一",
+        "playerId": 277,
+        "name": "秋田 慶郎"
+      }
+    ],
+    "pitchingRotation": [
+      {
+        "rotationOrder": 1,
+        "playerId": 124,
+        "name": "廣島 陽祐"
+      },
+      {
+        "rotationOrder": 2,
+        "playerId": 158,
+        "name": "磯井 育人"
+      },
+      {
+        "rotationOrder": 3,
+        "playerId": 225,
+        "name": "近内 清志"
+      },
+      {
+        "rotationOrder": 4,
+        "playerId": 187,
+        "name": "尾張 朝樹"
+      },
+      {
+        "rotationOrder": 5,
+        "playerId": 214,
+        "name": "河越 修弥"
+      },
+      {
+        "rotationOrder": 6,
+        "playerId": 189,
+        "name": "広兼 将希"
+      }
+    ]
+  }
+}
