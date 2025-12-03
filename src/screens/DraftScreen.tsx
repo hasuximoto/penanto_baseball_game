@@ -10,6 +10,16 @@ import { TeamStrategyManager } from '@/services/teamStrategyManager';
 import { Player, TeamId, NewsItem } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 
+const getRank = (value: number | undefined): string => {
+  if (value === undefined) return '-';
+  if (value >= 11) return 'S';
+  if (value >= 9) return 'A';
+  if (value >= 7) return 'B';
+  if (value >= 5) return 'C';
+  if (value >= 3) return 'D';
+  return 'E';
+};
+
 export const DraftScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -25,6 +35,7 @@ export const DraftScreen = () => {
   const [logs, setLogs] = useState<string[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Player | null>(null);
   const [filterPosition, setFilterPosition] = useState<'All' | 'P' | 'Fielder'>('All');
+  const [sortType, setSortType] = useState<'Evaluation' | 'Newest'>('Evaluation');
   const [isDraftOver, setIsDraftOver] = useState(false);
   const [teams, setTeams] = useState<any[]>([]);
   const [teamNeeds, setTeamNeeds] = useState<Record<string, any>>({});
@@ -237,8 +248,11 @@ export const DraftScreen = () => {
       teams.forEach(team => {
           if (team.id === gameState.selectedTeamId) return;
           
-          // 候補から選ぶ (既に誰かが選んでいてもOK)
-          const available = candidates; // 全員対象
+          // 既に指名済みのチームはスキップ
+          if (draftResults[team.id] && draftResults[team.id].length >= currentRound) return;
+          
+          // 候補から選ぶ (既に誰かが選んでいてもOK、ただし確定済みの選手は除く)
+          const available = candidates.filter(p => (p.team as string) === 'unknown');
           const needs = getDynamicNeeds(team.id);
           
           let bestPlayer: Player | null = null;
@@ -314,12 +328,15 @@ export const DraftScreen = () => {
 
       if (losers.length > 0) {
           addLog(`--- 外れ1位指名 (${losers.length}球団) ---`);
-          // 外れたチームだけでウェーバー順に指名させる (簡易実装)
-          // pickOrderから losers に含まれるチームだけを抽出して再構築
-          const newOrder = pickOrder.filter(tid => losers.includes(tid));
-          setPickOrder(newOrder);
-          setCurrentPickIndex(0);
-          setDraftPhase('waiver'); // ここからはウェーバー扱い
+          // 外れたチームだけで再度入札させる
+          setNominations({}); // リセット
+          setDraftPhase('nomination'); // 再入札
+          
+          // ユーザーが敗者チームに含まれている場合のみアラートを表示
+          if (gameState.selectedTeamId && losers.includes(gameState.selectedTeamId)) {
+             showAlert("抽選結果", "抽選に外れました。\n再度、指名選手を選択してください。");
+          }
+          // ユーザーが敗者でない場合は、useEffectが自動的に進行させる
       } else {
           // 全員確定 -> 2巡目へ
           addLog("1巡目指名終了。2巡目へ移ります。");
@@ -332,8 +349,34 @@ export const DraftScreen = () => {
       }
   };
 
+  // ハズレ1位指名の自動進行 (ユーザーが指名済みの場合)
+  useEffect(() => {
+      if (draftPhase === 'nomination' && currentRound === 1 && !loading) {
+          const userTeamId = gameState.selectedTeamId;
+          if (!userTeamId) return;
+
+          const userHasDrafted = (draftResults[userTeamId]?.length || 0) >= 1;
+          
+          // ユーザーが指名済みだが、まだ指名していないチームがある場合 (ハズレ1位)
+          if (userHasDrafted) {
+              // まだ指名していないチームがあるか確認
+              const pendingTeams = teams.filter(t => {
+                  const draftedCount = draftResults[t.id]?.length || 0;
+                  return draftedCount < 1;
+              });
+
+              if (pendingTeams.length > 0) {
+                  // 少し待ってからCPU指名を実行
+                  const timer = setTimeout(() => {
+                      processFirstRoundNominations(null);
+                  }, 1000);
+                  return () => clearTimeout(timer);
+              }
+          }
+      }
+  }, [draftPhase, currentRound, draftResults, loading, teams, gameState.selectedTeamId]);
+
   const handleCpuPick = (teamId: string) => {
-    // ロースター制限チェック
     const currentRosterCount = (teamRosterCounts[teamId] || 0) + (draftResults[teamId]?.length || 0);
     if (currentRosterCount >= ROSTER_LIMIT) {
         addLog(`${teams.find(t => t.id === teamId)?.name || teamId} は定員に達したため選択を終了します。`);
@@ -380,9 +423,9 @@ export const DraftScreen = () => {
 
   const getPlayerScore = (p: Player) => {
       if (p.position === 'P') {
-          return (p.abilities.speed || 0) + (p.abilities.control || 0) * 10 + (p.abilities.stamina || 0) * 10;
+          return (p.scoutInfo?.speed || 0) + (p.scoutInfo?.control || 0) * 10 + (p.scoutInfo?.stamina || 0) * 10;
       } else {
-          return (p.abilities.contact || 0) * 10 + (p.abilities.power || 0) * 10 + (p.abilities.fielding || 0) * 10;
+          return (p.scoutInfo?.contact || 0) * 10 + (p.scoutInfo?.power || 0) * 10 + (p.scoutInfo?.fielding || 0) * 10;
       }
   };
 
@@ -441,8 +484,20 @@ export const DraftScreen = () => {
     }
 
     // 通常指名
-    executePick(teamId, targetPlayer);
-    setSelectedCandidate(null);
+    showAlert(
+        "自動指名",
+        `CPU推奨選手: ${targetPlayer.name} (${targetPlayer.position})\nこの選手を指名しますか？`,
+        [
+            { text: "キャンセル", style: "cancel" },
+            { 
+                text: "指名する", 
+                onPress: () => {
+                    executePick(teamId, targetPlayer);
+                    setSelectedCandidate(null);
+                }
+            }
+        ]
+    );
   };
 
   const handleUserPick = () => {
@@ -649,9 +704,40 @@ export const DraftScreen = () => {
     return unsubscribe;
   }, [navigation, draftResults]);
 
+  const calculateScoutScore = (p: Player) => {
+    if (!p.scoutInfo) return 0;
+    if (p.position === 'P') {
+        // 投手: 球速 + コン + スタ
+        // 平均: 145 + 75 + 75 = 295
+        const score = (p.scoutInfo.speed || 0) + (p.scoutInfo.control || 0) * 10 + (p.scoutInfo.stamina || 0) * 10;
+        return score * 1.2; // 野手とスケールを合わせる補正
+    } else {
+        // 野手: 5ツール
+        // 平均: 7.5 * 10 * 5 = 375
+        return (
+            (p.scoutInfo.contact || 0) * 10 +
+            (p.scoutInfo.power || 0) * 10 +
+            (p.scoutInfo.speedFielder || 0) * 10 +
+            (p.scoutInfo.arm || 0) * 10 +
+            (p.scoutInfo.fielding || 0) * 10
+        );
+    }
+  };
+
+  const getOverallRankLetter = (score: number) => {
+    if (score >= 450) return 'S';
+    if (score >= 380) return 'A';
+    if (score >= 320) return 'B';
+    if (score >= 260) return 'C';
+    if (score >= 200) return 'D';
+    return 'E';
+  };
+
   const renderCandidateItem = ({ item }: { item: Player }) => {
     const isSelected = selectedCandidate?.id === item.id;
     const isTaken = (item.team as string) !== 'unknown';
+    const score = calculateScoutScore(item);
+    const rank = getOverallRankLetter(score);
     
     return (
       <TouchableOpacity 
@@ -667,14 +753,22 @@ export const DraftScreen = () => {
             <Text style={styles.candidateName}>{item.name}</Text>
             <Text style={styles.candidateDetail}>{item.position} | {item.age}歳</Text>
         </View>
+        <View style={styles.rankContainer}>
+            <Text style={styles.rankLabel}>総合</Text>
+            <Text style={[styles.rankValue, { color: rank === 'S' ? '#FFD700' : rank === 'A' ? '#FF5722' : '#333' }]}>{rank}</Text>
+        </View>
         <View style={styles.candidateStats}>
             {item.position === 'P' ? (
-                <Text style={styles.statText}>MAX: {item.abilities.speed}km | Con: {item.abilities.control} | Sta: {item.abilities.stamina}</Text>
+                <Text style={styles.statText}>MAX: {item.scoutInfo?.speed}km | ：制球: {getRank(item.scoutInfo?.control)} | スタミナ: {getRank(item.scoutInfo?.stamina)}</Text>
             ) : (
-                <Text style={styles.statText}>Daan: {item.abilities.trajectory} | Con: {item.abilities.contact} | Pow: {item.abilities.power}</Text>
+                <Text style={styles.statText}>弾道: {item.scoutInfo?.trajectory ? Math.round(item.scoutInfo.trajectory) : '-'} | コンタクト: {getRank(item.scoutInfo?.contact)} | パワー: {getRank(item.scoutInfo?.power)} | 走力: {getRank(item.scoutInfo?.speedFielder)} | 肩: {getRank(item.scoutInfo?.arm)} | 守備: {getRank(item.scoutInfo?.fielding)}</Text>
+            )}
+            {isTaken && (
+                <Text style={styles.takenText}>
+                    {teams.find(t => t.id === item.team)?.name || item.team} {item.draftRank}位
+                </Text>
             )}
         </View>
-        {isTaken && <Text style={styles.takenText}>指名済</Text>}
       </TouchableOpacity>
     );
   };
@@ -683,12 +777,23 @@ export const DraftScreen = () => {
       if (filterPosition === 'All') return true;
       if (filterPosition === 'P') return p.position === 'P';
       return p.position !== 'P';
+  }).sort((a, b) => {
+      if (sortType === 'Evaluation') {
+          return calculateScoutScore(b) - calculateScoutScore(a);
+      }
+      return 0; // デフォルト順（ID順など）
   });
 
   const currentTeamId = pickOrder[currentPickIndex];
   const currentTeamName = teams.find(t => t.id === currentTeamId)?.name || currentTeamId;
+  
   // 1巡目入札時は、順番に関係なくユーザーのターンとする
-  const isUserTurn = !isDraftOver && (draftPhase === 'nomination' || currentTeamId === gameState.selectedTeamId);
+  // ただし、既に指名済みの場合は除く
+  const isUserDoneInRound = gameState.selectedTeamId ? (draftResults[gameState.selectedTeamId]?.length || 0) >= currentRound : false;
+  const isUserTurn = !isDraftOver && (
+      (draftPhase === 'nomination' && !isUserDoneInRound) || 
+      (draftPhase !== 'nomination' && currentTeamId === gameState.selectedTeamId)
+  );
 
   return (
     <View style={styles.container}>
@@ -717,6 +822,13 @@ export const DraftScreen = () => {
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.filterButton, filterPosition === 'Fielder' && styles.activeFilter]} onPress={() => setFilterPosition('Fielder')}>
                     <Text style={styles.filterText}>野手</Text>
+                </TouchableOpacity>
+                <View style={styles.separator} />
+                <TouchableOpacity style={[styles.filterButton, sortType === 'Evaluation' && styles.activeFilter]} onPress={() => setSortType('Evaluation')}>
+                    <Text style={styles.filterText}>評価順</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.filterButton, sortType === 'Newest' && styles.activeFilter]} onPress={() => setSortType('Newest')}>
+                    <Text style={styles.filterText}>新着順</Text>
                 </TouchableOpacity>
             </View>
             <FlatList
@@ -865,6 +977,12 @@ const styles = StyleSheet.create({
   activeFilter: {
     backgroundColor: '#3F51B5',
   },
+  separator: {
+    width: 1,
+    height: '100%',
+    backgroundColor: '#ccc',
+    marginHorizontal: 5,
+  },
   filterText: {
     fontSize: 12,
     color: '#333',
@@ -890,6 +1008,20 @@ const styles = StyleSheet.create({
   candidateInfo: {
     flex: 1,
   },
+  rankContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 10,
+    width: 40,
+  },
+  rankLabel: {
+    fontSize: 10,
+    color: '#666',
+  },
+  rankValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   candidateName: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -914,7 +1046,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#F44336',
     fontWeight: 'bold',
-    marginLeft: 10,
+    marginTop: 2,
   },
   selectedInfo: {
     padding: 15,

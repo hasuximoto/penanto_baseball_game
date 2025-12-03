@@ -26,6 +26,11 @@ export class DraftManager {
     return candidates;
   }
 
+  private static generateScoutValue(value: number, max: number = 15): number {
+    const noise = RandomUtils.normal(0, 1.5);
+    return Math.max(0, Math.min(max, value + noise));
+  }
+
   private static generatePitcher(index: number): Player {
     const name = dbManager.generateRandomName();
     const age = RandomUtils.weightedChoice([18, 22, 24], [0.45, 0.45, 0.1]);
@@ -74,6 +79,11 @@ export class DraftManager {
       age,
       origin,
       team: 'unknown' as any, // Not assigned yet
+      scoutInfo: {
+        speed: speed,
+        control: this.generateScoutValue(control),
+        stamina: this.generateScoutValue(stamina)
+      },
       stats: {
         average: 0, homeRuns: 0, rbi: 0, stolenBases: 0, obp: 0,
         hits: 0, atBats: 0, era: 0, wins: 0, losses: 0, saves: 0,
@@ -126,6 +136,7 @@ export class DraftManager {
     const defense = genStat(); // Fielding
     const arm = genStat();
     const eye = genStat();
+    const trajectory = RandomUtils.int(1, 4);
 
     // Aptitudes
     const aptitudes = {
@@ -159,6 +170,14 @@ export class DraftManager {
       age,
       origin,
       team: 'unknown' as any,
+      scoutInfo: {
+        contact: this.generateScoutValue(contact),
+        power: this.generateScoutValue(power),
+        speedFielder: this.generateScoutValue(speed),
+        arm: this.generateScoutValue(arm),
+        fielding: this.generateScoutValue(defense),
+        trajectory: this.generateScoutValue(trajectory, 4)
+      },
       stats: {
         average: 0, homeRuns: 0, rbi: 0, stolenBases: 0, obp: 0,
         hits: 0, atBats: 0, era: 0, wins: 0, losses: 0, saves: 0,
@@ -170,7 +189,7 @@ export class DraftManager {
         bunt: genStat(),
         aggressiveness: genStat(),
         steal: genStat(),
-        trajectory: RandomUtils.int(1, 4),
+        trajectory,
         experience: 0,
         pinchHitter: 0,
         rosterSlot: '',

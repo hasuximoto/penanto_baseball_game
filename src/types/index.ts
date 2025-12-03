@@ -93,6 +93,20 @@ export interface Player {
   team: TeamId;
   draftRank?: number;               // ドラフト順位
   origin?: "High School" | "University" | "Industrial" | "Foreign" | "Unknown"; // 出身
+  scoutInfo?: {
+    // 投手
+    speed?: number; // 確定情報
+    control?: number; // ランク用数値 (実データ + 誤差)
+    stamina?: number; // ランク用数値 (実データ + 誤差)
+    
+    // 野手
+    contact?: number;
+    power?: number;
+    fielding?: number;
+    arm?: number;
+    speedFielder?: number; // 野手の走力
+    trajectory?: number;
+  };
   stats: PlayerStats;
   abilities: {
     contact: number;
