@@ -38,6 +38,10 @@ export class SeasonManager {
     // 2. 選手成績のリセットと年齢加算
     // 全選手を取得し、statsをリセットして保存
     const players = await dbManager.getInitialPlayers();
+
+    // 現在の成績を年度別成績として保存 (前年度の成績)
+    await dbManager.saveYearlyStats(newSeasonYear - 1, players);
+
     const resetPlayers = players.map(p => ({
         ...p,
         age: p.age + 1, // 年齢を1つ加算
@@ -64,6 +68,8 @@ export class SeasonManager {
             obp: 0,
             slugging: 0,
             ops: 0,
+            uzr: 0,
+            ubr: 0,
             
             // 投手
             era: 0,

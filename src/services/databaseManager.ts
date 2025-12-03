@@ -9,9 +9,10 @@ import INITIAL_LINEUPS from '../data/initialLineups.json';
 import INITIAL_TEAMS_DATA from '../data/teams.json';
 import INITIAL_SCHEDULE from '../data/initialSchedule.json';
 import NAME_MASTER_DATA from '../data/nameMaster.json';
-import { GameResult, PlayerGameStats, Player, NewsItem, TeamId } from '../types';
+import { GameResult, PlayerGameStats, Player, NewsItem, TeamId, YearlyStats, PlayerStats } from '../types';
 import { getGameDateString } from '../utils/dateUtils';
 import { AwardManager } from './awardManager';
+import { calculateWAR } from '../utils/calculations';
 
 const POS_JP_TO_EN: Record<string, string> = {
   '右': 'RF', '中': 'CF', '左': 'LF',
@@ -93,6 +94,9 @@ export const DATABASE_SCHEMA = {
       saves INTEGER,
       innings_pitched REAL,
       earned_runs INTEGER,
+      uzr REAL DEFAULT 0,
+      ubr REAL DEFAULT 0,
+      war REAL DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(player_id) REFERENCES players(id),
       UNIQUE(player_id, season)
@@ -1090,6 +1094,8 @@ export class DatabaseManager {
                 player.stats.batterStrikeouts = (player.stats.batterStrikeouts || 0) + (gs.strikeouts || 0);
                 player.stats.doublePlays = (player.stats.doublePlays || 0) + (gs.doublePlays || 0);
                 player.stats.errors = (player.stats.errors || 0) + (gs.errors || 0);
+                player.stats.uzr = (player.stats.uzr || 0) + (gs.uzrChange || 0);
+                player.stats.ubr = (player.stats.ubr || 0) + (gs.ubrChange || 0);
                 
                 // Calculate derived stats
                 if (player.stats.atBats > 0) {
@@ -1103,10 +1109,14 @@ export class DatabaseManager {
                 player.stats.obp = plateApps > 0 ? onBase / plateApps : 0;
 
                 const singles = (player.stats.hits || 0) - ((player.stats.doubles || 0) + (player.stats.triples || 0) + (player.stats.homeRuns || 0));
+                player.stats.singles = singles;
                 const totalBases = singles + ((player.stats.doubles || 0) * 2) + ((player.stats.triples || 0) * 3) + ((player.stats.homeRuns || 0) * 4);
                 player.stats.slugging = (player.stats.atBats || 0) > 0 ? totalBases / player.stats.atBats : 0;
 
                 player.stats.ops = (player.stats.obp || 0) + (player.stats.slugging || 0);
+
+                // WAR計算
+                player.stats.war = calculateWAR(player, player.stats);
 
                 // Pitching
                 // 登板判定: イニングを投げたか、登板順が記録されているか、先発フラグがあるか
@@ -2101,6 +2111,102 @@ export class DatabaseManager {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
     
     return `${lastName} ${firstName}`;
+  }
+
+  /**
+   * 年度別成績を保存
+   */
+  async saveYearlyStats(year: number, players: Player[]): Promise<void> {
+    try {
+      const statsData = await AsyncStorage.getItem('simbaseball_yearly_stats');
+      let allStats: YearlyStats[] = statsData ? JSON.parse(statsData) : [];
+
+      const newStats: YearlyStats[] = players.map(p => ({
+        playerId: p.id,
+        year: year,
+        teamId: p.team,
+        stats: p.stats || {} as PlayerStats
+      }));
+
+      // 重複排除 (同年度・同選手のデータがあれば上書き)
+      const statsMap = new Map<string, YearlyStats>();
+      allStats.forEach(s => statsMap.set(`${s.playerId}-${s.year}`, s));
+      newStats.forEach(s => statsMap.set(`${s.playerId}-${s.year}`, s));
+      
+      const mergedStats = Array.from(statsMap.values());
+
+      await AsyncStorage.setItem('simbaseball_yearly_stats', JSON.stringify(mergedStats));
+    } catch (error) {
+      console.error('Failed to save yearly stats:', error);
+    }
+  }
+
+  /**
+   * 選手の年度別成績を取得
+   */
+  async getYearlyStats(playerId: string | number): Promise<YearlyStats[]> {
+    try {
+      const statsData = await AsyncStorage.getItem('simbaseball_yearly_stats');
+      if (!statsData) return [];
+
+      const allStats: YearlyStats[] = JSON.parse(statsData);
+      return allStats.filter(s => s.playerId === playerId).sort((a, b) => a.year - b.year);
+    } catch (error) {
+      console.error('Failed to get yearly stats:', error);
+      return [];
+    }
+  }
+
+  /**
+   * リーグ全体の平均能力値を取得 (ポジション別)
+   */
+  async getLeagueAverageAbilities(): Promise<Record<string, { fielding: number, arm: number, speed: number }>> {
+    try {
+      const players = await this.getInitialPlayers();
+      const posMap: Record<string, { fielding: number[], arm: number[], speed: number[] }> = {};
+
+      players.forEach(p => {
+        if (!p.position) return;
+        if (!posMap[p.position]) {
+          posMap[p.position] = { fielding: [], arm: [], speed: [] };
+        }
+        posMap[p.position].fielding.push(p.abilities.fielding || 0);
+        posMap[p.position].arm.push(p.abilities.arm || 0);
+        posMap[p.position].speed.push(p.abilities.speed || 0);
+      });
+
+      const averages: Record<string, { fielding: number, arm: number, speed: number }> = {};
+      
+      Object.keys(posMap).forEach(pos => {
+        const counts = posMap[pos];
+        const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 50;
+        
+        // ポジションに付かない選手も計算してしまっているので平均に3を加算して調整
+        averages[pos] = {
+          fielding: avg(counts.fielding) + 3,
+          arm: avg(counts.arm) + 3,
+          speed: avg(counts.speed) + 3
+        };
+      });
+
+      // 全体平均も計算しておく (Unknown用)
+      const allFielding = players.map(p => p.abilities.fielding || 0);
+      const allArm = players.map(p => p.abilities.arm || 0);
+      const allSpeed = players.map(p => p.abilities.speed || 0);
+      
+      const avgAll = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 50;
+      
+      averages['All'] = {
+        fielding: avgAll(allFielding),
+        arm: avgAll(allArm),
+        speed: avgAll(allSpeed)
+      };
+
+      return averages;
+    } catch (error) {
+      console.error('Failed to get league average abilities:', error);
+      return {};
+    }
   }
 
 }

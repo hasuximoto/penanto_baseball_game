@@ -3,6 +3,7 @@ import gameReducer from './slices/gameSlice';
 import teamReducer from './slices/teamSlice';
 import playerReducer from './slices/playerSlice';
 import uiReducer from './slices/uiSlice';
+import statsReducer from './slices/statsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     team: teamReducer,
     player: playerReducer,
     ui: uiReducer,
+    stats: statsReducer,
   },
 });
 

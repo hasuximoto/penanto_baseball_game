@@ -3,7 +3,123 @@
  * VBA の各種計算ロジックを TypeScript に変換
  */
 
-import { Player, PlayerStats, Team } from '../types';
+import { Player, PlayerStats, Team, Position } from '../types';
+
+// WAR計算用の定数
+const WAR_CONSTANTS = {
+  wOBA_WEIGHTS: {
+    uBB: 0.69,
+    HBP: 0.72,
+    SINGLE: 0.89,
+    DOUBLE: 1.27,
+    TRIPLE: 1.62,
+    HR: 2.10
+  },
+  wOBA_SCALE: 1.24,
+  LEAGUE_wOBA: 0.320,
+  RUNS_PER_WIN: 10.0,
+  REPLACEMENT_LEVEL_RUNS: 20.0, // 600打席あたり
+  REPLACEMENT_ERA: 4.50, // 代替投手の防御率
+  POSITION_ADJUSTMENTS: {
+    'C': 12.5,
+    '1B': -12.5,
+    '2B': 2.5,
+    '3B': 2.5,
+    'SS': 7.5,
+    'LF': -7.5,
+    'CF': 2.5,
+    'RF': -7.5,
+    'OF': -2.5,
+    'DH': -17.5,
+    'P': 0,
+    'Unknown': 0
+  }
+};
+
+/**
+ * WAR (Wins Above Replacement) を計算
+ */
+export const calculateWAR = (player: Player, stats: PlayerStats): number => {
+  if (player.position === 'P') {
+    // 投手WAR (簡易版: RA9-WARベース)
+    // WAR = (Replacement_ERA - ERA) * (IP / 9) / RunsPerWin
+    // ※本来はFIPを使うべきだが、データ不足のためERA(または失点率)で代用
+    
+    const innings = stats.inningsPitched || 0;
+    if (innings === 0) return 0;
+
+    // 失点率 (Runs Allowed per 9)
+    // stats.runsAllowed があれば使うが、なければ earnedRuns (ERA) で代用
+    const runsAllowed = stats.runsAllowed || stats.earnedRuns || 0;
+    const ra9 = (runsAllowed * 9) / innings;
+    
+    // 代替水準との差分
+    const runsAboveRep = (WAR_CONSTANTS.REPLACEMENT_ERA - ra9) * (innings / 9);
+    
+    // 勝利数に換算
+    return Math.round((runsAboveRep / WAR_CONSTANTS.RUNS_PER_WIN) * 10) / 10;
+
+  } else {
+    // 野手WAR
+    // WAR = (Batting + Baserunning + Fielding + Positional + Replacement) / RunsPerWin
+
+    const pa = stats.plateAppearances || 0;
+    if (pa === 0) return 0;
+
+    // 1. Batting Runs (wRAA)
+    // wOBA = (0.69×uBB + 0.72×HBP + 0.89×1B + 1.27×2B + 1.62×3B + 2.10×HR) / (AB + BB - IBB + SF + HBP)
+    // 分母は PA - SH - IBB とほぼ等しいが、ここでは簡易的に PA を使うか、(AB + BB + HBP + SF) を計算する
+    
+    const walks = stats.walks || 0;
+    const hbp = stats.hitByPitch || 0;
+    const singles = stats.singles || 0;
+    const doubles = stats.doubles || 0;
+    const triples = stats.triples || 0;
+    const homeRuns = stats.homeRuns || 0;
+    const atBats = stats.atBats || 0;
+    const sf = stats.sacrificeFlies || 0;
+
+    const wobaDenominator = atBats + walks + hbp + sf;
+    
+    let wRAA = 0;
+    if (wobaDenominator > 0) {
+      const wobaNumerator = 
+        WAR_CONSTANTS.wOBA_WEIGHTS.uBB * walks +
+        WAR_CONSTANTS.wOBA_WEIGHTS.HBP * hbp +
+        WAR_CONSTANTS.wOBA_WEIGHTS.SINGLE * singles +
+        WAR_CONSTANTS.wOBA_WEIGHTS.DOUBLE * doubles +
+        WAR_CONSTANTS.wOBA_WEIGHTS.TRIPLE * triples +
+        WAR_CONSTANTS.wOBA_WEIGHTS.HR * homeRuns;
+      
+      const wOBA = wobaNumerator / wobaDenominator;
+      
+      // wRAA = ((wOBA - League_wOBA) / wOBA_Scale) * PA
+      wRAA = ((wOBA - WAR_CONSTANTS.LEAGUE_wOBA) / WAR_CONSTANTS.wOBA_SCALE) * pa;
+    }
+
+    // 2. Baserunning Runs (UBR)
+    const ubr = stats.ubr || 0;
+
+    // 3. Fielding Runs (UZR)
+    const uzr = stats.uzr || 0;
+
+    // 4. Positional Adjustment
+    // 162試合(または143試合)あたりの補正値を、打席数または試合数で按分
+    // ここでは簡易的に PA / 600 で按分する
+    const posAdjustmentBase = WAR_CONSTANTS.POSITION_ADJUSTMENTS[player.position] || 0;
+    const posAdjustment = posAdjustmentBase * (pa / 600);
+
+    // 5. Replacement Level
+    // 600打席あたり +20点
+    const replacement = WAR_CONSTANTS.REPLACEMENT_LEVEL_RUNS * (pa / 600);
+
+    // Total Runs
+    const totalRuns = wRAA + ubr + uzr + posAdjustment + replacement;
+
+    // WAR
+    return Math.round((totalRuns / WAR_CONSTANTS.RUNS_PER_WIN) * 10) / 10;
+  }
+};
 
 /**
  * 打率を計算

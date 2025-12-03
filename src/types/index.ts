@@ -75,6 +75,15 @@ export interface PlayerStats {
   bb9?: number;                     // BB/9
   
   pitchCount?: number;              // 投球数
+
+  // 守備統計
+  uzr?: number;                     // UZR (Ultimate Zone Rating) - 簡易版
+  
+  // 走塁統計
+  ubr?: number;                     // UBR (Ultimate Base Running) - 簡易版
+
+  // 総合指標
+  war?: number;                     // WAR (Wins Above Replacement) - 簡易版
 }
 
 export interface PlayerContract {
@@ -229,6 +238,8 @@ export interface PlayerGameStats {
   caughtStealing: number;   // 盗塁死
   doublePlays: number;      // 併殺打
   errors: number;           // 失策
+  uzrChange?: number;       // UZR変動値
+  ubrChange?: number;       // UBR変動値
   
   order?: number; // 打順 (1-9)
   // 投手用
@@ -427,6 +438,10 @@ export interface AtBatResult {
   errorPlayerId?: string | number; // エラーした選手のID
   direction?: number; // 打球方向 (1-9)
   isGroundBall?: boolean; // ゴロかどうか (併殺判定用)
+  defenseStats?: {
+    fielderId: string | number;
+    uzrChange: number;
+  };
 }
 
 export interface GameSimulationConfig {
@@ -487,4 +502,11 @@ export interface PaginationParams {
   pageSize: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+}
+
+export interface YearlyStats {
+  playerId: string | number;
+  year: number;
+  teamId: TeamId;
+  stats: PlayerStats;
 }

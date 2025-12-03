@@ -111,6 +111,9 @@ export const PlayerListScreen = () => {
       if (sortField === 'name') {
         valA = a.name;
         valB = b.name;
+      } else if (sortField === 'age') {
+        valA = a.age || 0;
+        valB = b.age || 0;
       } else if (sortField === 'team') {
         valA = a.team;
         valB = b.team;
@@ -148,6 +151,7 @@ export const PlayerListScreen = () => {
   const renderBatterHeader = () => (
     <View style={styles.headerRow}>
       {renderHeaderCell('名前', 'name', 120)}
+      {renderHeaderCell('年齢', 'age', 50)}
       {renderHeaderCell('球団', 'team', 60)}
       {renderHeaderCell('守備', 'position', 50)}
       {renderHeaderCell('試合', 'gamesPlayed', 50)}
@@ -171,12 +175,16 @@ export const PlayerListScreen = () => {
       {renderHeaderCell('出塁率', 'obp', 60)}
       {renderHeaderCell('長打率', 'slugging', 60)}
       {renderHeaderCell('OPS', 'ops', 60)} 
+      {renderHeaderCell('UZR', 'uzr', 60)}
+      {renderHeaderCell('UBR', 'ubr', 60)}
+      {renderHeaderCell('WAR', 'war', 60)}
     </View>
   );
 
   const renderPitcherHeader = () => (
     <View style={styles.headerRow}>
       {renderHeaderCell('名前', 'name', 120)}
+      {renderHeaderCell('年齢', 'age', 50)}
       {renderHeaderCell('球団', 'team', 60)}
       {renderHeaderCell('登板', 'gamesPitched', 50)}
       {renderHeaderCell('投球回', 'inningsPitched', 60)}
@@ -197,6 +205,7 @@ export const PlayerListScreen = () => {
       {renderHeaderCell('奪三振率', 'k9', 60)}
       {renderHeaderCell('与四球率', 'bb9', 60)}
       {renderHeaderCell('WHIP', 'whip', 60)}
+      {renderHeaderCell('WAR', 'war', 60)}
     </View>
   );
 
@@ -206,6 +215,7 @@ export const PlayerListScreen = () => {
       onPress={() => (navigation as any).navigate('PlayerDetail', { player: item })}
     >
       <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
+      <Text style={[styles.cell, { width: 50 }]}>{item.age || 0}</Text>
       <Text style={[styles.cell, { width: 60 }]}>{item.team ? item.team.toUpperCase() : ''}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.position}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.stats?.gamesPlayed || 0}</Text>
@@ -229,6 +239,9 @@ export const PlayerListScreen = () => {
       <Text style={[styles.cell, { width: 60 }]}>{item.stats?.obp?.toFixed(3)}</Text>
       <Text style={[styles.cell, { width: 60 }]}>{item.stats?.slugging?.toFixed(3)}</Text>
       <Text style={[styles.cell, { width: 60 }]}>{item.stats?.ops?.toFixed(3)}</Text>
+      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.uzr?.toFixed(2)}</Text>
+      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.ubr?.toFixed(2)}</Text>
+      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.war?.toFixed(2)}</Text>
     </TouchableOpacity>
   );
 
@@ -248,6 +261,7 @@ export const PlayerListScreen = () => {
         onPress={() => (navigation as any).navigate('PlayerDetail', { player: item })}
       >
         <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
+        <Text style={[styles.cell, { width: 50 }]}>{item.age || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{item.team ? item.team.toUpperCase() : ''}</Text>
         <Text style={[styles.cell, { width: 50 }]}>{item.stats?.gamesPitched || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{formatInnings(item.stats?.inningsPitched || 0)}</Text>
@@ -268,6 +282,7 @@ export const PlayerListScreen = () => {
         <Text style={[styles.cell, { width: 60 }]}>{item.stats?.k9?.toFixed(2) || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{item.stats?.bb9?.toFixed(2) || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{item.stats?.whip?.toFixed(2) || 0}</Text>
+        <Text style={[styles.cell, { width: 60 }]}>{item.stats?.war?.toFixed(2)}</Text>
       </TouchableOpacity>
     );
   };

@@ -12,10 +12,20 @@ import { getGameDateString } from '../utils/dateUtils';
  */
 export class GameEngine {
   
+  private leagueAverages: Record<string, { fielding: number, arm: number, speed: number }> | null = null;
+  private lastCalculatedSeason: number | null = null;
+
   /**
    * リーグ全体の1日分の試合をシミュレート
    */
   async simulateLeagueDay(gameState: GameState, saveDetails: boolean = true): Promise<GameResult[]> {
+    // リーグ平均能力値を取得 (キャッシュがない場合、またはシーズンが変わった場合)
+    if (!this.leagueAverages || this.lastCalculatedSeason !== gameState.season) {
+        console.log(`Recalculating league averages for season ${gameState.season}...`);
+        this.leagueAverages = await databaseManager.getLeagueAverageAbilities();
+        this.lastCalculatedSeason = gameState.season;
+    }
+
     const results: GameResult[] = [];
     const dateStr = getGameDateString(gameState.currentDate, gameState.season);
     
@@ -881,55 +891,71 @@ export class GameEngine {
   }
 
   /**
-   * ランナーが追加進塁できるか判定
+   * ランナーが追加進塁できるか判定し、UBRを計算
    */
-  private shouldAdvanceExtra(
+  private calculateExtraAdvance(
     runnerId: string | number | undefined,
     hitType: 'single' | 'double',
     direction: number | undefined,
     roster: Player[],
     isScoringAttempt: boolean = false
-  ): boolean {
-    if (!runnerId) return false;
+  ): { success: boolean, ubrChange: number } {
+    if (!runnerId) return { success: false, ubrChange: 0 };
     const runner = roster.find(p => p.id === runnerId);
-    if (!runner) return false;
+    if (!runner) return { success: false, ubrChange: 0 };
 
     const speed = runner.abilities.speed || 10;
-    let chance = 0;
+    let baseChance = 0;
 
     if (hitType === 'single') {
         // シングルヒットの場合
         if (isScoringAttempt) {
             // 2塁ランナーがホームを狙う (2nd -> Home)
-            // 外野へのヒットなら高確率で還れる
             if (direction && direction >= 7) {
-                chance = 0.6; // 基本60%
-                // ライト(9)・センター(8)は還りやすい、レフト(7)は少し落ちる
-                if (direction === 7) chance = 0.45; 
+                baseChance = 0.6; 
+                if (direction === 7) baseChance = 0.45; 
             } else {
-                // 内野安打なら無理
-                chance = 0.0;
+                baseChance = 0.0;
             }
         } else {
             // 1塁ランナーが3塁を狙う (1st -> 3rd)
-            // ライト(9)へのヒットは3塁に行きやすい
-            if (direction === 9) chance = 0.5;
-            else if (direction === 8) chance = 0.25;
-            else if (direction === 7) chance = 0.05; // レフト前は止まることが多い
-            else chance = 0.0;
+            if (direction === 9) baseChance = 0.5;
+            else if (direction === 8) baseChance = 0.25;
+            else if (direction === 7) baseChance = 0.05;
+            else baseChance = 0.0;
         }
     } else if (hitType === 'double') {
         // 2塁打の場合 (1st -> Home)
-        chance = 0.4; // 基本40%
+        baseChance = 0.4;
     }
 
-    // 走力補正: (Speed - 10) * 3%
-    chance += (speed - 10) * 0.03;
+    if (baseChance <= 0) return { success: false, ubrChange: 0 };
 
-    // 確率の範囲制限
+    // 平均的な選手(Speed 50)の成功率
+    // DBから取得したリーグ平均を使用。なければ50
+    let avgSpeed = 50;
+    if (this.leagueAverages && this.leagueAverages['All']) {
+        avgSpeed = this.leagueAverages['All'].speed;
+    }
+    
+    // 平均的な選手の確率
+    let avgChance = baseChance + (avgSpeed - 5) * 0.01;
+    avgChance = Math.max(0.0, Math.min(0.95, avgChance));
+
+    // 実際の選手の確率
+    let chance = baseChance + (speed - 5) * 0.01;
     chance = Math.max(0.0, Math.min(0.95, chance));
 
-    return Math.random() < chance;
+    const success = Math.random() < chance;
+    
+    // UBR計算
+    // 成功時: (1 - 平均確率) * 価値
+    // 失敗時(自重): (0 - 平均確率) * 価値
+    // 価値は簡易的に0.2とする
+    const runValue = 0.2;
+    const ubrChange = ((success ? 1 : 0) - avgChance) * runValue;
+
+    return { success, ubrChange };
   }
 
   /**
@@ -1146,6 +1172,14 @@ export class GameEngine {
           }
       }
 
+      // UZR記録
+      if (result.defenseStats) {
+          const fielderStat = defenseBattingStats.find(s => s.playerId === result.defenseStats.fielderId);
+          if (fielderStat) {
+              fielderStat.uzrChange = (fielderStat.uzrChange || 0) + result.defenseStats.uzrChange;
+          }
+      }
+
       if (result.type === 'out' || result.type === 'strikeout') {
         outs++;
         potentialOuts++; // アウトならみなしアウトも増える
@@ -1245,7 +1279,17 @@ export class GameEngine {
           if (currentRunners[0].occupied) {
               const runnerId = currentRunners[0].playerId;
               // Check extra advance (1st -> Home)
-              if (this.shouldAdvanceExtra(runnerId, 'double', result.direction, roster)) {
+              const advanceResult = this.calculateExtraAdvance(runnerId, 'double', result.direction, roster);
+              
+              // UBR記録
+              if (runnerId) {
+                  const runnerStat = battingStats.find(s => s.playerId === runnerId);
+                  if (runnerStat) {
+                      runnerStat.ubrChange = (runnerStat.ubrChange || 0) + advanceResult.ubrChange;
+                  }
+              }
+
+              if (advanceResult.success) {
                   newRuns++;
                   if (currentRunners[0].isEarned && potentialOuts < 3) earnedRunsToAdd++;
                   // Runner scores, so nextRunners[2] remains empty
@@ -1271,7 +1315,17 @@ export class GameEngine {
           if (currentRunners[1].occupied) {
              const runnerId = currentRunners[1].playerId;
              // Check extra advance (2nd -> Home)
-             if (this.shouldAdvanceExtra(runnerId, 'single', result.direction, roster, true)) {
+             const advanceResult = this.calculateExtraAdvance(runnerId, 'single', result.direction, roster, true);
+             
+             // UBR記録
+             if (runnerId) {
+                 const runnerStat = battingStats.find(s => s.playerId === runnerId);
+                 if (runnerStat) {
+                     runnerStat.ubrChange = (runnerStat.ubrChange || 0) + advanceResult.ubrChange;
+                 }
+             }
+
+             if (advanceResult.success) {
                  newRuns++;
                  if (currentRunners[1].isEarned && potentialOuts < 3) earnedRunsToAdd++;
              } else {
@@ -1284,7 +1338,17 @@ export class GameEngine {
              const runnerId = currentRunners[0].playerId;
              // Check extra advance (1st -> 3rd)
              // ただし、2塁ランナーが3塁に止まっている場合は行けない
-             if (this.shouldAdvanceExtra(runnerId, 'single', result.direction, roster)) {
+             const advanceResult = this.calculateExtraAdvance(runnerId, 'single', result.direction, roster);
+             
+             // UBR記録
+             if (runnerId) {
+                 const runnerStat = battingStats.find(s => s.playerId === runnerId);
+                 if (runnerStat) {
+                     runnerStat.ubrChange = (runnerStat.ubrChange || 0) + advanceResult.ubrChange;
+                 }
+             }
+
+             if (advanceResult.success) {
                  if (!nextRunners[2].occupied) {
                      nextRunners[2] = currentRunners[0];
                  } else {
@@ -1525,6 +1589,8 @@ export class GameEngine {
     let rbiEarned = 0;
     let errorPlayerId: string | number | undefined;
     let direction: number | undefined;
+    let fielder: Player | undefined;
+    let uzrChange: number | undefined;
 
     // 確率に基づいて結果を決定
     let cumulative = 0;
@@ -1563,52 +1629,95 @@ export class GameEngine {
         const posName = posMap[location - 1];
         
         // 野手を特定
-        let fielder = defenseLineup.find(p => p.position === posName);
+        fielder = defenseLineup.find(p => p.position === posName);
         if (!fielder && location === 1) fielder = pitcher; // Pitcher
         if (!fielder) fielder = defenseLineup.find(p => p.position === 'Unknown') || defenseLineup[0]; // Fallback
 
+        uzrChange = 0;
         if (fielder) {
             const fielding = fielder.abilities.fielding || 0;
             const arm = fielder.abilities.arm || 0;
             const speed = fielder.abilities.speed || 0;
 
+            // 平均的な選手の能力 (UZR基準値計算用)
+            // DBから取得したリーグ平均を使用。なければ50
+            let avgFielding = 50;
+            let avgArm = 50;
+            let avgSpeed = 50;
+
+            if (this.leagueAverages) {
+                // ポジション別の平均があればそれを使う
+                const posAvg = this.leagueAverages[posName];
+                if (posAvg) {
+                    avgFielding = posAvg.fielding;
+                    avgArm = posAvg.arm;
+                    avgSpeed = posAvg.speed;
+                } else {
+                    // なければ全体平均
+                    const allAvg = this.leagueAverages['All'];
+                    if (allAvg) {
+                        avgFielding = allAvg.fielding;
+                        avgArm = allAvg.arm;
+                        avgSpeed = allAvg.speed;
+                    }
+                }
+            }
+
             // A. エラー判定
             // ポジションによってエラー率を変える
-            // 外野手(LF, CF, RF)は守備機会の難易度等の関係でエラー率を低めに設定
             let baseErrorRate = 0.04;
             let fieldingFactor = 0.03;
 
             if (['LF', 'CF', 'RF'].includes(posName)) {
-                // 外野手: 基本率 1.5%, 守備力影響小
                 baseErrorRate = 0.015;
                 fieldingFactor = 0.013;
             } else if (['SS', '2B', '3B'].includes(posName)) {
-                // 内野手(二遊三): 難しい打球が多いので基本率高め
                 baseErrorRate = 0.045;
                 fieldingFactor = 0.040;
             } else {
-                // 投手・捕手・一塁手
                 baseErrorRate = 0.03;
                 fieldingFactor = 0.025;
             }
 
-            // 守備力による補正
+            // 実際の選手のエラー率
             const errorChance = baseErrorRate - (fielding / 100) * fieldingFactor;
+            // 平均的な選手のエラー率
+            const avgErrorChance = baseErrorRate - (avgFielding / 100) * fieldingFactor;
             
+            // UZR計算用の期待アウト確率 (P) と 結果 (R)
+            let expectedOutProb = 0;
+            let resultIsOut = 0;
+            const runValue = 0.75; // 1アウトの価値係数
+
             if (Math.random() < Math.max(0.001, errorChance)) {
+                // エラー発生
                 type = 'error';
                 advanceBases = 1;
                 errorPlayerId = fielder.id;
+                resultIsOut = 0;
             } else {
+                // エラー回避 -> 次の判定へ
+                
                 // B. 好守備判定 (ヒット性の当たりをアウトにする)
                 if (type === 'single' || type === 'double' || type === 'triple') {
                     // 守備範囲(Speed)と捕球(Fielding)で判定
-                    const defenseScore = (fielding + speed) / 2; // 0-100
-                    const saveChance = (defenseScore / 100) * 0.15; // 最大15%の確率でヒットを阻止
+                    const defenseScore = (fielding + speed) / 2; 
+                    const saveChance = (defenseScore / 100) * 0.15; 
                     
+                    // 平均的な選手の阻止率
+                    const avgDefenseScore = (avgFielding + avgSpeed) / 2;
+                    const avgSaveChance = (avgDefenseScore / 100) * 0.15;
+
+                    // この打球における平均的な選手のアウト確率
+                    // (エラーせず) かつ (好守備で阻止する)
+                    expectedOutProb = (1 - avgErrorChance) * avgSaveChance;
+
                     if (Math.random() < saveChance) {
                         type = 'out';
                         advanceBases = 0;
+                        resultIsOut = 1;
+                    } else {
+                        resultIsOut = 0;
                     }
                 }
                 // C. 内野安打判定 (アウト性の当たりがヒットになる)
@@ -1616,21 +1725,48 @@ export class GameEngine {
                     // 内野ゴロの場合 (1-6)
                     if (location <= 6) {
                         const batterSpeed = batter.abilities.speed || 0;
-                        // 守備側の送球(Arm)と捕球(Fielding)
                         const defensePower = (fielding + arm) / 2;
                         
-                        // 打者の足が速く、守備が弱い場合
+                        // 平均的な選手の守備力
+                        const avgDefensePower = (avgFielding + avgArm) / 2;
+
+                        // 実際の選手の内野安打許容率
+                        let infieldHitChance = 0;
                         if (batterSpeed > defensePower) {
                             const diff = batterSpeed - defensePower;
-                            const infieldHitChance = 0.05 + (diff / 100) * 0.2; // 5% + 差分ボーナス
-                            if (Math.random() < infieldHitChance) {
-                                type = 'single';
-                                advanceBases = 1;
-                            }
+                            infieldHitChance = 0.05 + (diff / 100) * 0.2;
                         }
+
+                        // 平均的な選手の内野安打許容率
+                        let avgInfieldHitChance = 0;
+                        if (batterSpeed > avgDefensePower) {
+                            const diff = batterSpeed - avgDefensePower;
+                            avgInfieldHitChance = 0.05 + (diff / 100) * 0.2;
+                        }
+
+                        // この打球における平均的な選手のアウト確率
+                        // (エラーせず) かつ (内野安打にされない)
+                        expectedOutProb = (1 - avgErrorChance) * (1 - avgInfieldHitChance);
+
+                        if (Math.random() < infieldHitChance) {
+                            type = 'single';
+                            advanceBases = 1;
+                            resultIsOut = 0;
+                        } else {
+                            resultIsOut = 1;
+                        }
+                    } else {
+                        // 外野フライ/ライナーなど (ほぼアウト)
+                        expectedOutProb = 1 - avgErrorChance;
+                        resultIsOut = 1;
                     }
                 }
             }
+
+            // UZR変動値の計算: (結果 - 期待値) * 価値
+            // 結果: アウト=1, セーフ=0
+            // 期待値: 平均的な選手がアウトにする確率
+            uzrChange = (resultIsOut - expectedOutProb) * runValue;
         }
     }
 
@@ -1643,7 +1779,18 @@ export class GameEngine {
         }
     }
 
-    return { type, advanceBases, rbiEarned, errorPlayerId, direction, isGroundBall };
+    return { 
+        type, 
+        advanceBases, 
+        rbiEarned, 
+        errorPlayerId, 
+        direction, 
+        isGroundBall,
+        defenseStats: fielder ? {
+            fielderId: fielder.id,
+            uzrChange
+        } : undefined
+    };
   }
 
   /**
