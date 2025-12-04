@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { dbManager } from '../services/databaseManager';
 import { Player, TeamId } from '../types';
@@ -28,6 +28,7 @@ export const PlayerListScreen = () => {
   const [showRookieOnly, setShowRookieOnly] = useState(false);
   const [showRookieEligibleOnly, setShowRookieEligibleOnly] = useState(false);
   const navigation = useNavigation();
+  const scrollX = React.useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -37,7 +38,7 @@ export const PlayerListScreen = () => {
 
   const loadPlayers = async () => {
     try {
-      setLoading(true);
+      // setLoading(true); // 画面遷移戻り時に再レンダリングされてスクロール位置がリセットされるのを防ぐ
       const [playersData, teamsData] = await Promise.all([
         dbManager.getInitialPlayers(),
         dbManager.getInitialTeams()
@@ -147,24 +148,44 @@ export const PlayerListScreen = () => {
     return result;
   }, [players, teams, viewMode, selectedTeam, sortField, sortOrder, showRegulationOnly, showRookieOnly, showRookieEligibleOnly]);
 
-  const renderHeaderCell = (label: string, field: string, width: number) => (
-    <TouchableOpacity 
-      style={[styles.headerCell, { width }]} 
-      onPress={() => handleSort(field)}
-    >
-      <Text style={[
-        styles.headerText, 
-        sortField === field && styles.activeSortText
-      ]}>
-        {label} {sortField === field ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
-      </Text>
-    </TouchableOpacity>
-  );
+  const renderHeaderCell = (label: string, field: string, width: number) => {
+    const isSticky = field === 'name';
+    const cellContent = (
+      <TouchableOpacity 
+        style={[styles.headerCell, { width }, isSticky ? { borderRightWidth: 1, borderRightColor: '#ccc' } : null]} 
+        onPress={() => handleSort(field)}
+      >
+        <Text style={[
+          styles.headerText, 
+          sortField === field && styles.activeSortText
+        ]}>
+          {label} {sortField === field ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+        </Text>
+      </TouchableOpacity>
+    );
+
+    if (isSticky) {
+      return (
+        <Animated.View 
+          style={{
+            width,
+            zIndex: 100,
+            backgroundColor: '#e0e0e0',
+            transform: [{ translateX: scrollX }]
+          }}
+        >
+          {cellContent}
+        </Animated.View>
+      );
+    }
+    return cellContent;
+  };
 
   const renderBatterHeader = () => (
     <View style={styles.headerRow}>
       {renderHeaderCell('名前', 'name', 120)}
       {renderHeaderCell('年齢', 'age', 50)}
+      {renderHeaderCell('年数', 'experienceYears', 40)}
       {renderHeaderCell('球団', 'team', 40)}
       {renderHeaderCell('守備', 'position', 50)}
       {renderHeaderCell('試合', 'gamesPlayed', 50)}
@@ -198,6 +219,7 @@ export const PlayerListScreen = () => {
     <View style={styles.headerRow}>
       {renderHeaderCell('名前', 'name', 120)}
       {renderHeaderCell('年齢', 'age', 50)}
+      {renderHeaderCell('年数', 'experienceYears', 40)}
       {renderHeaderCell('球団', 'team', 40)}
       {renderHeaderCell('登板', 'gamesPitched', 50)}
       {renderHeaderCell('投球回', 'inningsPitched', 60)}
@@ -227,8 +249,18 @@ export const PlayerListScreen = () => {
       style={styles.row} 
       onPress={() => (navigation as any).navigate('PlayerDetail', { player: item })}
     >
-      <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
+      <Animated.View style={{
+        width: 120,
+        zIndex: 100,
+        backgroundColor: 'white',
+        borderRightWidth: 1,
+        borderRightColor: '#eee',
+        transform: [{ translateX: scrollX }]
+      }}>
+        <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
+      </Animated.View>
       <Text style={[styles.cell, { width: 50 }]}>{item.age || 0}</Text>
+      <Text style={[styles.cell, { width: 40 }]}>{item.experienceYears || 0}</Text>
       <Text style={[styles.cell, { width: 40, fontWeight: 'bold' }]}>{item.team ? (TEAM_ABBREVIATIONS[item.team] || item.team.toUpperCase()) : ''}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.position}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.stats?.gamesPlayed || 0}</Text>
@@ -273,8 +305,18 @@ export const PlayerListScreen = () => {
         style={styles.row}
         onPress={() => (navigation as any).navigate('PlayerDetail', { player: item })}
       >
-        <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
+        <Animated.View style={{
+          width: 120,
+          zIndex: 100,
+          backgroundColor: 'white',
+          borderRightWidth: 1,
+          borderRightColor: '#eee',
+          transform: [{ translateX: scrollX }]
+        }}>
+          <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
+        </Animated.View>
         <Text style={[styles.cell, { width: 50 }]}>{item.age || 0}</Text>
+        <Text style={[styles.cell, { width: 40 }]}>{item.experienceYears || 0}</Text>
         <Text style={[styles.cell, { width: 40, fontWeight: 'bold' }]}>{item.team ? (TEAM_ABBREVIATIONS[item.team] || item.team.toUpperCase()) : ''}</Text>
         <Text style={[styles.cell, { width: 50 }]}>{item.stats?.gamesPitched || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{formatInnings(item.stats?.inningsPitched || 0)}</Text>
@@ -401,7 +443,14 @@ export const PlayerListScreen = () => {
       </View>
 
       {/* Table */}
-      <ScrollView horizontal>
+      <Animated.ScrollView 
+        horizontal 
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
         <View>
           {viewMode === 'batter' ? renderBatterHeader() : renderPitcherHeader()}
           <FlatList
@@ -411,7 +460,7 @@ export const PlayerListScreen = () => {
             contentContainerStyle={{ paddingBottom: 20 }}
           />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 };
@@ -527,7 +576,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#e0e0e0',
     paddingVertical: 10,
-    paddingHorizontal: 5,
+    // paddingHorizontal: 5, // 左端固定のために削除
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
@@ -547,7 +596,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'white',
     paddingVertical: 12,
-    paddingHorizontal: 5,
+    // paddingHorizontal: 5, // 左端固定のために削除
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
