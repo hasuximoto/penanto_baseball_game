@@ -35,6 +35,7 @@ const MainStack = () => (
       headerStyle: { backgroundColor: '#4CAF50' },
       headerTintColor: '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
+      headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
     <Stack.Screen
@@ -90,6 +91,7 @@ const PlayerStack = () => (
       headerStyle: { backgroundColor: '#2196F3' },
       headerTintColor: '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
+      headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
     <Stack.Screen
@@ -120,6 +122,7 @@ const NewsStack = () => (
       headerStyle: { backgroundColor: '#607D8B' },
       headerTintColor: '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
+      headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
     <Stack.Screen
@@ -145,6 +148,7 @@ const TeamStatsStack = () => (
       headerStyle: { backgroundColor: '#9C27B0' },
       headerTintColor: '#fff',
       headerTitleStyle: { fontWeight: 'bold' },
+      headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
     <Stack.Screen
