@@ -20,6 +20,7 @@ import { DebugScreen } from '../screens/DebugScreen';
 // import { GameScreen } from '../screens/GameScreen';
 import { StoveLeagueScreen } from '../screens/StoveLeagueScreen';
 import { DraftScreen } from '../screens/DraftScreen';
+import { TitleHistoryScreen } from '../screens/TitleHistoryScreen';
 // import { PlayerDataScreen } from '../screens/PlayerDataScreen';
 
 const Stack = createStackNavigator();
@@ -67,6 +68,11 @@ const MainStack = () => (
       name="Debug"
       component={DebugScreen}
       options={{ title: 'Debug Menu' }}
+    />
+    <Stack.Screen
+      name="TitleHistory"
+      component={TitleHistoryScreen}
+      options={{ title: '年度別タイトル獲得者一覧' }}
     />
     {/* <Stack.Screen
       name="Game"

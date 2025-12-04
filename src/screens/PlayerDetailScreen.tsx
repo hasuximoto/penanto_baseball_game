@@ -552,6 +552,7 @@ export const PlayerDetailScreen = ({ route }: any) => {
       <View style={styles.header}>
         <Text style={styles.playerName}>{player.name}</Text>
         <Text style={styles.playerInfo}>{player.team.toUpperCase()} | {player.position} | 年齢: {player.age}</Text>
+        <Text style={styles.playerInfo}>ドラフト順位: {player.draftRank} | 年数: {player.experienceYears} | 新人王資格: {player.isRookieEligible ? 'あり' : 'なし'}</Text>
       </View>
 
       <View style={styles.tabContainer}>

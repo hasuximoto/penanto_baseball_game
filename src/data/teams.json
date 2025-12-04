@@ -4,6 +4,7 @@
     "name": "ソフトバンクホークス",
     "league": "pacific",
     "budget": 100000000,
+    "mark": "Sh",
     "payroll": 0
   },
   {
@@ -11,6 +12,7 @@
     "name": "埼玉西武ライオンズ",
     "league": "pacific",
     "budget": 95000000,
+    "mark": "L",
     "payroll": 0
   },
   {
@@ -18,6 +20,7 @@
     "name": "北海道日本ハムファイターズ",
     "league": "pacific",
     "budget": 90000000,
+    "mark": "F",
     "payroll": 0
   },
   {
@@ -25,6 +28,7 @@
     "name": "オリックスバファローズ",
     "league": "pacific",
     "budget": 85000000,
+    "mark": "Bs",
     "payroll": 0
   },
   {
@@ -32,6 +36,7 @@
     "name": "東北楽天ゴールデンイーグルス",
     "league": "pacific",
     "budget": 80000000,
+    "mark": "E",
     "payroll": 0
   },
   {
@@ -39,6 +44,7 @@
     "name": "千葉ロッテマリーンズ",
     "league": "pacific",
     "budget": 75000000,
+    "mark": "M",
     "payroll": 0
   },
   {
@@ -46,6 +52,7 @@
     "name": "読売ジャイアンツ",
     "league": "central",
     "budget": 100000000,
+    "mark": "G",
     "payroll": 0
   },
   {
@@ -53,6 +60,7 @@
     "name": "阪神タイガース",
     "league": "central",
     "budget": 95000000,
+    "mark": "T",
     "payroll": 0
   },
   {
@@ -60,6 +68,7 @@
     "name": "中日ドラゴンズ",
     "league": "central",
     "budget": 90000000,
+    "mark": "D",
     "payroll": 0
   },
   {
@@ -67,6 +76,7 @@
     "name": "横浜DeNAベイスターズ",
     "league": "central",
     "budget": 85000000,
+    "mark": "DB",
     "payroll": 0
   },
   {
@@ -74,6 +84,7 @@
     "name": "広島東洋カープ",
     "league": "central",
     "budget": 80000000,
+    "mark": "C",
     "payroll": 0
   },
   {
@@ -81,6 +92,7 @@
     "name": "東京ヤクルトスワローズ",
     "league": "central",
     "budget": 75000000,
+    "mark": "S",
     "payroll": 0
   }
 ]

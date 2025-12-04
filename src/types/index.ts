@@ -99,6 +99,8 @@ export interface Player {
   position: Position;
   handedness: "R" | "L" | "B";      // 右・左・両打ち
   age: number;
+  experienceYears?: number;         // プロ年数
+  isRookieEligible?: boolean;       // 新人王資格
   team: TeamId;
   draftRank?: number;               // ドラフト順位
   origin?: "High School" | "University" | "Industrial" | "Foreign" | "Unknown"; // 出身
@@ -509,4 +511,15 @@ export interface YearlyStats {
   year: number;
   teamId: TeamId;
   stats: PlayerStats;
+}
+
+export interface Title {
+  id?: number;
+  year: number;
+  name: string;
+  playerId: number | string;
+  teamId: TeamId;
+  value?: string;
+  league: 'central' | 'pacific';
+  category: 'batting' | 'pitching' | 'award';
 }

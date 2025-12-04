@@ -239,6 +239,7 @@ export const BoxScoreScreen = ({ route }: any) => {
         })}
          {/* Pitching Totals Row */}
          <View style={[styles.row, styles.totalRow]}>
+          <Text style={[styles.colStat, styles.bold]}></Text>
           <Text style={[styles.colName, styles.bold]}>Totals</Text>
           <Text style={[styles.colStat, styles.bold]}>{formatInnings(pitching.reduce((s, p) => s + (p.inningsPitched || 0), 0))}</Text>
           <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.pitchingHits || 0), 0)}</Text>

@@ -2,7 +2,6 @@ import { GameState, GameResult, GameStatus, TeamId, AtBatResult, Player, PlayerS
 import { dbManager as databaseManager } from './databaseManager';
 import { rosterManager } from './rosterManager';
 import { calculateAtBatProbabilities } from './formulaCalculations';
-import INITIAL_LINEUPS from '../data/initialLineups.json';
 import { getGameDateString } from '../utils/dateUtils';
 
 /**
@@ -841,9 +840,6 @@ export class GameEngine {
     
     // ローテーション投手を特定（リリーフ登板させないため）
     let rotationPlayerIds: (string | number)[] = [];
-    if (teamId && (INITIAL_LINEUPS as any)[teamId]) {
-        rotationPlayerIds = (INITIAL_LINEUPS as any)[teamId].pitchingRotation.map((p: any) => p.playerId);
-    }
 
     const reliefCandidates = roster.filter(p => 
       p.position === 'P' && 
@@ -931,9 +927,9 @@ export class GameEngine {
 
     if (baseChance <= 0) return { success: false, ubrChange: 0 };
 
-    // 平均的な選手(Speed 50)の成功率
-    // DBから取得したリーグ平均を使用。なければ50
-    let avgSpeed = 50;
+    // 平均的な選手(Speed 6)の成功率
+    // DBから取得したリーグ平均を使用。なければ6
+    let avgSpeed = 6;
     if (this.leagueAverages && this.leagueAverages['All']) {
         avgSpeed = this.leagueAverages['All'].speed;
     }
@@ -1640,10 +1636,10 @@ export class GameEngine {
             const speed = fielder.abilities.speed || 0;
 
             // 平均的な選手の能力 (UZR基準値計算用)
-            // DBから取得したリーグ平均を使用。なければ50
-            let avgFielding = 50;
-            let avgArm = 50;
-            let avgSpeed = 50;
+            // DBから取得したリーグ平均を使用。なければ6
+            let avgFielding = 6;
+            let avgArm = 6;
+            let avgSpeed = 6;
 
             if (this.leagueAverages) {
                 // ポジション別の平均があればそれを使う
@@ -1680,9 +1676,9 @@ export class GameEngine {
             }
 
             // 実際の選手のエラー率
-            const errorChance = baseErrorRate - (fielding / 100) * fieldingFactor;
+            const errorChance = baseErrorRate - (fielding / 80) * fieldingFactor;
             // 平均的な選手のエラー率
-            const avgErrorChance = baseErrorRate - (avgFielding / 100) * fieldingFactor;
+            const avgErrorChance = baseErrorRate - (avgFielding / 80) * fieldingFactor;
             
             // UZR計算用の期待アウト確率 (P) と 結果 (R)
             let expectedOutProb = 0;

@@ -439,8 +439,8 @@ export const calculateAtBatProbabilities = (
   const pitcherSpeed = pitcher.abilities.speed || 140.0; // km/h
   const baseKRate = 0.18;
   
-  // 球速 145km/h 基準, +10km/h で +5%
-  const speedFactor = (pitcherSpeed - 145.0) * 0.005;
+  // 球速 146km/h 基準, +10km/h で +9%
+  const speedFactor = (pitcherSpeed - 146.0) * 0.009;
   // Contact 10 基準, +10 で -5%
   const contactKFactor = (batterContact - 10.0) * -0.005;
   

@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { dbManager } from '../services/databaseManager';
 import { Player, TeamId } from '../types';
+import { TEAM_ABBREVIATIONS } from '../utils/constants';
 
 type ViewMode = 'batter' | 'pitcher';
 type SortOrder = 'asc' | 'desc';
@@ -24,6 +25,8 @@ export const PlayerListScreen = () => {
   const [sortField, setSortField] = useState<string>('average'); // Default sort
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [showRegulationOnly, setShowRegulationOnly] = useState(false);
+  const [showRookieOnly, setShowRookieOnly] = useState(false);
+  const [showRookieEligibleOnly, setShowRookieEligibleOnly] = useState(false);
   const navigation = useNavigation();
 
   useFocusEffect(
@@ -102,7 +105,17 @@ export const PlayerListScreen = () => {
       });
     }
 
-    // 4. Sort
+    // 4. Filter by Rookie Only
+    if (showRookieOnly) {
+      result = result.filter(p => p.experienceYears === 1);
+    }
+
+    // 5. Filter by Rookie Eligible Only
+    if (showRookieEligibleOnly) {
+      result = result.filter(p => p.isRookieEligible === true);
+    }
+
+    // 6. Sort
     result = [...result].sort((a, b) => {
       let valA: any;
       let valB: any;
@@ -132,7 +145,7 @@ export const PlayerListScreen = () => {
     });
 
     return result;
-  }, [players, teams, viewMode, selectedTeam, sortField, sortOrder, showRegulationOnly]);
+  }, [players, teams, viewMode, selectedTeam, sortField, sortOrder, showRegulationOnly, showRookieOnly, showRookieEligibleOnly]);
 
   const renderHeaderCell = (label: string, field: string, width: number) => (
     <TouchableOpacity 
@@ -152,7 +165,7 @@ export const PlayerListScreen = () => {
     <View style={styles.headerRow}>
       {renderHeaderCell('名前', 'name', 120)}
       {renderHeaderCell('年齢', 'age', 50)}
-      {renderHeaderCell('球団', 'team', 60)}
+      {renderHeaderCell('球団', 'team', 40)}
       {renderHeaderCell('守備', 'position', 50)}
       {renderHeaderCell('試合', 'gamesPlayed', 50)}
       {renderHeaderCell('打席', 'plateAppearances', 50)}
@@ -185,7 +198,7 @@ export const PlayerListScreen = () => {
     <View style={styles.headerRow}>
       {renderHeaderCell('名前', 'name', 120)}
       {renderHeaderCell('年齢', 'age', 50)}
-      {renderHeaderCell('球団', 'team', 60)}
+      {renderHeaderCell('球団', 'team', 40)}
       {renderHeaderCell('登板', 'gamesPitched', 50)}
       {renderHeaderCell('投球回', 'inningsPitched', 60)}
       {renderHeaderCell('自責点', 'earnedRuns', 50)}
@@ -216,7 +229,7 @@ export const PlayerListScreen = () => {
     >
       <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.age || 0}</Text>
-      <Text style={[styles.cell, { width: 60 }]}>{item.team ? item.team.toUpperCase() : ''}</Text>
+      <Text style={[styles.cell, { width: 40, fontWeight: 'bold' }]}>{item.team ? (TEAM_ABBREVIATIONS[item.team] || item.team.toUpperCase()) : ''}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.position}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.stats?.gamesPlayed || 0}</Text>
       <Text style={[styles.cell, { width: 50 }]}>{item.stats?.plateAppearances || 0}</Text>
@@ -239,9 +252,9 @@ export const PlayerListScreen = () => {
       <Text style={[styles.cell, { width: 60 }]}>{item.stats?.obp?.toFixed(3)}</Text>
       <Text style={[styles.cell, { width: 60 }]}>{item.stats?.slugging?.toFixed(3)}</Text>
       <Text style={[styles.cell, { width: 60 }]}>{item.stats?.ops?.toFixed(3)}</Text>
-      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.uzr?.toFixed(2)}</Text>
-      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.ubr?.toFixed(2)}</Text>
-      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.war?.toFixed(2)}</Text>
+      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.uzr?.toFixed(2) || 0}</Text>
+      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.ubr?.toFixed(2) || 0}</Text>
+      <Text style={[styles.cell, { width: 60 }]}>{item.stats?.war?.toFixed(2) || 0}</Text>
     </TouchableOpacity>
   );
 
@@ -262,7 +275,7 @@ export const PlayerListScreen = () => {
       >
         <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
         <Text style={[styles.cell, { width: 50 }]}>{item.age || 0}</Text>
-        <Text style={[styles.cell, { width: 60 }]}>{item.team ? item.team.toUpperCase() : ''}</Text>
+        <Text style={[styles.cell, { width: 40, fontWeight: 'bold' }]}>{item.team ? (TEAM_ABBREVIATIONS[item.team] || item.team.toUpperCase()) : ''}</Text>
         <Text style={[styles.cell, { width: 50 }]}>{item.stats?.gamesPitched || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{formatInnings(item.stats?.inningsPitched || 0)}</Text>
         <Text style={[styles.cell, { width: 50 }]}>{item.stats?.earnedRuns || 0}</Text>
@@ -282,7 +295,7 @@ export const PlayerListScreen = () => {
         <Text style={[styles.cell, { width: 60 }]}>{item.stats?.k9?.toFixed(2) || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{item.stats?.bb9?.toFixed(2) || 0}</Text>
         <Text style={[styles.cell, { width: 60 }]}>{item.stats?.whip?.toFixed(2) || 0}</Text>
-        <Text style={[styles.cell, { width: 60 }]}>{item.stats?.war?.toFixed(2)}</Text>
+        <Text style={[styles.cell, { width: 60 }]}>{item.stats?.war?.toFixed(2) || 0}</Text>
       </TouchableOpacity>
     );
   };
@@ -350,21 +363,41 @@ export const PlayerListScreen = () => {
               onPress={() => setSelectedTeam(team)}
             >
               <Text style={[styles.teamText, selectedTeam === team && styles.activeTeamText]}>
-                {team.toUpperCase()}
+                {TEAM_ABBREVIATIONS[team] || team.toUpperCase()}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <TouchableOpacity 
-          style={styles.checkboxContainer}
-          onPress={() => setShowRegulationOnly(!showRegulationOnly)}
-        >
-          <View style={[styles.checkbox, showRegulationOnly && styles.checkboxChecked]}>
-            {showRegulationOnly && <Text style={styles.checkmark}>✓</Text>}
-          </View>
-          <Text style={styles.checkboxLabel}>規定{viewMode === 'batter' ? '打席' : '投球回'}到達のみ</Text>
-        </TouchableOpacity>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.teamFilter}>
+          <TouchableOpacity 
+            style={styles.checkboxContainer}
+            onPress={() => setShowRegulationOnly(!showRegulationOnly)}
+          >
+            <View style={[styles.checkbox, showRegulationOnly && styles.checkboxChecked]}>
+              {showRegulationOnly && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxLabel}>規定{viewMode === 'batter' ? '打席' : '投球回'}到達のみ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.checkboxContainer}
+            onPress={() => setShowRookieOnly(!showRookieOnly)}
+          >
+            <View style={[styles.checkbox, showRookieOnly && styles.checkboxChecked]}>
+              {showRookieOnly && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxLabel}>新人のみ表示</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.checkboxContainer}
+            onPress={() => setShowRookieEligibleOnly(!showRookieEligibleOnly)}
+          >
+            <View style={[styles.checkbox, showRookieEligibleOnly && styles.checkboxChecked]}>
+              {showRookieEligibleOnly && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxLabel}>新人王資格ありのみ表示</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       {/* Table */}

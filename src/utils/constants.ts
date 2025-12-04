@@ -16,6 +16,21 @@ export const TEAMS = {
 export const TEAM_IDS = ['eagles', 'marines', 'baystars', 'dragons', 'tigers', 'carp'] as const;
 export type TeamIdType = typeof TEAM_IDS[number];
 
+export const TEAM_ABBREVIATIONS: Record<string, string> = {
+  'giants': 'G',
+  'tigers': 'T',
+  'dragons': 'D',
+  'baystars': 'De',
+  'carp': 'C',
+  'swallows': 'S',
+  'hawks': 'H',
+  'lions': 'L',
+  'fighters': 'F',
+  'buffaloes': 'B',
+  'eagles': 'E',
+  'marines': 'M'
+};
+
 // ポジション
 export const POSITIONS = {
   P: { id: 'P', name: '投手', order: 1 },

@@ -42,10 +42,38 @@ export class SeasonManager {
     // 現在の成績を年度別成績として保存 (前年度の成績)
     await dbManager.saveYearlyStats(newSeasonYear - 1, players);
 
-    const resetPlayers = players.map(p => ({
-        ...p,
-        age: p.age + 1, // 年齢を1つ加算
-        stats: {
+    const resetPlayers = await Promise.all(players.map(async p => {
+        // プロ年数の更新
+        const experienceYears = (p.experienceYears || 0) + 1;
+        
+        // 新人王資格判定
+        let isRookieEligible = false;
+        // 支配下登録5年以内
+        if (experienceYears <= 5) {
+            // 過去の成績を取得 (前年度の成績も含む)
+            const pastStats = await dbManager.getYearlyStats(p.id);
+            
+            if (p.position === 'P') {
+                // 投手: 前年までの通算投球回が30イニング以内
+                const totalInnings = pastStats.reduce((sum, s) => sum + (s.stats.inningsPitched || 0), 0);
+                if (totalInnings <= 30) {
+                    isRookieEligible = true;
+                }
+            } else {
+                // 野手: 前年までの通算打席数が60打席以内
+                const totalPA = pastStats.reduce((sum, s) => sum + (s.stats.plateAppearances || 0), 0);
+                if (totalPA <= 60) {
+                    isRookieEligible = true;
+                }
+            }
+        }
+
+        return {
+            ...p,
+            age: p.age + 1, // 年齢を1つ加算
+            experienceYears,
+            isRookieEligible,
+            stats: {
             // 打者
             gamesPlayed: 0,
             plateAppearances: 0,
@@ -94,6 +122,7 @@ export class SeasonManager {
             bb9: 0,
             pitchCount: 0
         }
+    };
     }));
 
     await dbManager.updatePlayers(resetPlayers);

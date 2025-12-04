@@ -369,6 +369,15 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
         <TouchableOpacity
           style={[styles.button, styles.secondaryButton, loading && styles.disabledButton]}
+          onPress={() => navigation.navigate('TitleHistory')}
+          activeOpacity={0.7}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>タイトル履歴</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.secondaryButton, loading && styles.disabledButton]}
           onPress={handleSettings}
           activeOpacity={0.7}
           disabled={loading}

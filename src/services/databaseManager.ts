@@ -5,11 +5,10 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import INITIAL_PLAYERS_DATA from '../data/initialPlayers.json';
-import INITIAL_LINEUPS from '../data/initialLineups.json';
 import INITIAL_TEAMS_DATA from '../data/teams.json';
 import INITIAL_SCHEDULE from '../data/initialSchedule.json';
 import NAME_MASTER_DATA from '../data/nameMaster.json';
-import { GameResult, PlayerGameStats, Player, NewsItem, TeamId, YearlyStats, PlayerStats } from '../types';
+import { GameResult, PlayerGameStats, Player, NewsItem, TeamId, YearlyStats, PlayerStats, Title } from '../types';
 import { getGameDateString } from '../utils/dateUtils';
 import { AwardManager } from './awardManager';
 import { calculateWAR } from '../utils/calculations';
@@ -100,6 +99,22 @@ export const DATABASE_SCHEMA = {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(player_id) REFERENCES players(id),
       UNIQUE(player_id, season)
+    )
+  `,
+
+  // タイトル履歴
+  titles: `
+    CREATE TABLE IF NOT EXISTS titles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      year INTEGER NOT NULL,
+      title_name TEXT NOT NULL,
+      player_id INTEGER NOT NULL,
+      team_id TEXT,
+      value TEXT,
+      league TEXT,
+      category TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(player_id) REFERENCES players(id)
     )
   `,
 
@@ -348,6 +363,7 @@ export class DatabaseManager {
           teams: INITIAL_TEAMS,
           players: distributedPlayers,
           schedule: INITIAL_SCHEDULE,
+          titles: [],
         },
         version: this.currentVersion,
       };
@@ -925,6 +941,61 @@ export class DatabaseManager {
       }
     } catch (error) {
       console.error('Failed to update team stats:', error);
+    }
+  }
+
+  /**
+   * タイトル履歴を保存
+   */
+  async saveTitle(title: Title): Promise<void> {
+    try {
+      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      if (schemaData) {
+        const parsed = JSON.parse(schemaData);
+        if (!parsed.initialData.titles) {
+          parsed.initialData.titles = [];
+        }
+        // ID付与
+        const newTitle = { ...title, id: parsed.initialData.titles.length + 1 };
+        parsed.initialData.titles.push(newTitle);
+        await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+      }
+    } catch (error) {
+      console.error('Failed to save title:', error);
+    }
+  }
+
+  /**
+   * 指定年度のタイトル一覧を取得
+   */
+  async getTitlesByYear(year: number): Promise<Title[]> {
+    try {
+      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      if (!schemaData) return [];
+      
+      const parsed = JSON.parse(schemaData);
+      const titles = parsed.initialData.titles || [];
+      return titles.filter((t: Title) => t.year === year);
+    } catch (error) {
+      console.error('Failed to get titles:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 選手ごとのタイトル履歴を取得
+   */
+  async getPlayerTitles(playerId: number | string): Promise<Title[]> {
+    try {
+      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      if (!schemaData) return [];
+      
+      const parsed = JSON.parse(schemaData);
+      const titles = parsed.initialData.titles || [];
+      return titles.filter((t: Title) => t.playerId === playerId);
+    } catch (error) {
+      console.error('Failed to get player titles:', error);
+      return [];
     }
   }
 

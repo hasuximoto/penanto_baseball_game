@@ -35,7 +35,7 @@ export const DraftScreen = () => {
   const [logs, setLogs] = useState<string[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<Player | null>(null);
   const [filterPosition, setFilterPosition] = useState<'All' | 'P' | 'Fielder'>('All');
-  const [sortType, setSortType] = useState<'Evaluation' | 'Newest'>('Evaluation');
+  const [sortType, setSortType] = useState<'Evaluation' | 'Position'>('Evaluation');
   const [isDraftOver, setIsDraftOver] = useState(false);
   const [teams, setTeams] = useState<any[]>([]);
   const [teamNeeds, setTeamNeeds] = useState<Record<string, any>>({});
@@ -73,7 +73,7 @@ export const DraftScreen = () => {
         setLoading(true);
         
         // 1. 候補選手生成
-        const newCandidates = DraftManager.generateDraftCandidates(200); 
+        const newCandidates = DraftManager.generateDraftCandidates(150); 
         setCandidates(newCandidates);
 
         // 2. チーム分析 (戦力外候補と補強ポイントの算出)
@@ -422,11 +422,24 @@ export const DraftScreen = () => {
   };
 
   const getPlayerScore = (p: Player) => {
+      let score = 0;
       if (p.position === 'P') {
-          return (p.scoutInfo?.speed || 0) + (p.scoutInfo?.control || 0) * 10 + (p.scoutInfo?.stamina || 0) * 10;
+          // 投手: 球速100km/hを基準0とし、そこからの上積みで評価
+          // 平均: (145-100)*4.5 + 7.5*15 + 7.5*12 = 202.5 + 112.5 + 90 = 405
+          const speedScore = Math.max(0, (p.scoutInfo?.speed || 0) - 100) * 4.5;
+          score = speedScore + (p.scoutInfo?.control || 0) * 14 + (p.scoutInfo?.stamina || 0) * 11;
       } else {
-          return (p.scoutInfo?.contact || 0) * 10 + (p.scoutInfo?.power || 0) * 10 + (p.scoutInfo?.fielding || 0) * 10;
+          // 野手: 各能力(0-15) * 重み
+          // 平均 7.5 * 係数合計53 = 397.5
+          score = ((p.scoutInfo?.contact || 0) * 16 + (p.scoutInfo?.power || 0) * 16 + (p.scoutInfo?.fielding || 0) * 9 + (p.scoutInfo?.arm || 0) * 7 + (p.scoutInfo?.speedFielder || 0) * 8) * 1.05;
       }
+
+      // 年齢補正: 18歳(高卒)=1.05, 22歳(大卒)=1.0, 24歳(社会人)=0.95
+      let ageMultiplier = 1.0;
+      if (p.age <= 18) ageMultiplier = 1.05;
+      else if (p.age >= 24) ageMultiplier = 0.95;
+
+      return score * ageMultiplier;
   };
 
   const handleAutoPick = () => {
@@ -704,39 +717,19 @@ export const DraftScreen = () => {
     return unsubscribe;
   }, [navigation, draftResults]);
 
-  const calculateScoutScore = (p: Player) => {
-    if (!p.scoutInfo) return 0;
-    if (p.position === 'P') {
-        // 投手: 球速 + コン + スタ
-        // 平均: 145 + 75 + 75 = 295
-        const score = (p.scoutInfo.speed || 0) + (p.scoutInfo.control || 0) * 10 + (p.scoutInfo.stamina || 0) * 10;
-        return score * 1.2; // 野手とスケールを合わせる補正
-    } else {
-        // 野手: 5ツール
-        // 平均: 7.5 * 10 * 5 = 375
-        return (
-            (p.scoutInfo.contact || 0) * 10 +
-            (p.scoutInfo.power || 0) * 10 +
-            (p.scoutInfo.speedFielder || 0) * 10 +
-            (p.scoutInfo.arm || 0) * 10 +
-            (p.scoutInfo.fielding || 0) * 10
-        );
-    }
-  };
-
   const getOverallRankLetter = (score: number) => {
-    if (score >= 450) return 'S';
-    if (score >= 380) return 'A';
-    if (score >= 320) return 'B';
-    if (score >= 260) return 'C';
-    if (score >= 200) return 'D';
+    if (score >= 530) return 'S';
+    if (score >= 430) return 'A';
+    if (score >= 350) return 'B';
+    if (score >= 280) return 'C';
+    if (score >= 220) return 'D';
     return 'E';
   };
 
   const renderCandidateItem = ({ item }: { item: Player }) => {
     const isSelected = selectedCandidate?.id === item.id;
     const isTaken = (item.team as string) !== 'unknown';
-    const score = calculateScoutScore(item);
+    const score = getPlayerScore(item);
     const rank = getOverallRankLetter(score);
     
     return (
@@ -779,7 +772,12 @@ export const DraftScreen = () => {
       return p.position !== 'P';
   }).sort((a, b) => {
       if (sortType === 'Evaluation') {
-          return calculateScoutScore(b) - calculateScoutScore(a);
+          return getPlayerScore(b) - getPlayerScore(a);
+      }
+      if (sortType === 'Position') {
+          if (a.position < b.position) return -1;
+          if (a.position > b.position) return 1;
+          return getPlayerScore(b) - getPlayerScore(a);
       }
       return 0; // デフォルト順（ID順など）
   });
@@ -827,8 +825,8 @@ export const DraftScreen = () => {
                 <TouchableOpacity style={[styles.filterButton, sortType === 'Evaluation' && styles.activeFilter]} onPress={() => setSortType('Evaluation')}>
                     <Text style={styles.filterText}>評価順</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.filterButton, sortType === 'Newest' && styles.activeFilter]} onPress={() => setSortType('Newest')}>
-                    <Text style={styles.filterText}>新着順</Text>
+                <TouchableOpacity style={[styles.filterButton, sortType === 'Position' && styles.activeFilter]} onPress={() => setSortType('Position')}>
+                    <Text style={styles.filterText}>ポジション順</Text>
                 </TouchableOpacity>
             </View>
             <FlatList

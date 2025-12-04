@@ -128,7 +128,7 @@ export class DraftManager {
 
     // Stats (Scale 0-15)
     // Pros are ~10. Rookies ~4-8.
-    const genStat = () => parseFloat(RandomUtils.clampedNormal(5, 2.5, 1, 15).toFixed(1));
+    const genStat = () => parseFloat(RandomUtils.clampedNormal(5.5, 3, 1, 15).toFixed(1));
 
     const contact = genStat();
     const power = genStat();

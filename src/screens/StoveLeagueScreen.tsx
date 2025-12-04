@@ -53,10 +53,7 @@ export const StoveLeagueScreen = () => {
               // 次のフェーズへ
               dispatch(setOffSeasonStep('camp'));
 
-              // ログが多すぎる可能性があるので、要約を表示するか、ログ画面へ遷移する
-              // ここでは簡易的に完了メッセージと重要なログの一部を表示
-              const summary = logs.filter(l => l.includes('[引退]') || l.includes('[戦力外]')).join('\n');
-              showAlert("完了", "契約更改が完了しました。\n\n" + (summary ? summary.substring(0, 500) + (summary.length > 500 ? "..." : "") : "特筆すべき変動はありませんでした。"));
+              showAlert("完了", "契約更改が完了しました。\n\n" + "引退・戦力外はニュースを確認してください。");
             } catch (error) {
               console.error(error);
               showAlert("エラー", "処理中にエラーが発生しました。");
