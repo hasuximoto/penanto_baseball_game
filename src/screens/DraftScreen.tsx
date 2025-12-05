@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -775,8 +775,16 @@ export const DraftScreen = () => {
           return getPlayerScore(b) - getPlayerScore(a);
       }
       if (sortType === 'Position') {
-          if (a.position < b.position) return -1;
-          if (a.position > b.position) return 1;
+          const positionOrder: Record<string, number> = {
+              'P': 0,
+              'C': 1,
+              '1B': 2, '2B': 3, '3B': 4, 'SS': 5,
+              'LF': 6, 'CF': 7, 'RF': 8
+          };
+          const orderA = positionOrder[a.position] ?? 99;
+          const orderB = positionOrder[b.position] ?? 99;
+          
+          if (orderA !== orderB) return orderA - orderB;
           return getPlayerScore(b) - getPlayerScore(a);
       }
       return 0; // デフォルト順（ID順など）
@@ -811,7 +819,12 @@ export const DraftScreen = () => {
       <View style={styles.content}>
         {/* 左パネル: 候補選手 */}
         <View style={styles.leftPanel}>
-            <View style={styles.filterContainer}>
+            <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                style={styles.filterContainer}
+                contentContainerStyle={styles.filterContentContainer}
+            >
                 <TouchableOpacity style={[styles.filterButton, filterPosition === 'All' && styles.activeFilter]} onPress={() => setFilterPosition('All')}>
                     <Text style={styles.filterText}>全て</Text>
                 </TouchableOpacity>
@@ -828,7 +841,7 @@ export const DraftScreen = () => {
                 <TouchableOpacity style={[styles.filterButton, sortType === 'Position' && styles.activeFilter]} onPress={() => setSortType('Position')}>
                     <Text style={styles.filterText}>ポジション順</Text>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
             <FlatList
                 data={filteredCandidates}
                 renderItem={renderCandidateItem}
@@ -960,10 +973,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   filterContainer: {
-    flexDirection: 'row',
     padding: 10,
     borderBottomWidth: 1,
     borderColor: '#eee',
+    flexGrow: 0,
+  },
+  filterContentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   filterButton: {
     paddingVertical: 6,
