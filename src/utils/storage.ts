@@ -1,19 +1,36 @@
 /**
- * AsyncStorage ユーティリティ
- * ゲームデータの永続化を担当
+ * Storage ユーティリティ
+ * ゲームデータの永続化を担当 (Web: localforage, Native: AsyncStorage)
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import localforage from 'localforage';
 import { STORAGE_KEYS } from './constants';
 import { GameState, SaveData } from '../types';
 
+// Web用の設定
+if (Platform.OS === 'web') {
+  localforage.config({
+    driver: [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE],
+    name: 'simbaseball_db',
+    version: 1.0,
+    storeName: 'keyvalue_pairs',
+    description: 'SimBaseball Database'
+  });
+}
+
 /**
- * 値を AsyncStorage に保存
+ * 値をストレージに保存
  */
 export const setStorageItem = async (key: string, value: any): Promise<void> => {
   try {
     const serialized = JSON.stringify(value);
-    await AsyncStorage.setItem(key, serialized);
+    if (Platform.OS === 'web') {
+      await localforage.setItem(key, serialized);
+    } else {
+      await AsyncStorage.setItem(key, serialized);
+    }
   } catch (error) {
     console.error(`Failed to set storage item "${key}":`, error);
     throw error;
@@ -21,14 +38,20 @@ export const setStorageItem = async (key: string, value: any): Promise<void> => 
 };
 
 /**
- * AsyncStorage から値を取得
+ * ストレージから値を取得
  */
 export const getStorageItem = async <T = any>(
   key: string,
   defaultValue?: T | null
 ): Promise<T | null | undefined> => {
   try {
-    const value = await AsyncStorage.getItem(key);
+    let value: string | null;
+    if (Platform.OS === 'web') {
+      value = await localforage.getItem<string>(key);
+    } else {
+      value = await AsyncStorage.getItem(key);
+    }
+
     if (value === null) {
       return defaultValue;
     }
@@ -40,11 +63,15 @@ export const getStorageItem = async <T = any>(
 };
 
 /**
- * AsyncStorage から値を削除
+ * ストレージから値を削除
  */
 export const removeStorageItem = async (key: string): Promise<void> => {
   try {
-    await AsyncStorage.removeItem(key);
+    if (Platform.OS === 'web') {
+      await localforage.removeItem(key);
+    } else {
+      await AsyncStorage.removeItem(key);
+    }
   } catch (error) {
     console.error(`Failed to remove storage item "${key}":`, error);
     throw error;
@@ -56,11 +83,18 @@ export const removeStorageItem = async (key: string): Promise<void> => {
  */
 export const setMultipleItems = async (items: Record<string, any>): Promise<void> => {
   try {
-    const serializedItems: Array<[string, string]> = Object.entries(items).map(([key, value]) => [
-      key,
-      JSON.stringify(value),
-    ]);
-    await AsyncStorage.multiSet(serializedItems);
+    if (Platform.OS === 'web') {
+      const promises = Object.entries(items).map(([key, value]) => 
+        localforage.setItem(key, JSON.stringify(value))
+      );
+      await Promise.all(promises);
+    } else {
+      const serializedItems: Array<[string, string]> = Object.entries(items).map(([key, value]) => [
+        key,
+        JSON.stringify(value),
+      ]);
+      await AsyncStorage.multiSet(serializedItems);
+    }
   } catch (error) {
     console.error('Failed to set multiple storage items:', error);
     throw error;
@@ -72,12 +106,22 @@ export const setMultipleItems = async (items: Record<string, any>): Promise<void
  */
 export const getMultipleItems = async (keys: string[]): Promise<Record<string, any>> => {
   try {
-    const values = await AsyncStorage.multiGet(keys);
     const result: Record<string, any> = {};
 
-    for (const [key, value] of values) {
-      if (value !== null) {
-        result[key] = JSON.parse(value);
+    if (Platform.OS === 'web') {
+      const promises = keys.map(async (key) => {
+        const value = await localforage.getItem<string>(key);
+        if (value !== null) {
+          result[key] = JSON.parse(value);
+        }
+      });
+      await Promise.all(promises);
+    } else {
+      const values = await AsyncStorage.multiGet(keys);
+      for (const [key, value] of values) {
+        if (value !== null) {
+          result[key] = JSON.parse(value);
+        }
       }
     }
 
@@ -89,11 +133,15 @@ export const getMultipleItems = async (keys: string[]): Promise<Record<string, a
 };
 
 /**
- * AsyncStorage をクリア
+ * ストレージをクリア
  */
 export const clearAllStorage = async (): Promise<void> => {
   try {
-    await AsyncStorage.clear();
+    if (Platform.OS === 'web') {
+      await localforage.clear();
+    } else {
+      await AsyncStorage.clear();
+    }
   } catch (error) {
     console.error('Failed to clear storage:', error);
     throw error;
@@ -135,7 +183,13 @@ export const loadSaveData = async (): Promise<SaveData | null> => {
  */
 export const loadAllSaveData = async (): Promise<SaveData[]> => {
   try {
-    const allKeys = await AsyncStorage.getAllKeys();
+    let allKeys: string[];
+    if (Platform.OS === 'web') {
+      allKeys = await localforage.keys();
+    } else {
+      allKeys = await AsyncStorage.getAllKeys() as string[];
+    }
+    
     const saveKeys = allKeys.filter(key => key.startsWith(STORAGE_KEYS.SEASON_DATA));
     const saves = await getMultipleItems(saveKeys);
     return Object.values(saves) as SaveData[];
@@ -155,12 +209,22 @@ export const autoSaveGame = async (gameState: GameState): Promise<void> => {
     await setStorageItem(autoSaveKey, gameState);
 
     // 古いオートセーブを削除（最新 5 つだけ保持）
-    const allKeys = await AsyncStorage.getAllKeys();
+    let allKeys: string[];
+    if (Platform.OS === 'web') {
+      allKeys = await localforage.keys();
+    } else {
+      allKeys = await AsyncStorage.getAllKeys() as string[];
+    }
+
     const autoSaveKeys = allKeys.filter(key => key.startsWith(STORAGE_KEYS.AUTOSAVE));
 
     if (autoSaveKeys.length > 5) {
       const keysToDelete = autoSaveKeys.sort().slice(0, autoSaveKeys.length - 5);
-      await AsyncStorage.multiRemove(keysToDelete);
+      if (Platform.OS === 'web') {
+        await Promise.all(keysToDelete.map(key => localforage.removeItem(key)));
+      } else {
+        await AsyncStorage.multiRemove(keysToDelete);
+      }
     }
   } catch (error) {
     console.error('Failed to auto-save game:', error);
@@ -172,7 +236,13 @@ export const autoSaveGame = async (gameState: GameState): Promise<void> => {
  */
 export const loadLatestAutoSave = async (): Promise<GameState | null> => {
   try {
-    const allKeys = await AsyncStorage.getAllKeys();
+    let allKeys: string[];
+    if (Platform.OS === 'web') {
+      allKeys = await localforage.keys();
+    } else {
+      allKeys = await AsyncStorage.getAllKeys() as string[];
+    }
+
     const autoSaveKeys = allKeys.filter(key => key.startsWith(STORAGE_KEYS.AUTOSAVE));
 
     if (autoSaveKeys.length === 0) {
@@ -210,8 +280,14 @@ export const loadGameSettings = async (): Promise<Record<string, any>> => {
  */
 export const getStorageInfo = async (): Promise<{ keys: number; estimatedSize: string }> => {
   try {
-    const allKeys = await AsyncStorage.getAllKeys();
-    const items = await getMultipleItems(allKeys as string[]);
+    let allKeys: string[];
+    if (Platform.OS === 'web') {
+      allKeys = await localforage.keys();
+    } else {
+      allKeys = await AsyncStorage.getAllKeys() as string[];
+    }
+
+    const items = await getMultipleItems(allKeys);
     const serialized = JSON.stringify(items);
     const sizeInBytes = new Blob([serialized]).size;
     const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(2);

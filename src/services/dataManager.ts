@@ -1,5 +1,4 @@
 import { SaveData, GameState, Player, Team } from '../types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dbManager } from './databaseManager';
 
 /**
@@ -33,7 +32,7 @@ export class DataManager {
       const key = isAutoSave ? this.AUTO_SAVE_KEY : this.SAVE_KEY;
       const jsonData = JSON.stringify(data);
 
-      await AsyncStorage.setItem(key, jsonData);
+      await dbManager.setItem(key, jsonData);
       console.log(`Game saved successfully (${isAutoSave ? 'auto' : 'manual'})`);
     } catch (error) {
       console.error('Failed to save game:', error);
@@ -47,7 +46,7 @@ export class DataManager {
    */
   async loadGame(): Promise<SaveData | null> {
     try {
-      const data = await AsyncStorage.getItem(this.SAVE_KEY);
+      const data = await dbManager.getItem(this.SAVE_KEY);
       if (data) {
         return JSON.parse(data);
       }
@@ -63,7 +62,7 @@ export class DataManager {
    */
   async getAutoSave(): Promise<SaveData | null> {
     try {
-      const data = await AsyncStorage.getItem(this.AUTO_SAVE_KEY);
+      const data = await dbManager.getItem(this.AUTO_SAVE_KEY);
       if (data) {
         return JSON.parse(data);
       }

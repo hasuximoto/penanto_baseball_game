@@ -4,6 +4,8 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import localforage from 'localforage';
 import INITIAL_PLAYERS_DATA from '../data/initialPlayers.json';
 import INITIAL_TEAMS_DATA from '../data/teams.json';
 import INITIAL_SCHEDULE from '../data/initialSchedule.json';
@@ -215,13 +217,80 @@ export class DatabaseManager {
   private dbVersionKey = 'simbaseball_db_version';
   private currentVersion = 13;
 
+  constructor() {
+    if (Platform.OS === 'web') {
+      localforage.config({
+        driver: [localforage.INDEXEDDB, localforage.WEBSQL, localforage.LOCALSTORAGE],
+        name: 'simbaseball_db',
+        version: 1.0,
+        storeName: 'keyvalue_pairs',
+        description: 'SimBaseball Database'
+      });
+    }
+  }
+
+  /**
+   * ストレージからデータを取得するヘルパー
+   */
+  public async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === 'web') {
+      return await localforage.getItem<string>(key);
+    } else {
+      return await AsyncStorage.getItem(key);
+    }
+  }
+
+  /**
+   * ストレージにデータを保存するヘルパー
+   */
+  public async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      await localforage.setItem(key, value);
+    } else {
+      await AsyncStorage.setItem(key, value);
+    }
+  }
+
+  /**
+   * ストレージからデータを削除するヘルパー
+   */
+  public async removeItem(key: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      await localforage.removeItem(key);
+    } else {
+      await AsyncStorage.removeItem(key);
+    }
+  }
+
+  /**
+   * ストレージの全キーを取得するヘルパー
+   */
+  private async getAllKeys(): Promise<string[]> {
+    if (Platform.OS === 'web') {
+      return await localforage.keys();
+    } else {
+      return await AsyncStorage.getAllKeys();
+    }
+  }
+
+  /**
+   * 複数のキーを削除するヘルパー
+   */
+  private async multiRemove(keys: string[]): Promise<void> {
+    if (Platform.OS === 'web') {
+      await Promise.all(keys.map(key => localforage.removeItem(key)));
+    } else {
+      await AsyncStorage.multiRemove(keys);
+    }
+  }
+
   /**
    * データベースの初期化状態を確認
    */
   async isInitialized(): Promise<boolean> {
     try {
-      const initialized = await AsyncStorage.getItem(this.dbKey);
-      const version = await AsyncStorage.getItem(this.dbVersionKey);
+      const initialized = await this.getItem(this.dbKey);
+      const version = await this.getItem(this.dbVersionKey);
 
       return initialized === 'true' && parseInt(version || '0') === this.currentVersion;
     } catch (error) {
@@ -235,9 +304,9 @@ export class DatabaseManager {
    */
   async reset(): Promise<void> {
     try {
-      const keys = await AsyncStorage.getAllKeys();
+      const keys = await this.getAllKeys();
       const simbaseballKeys = keys.filter(key => key.startsWith('simbaseball_'));
-      await AsyncStorage.multiRemove(simbaseballKeys);
+      await this.multiRemove(simbaseballKeys);
       console.log('Database reset successfully');
     } catch (error) {
       console.error('Failed to reset database:', error);
@@ -368,14 +437,14 @@ export class DatabaseManager {
         version: this.currentVersion,
       };
 
-      await AsyncStorage.setItem(
+      await this.setItem(
         'simbaseball_db_schema',
         JSON.stringify(dbSchema)
       );
 
       // 初期化フラグを設定
-      await AsyncStorage.setItem(this.dbKey, 'true');
-      await AsyncStorage.setItem(this.dbVersionKey, this.currentVersion.toString());
+      await this.setItem(this.dbKey, 'true');
+      await this.setItem(this.dbVersionKey, this.currentVersion.toString());
 
       console.log('Database initialized successfully');
     } catch (error) {
@@ -389,7 +458,7 @@ export class DatabaseManager {
    */
   async getInitialPlayers(): Promise<typeof INITIAL_PLAYERS> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) {
         await this.initialize();
         return INITIAL_PLAYERS;
@@ -408,7 +477,7 @@ export class DatabaseManager {
    */
   async getInitialTeams(): Promise<typeof INITIAL_TEAMS> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) {
         await this.initialize();
         return INITIAL_TEAMS;
@@ -427,7 +496,7 @@ export class DatabaseManager {
    */
   async updatePlayers(updatedPlayers: Player[]): Promise<void> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) return;
 
       const parsed = JSON.parse(schemaData);
@@ -444,7 +513,7 @@ export class DatabaseManager {
       });
 
       parsed.initialData.players = newPlayers;
-      await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+      await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
     } catch (error) {
       console.error('Failed to update players:', error);
     }
@@ -455,7 +524,7 @@ export class DatabaseManager {
    */
   async removePlayers(playerIds: (string | number)[]): Promise<void> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) return;
 
       const parsed = JSON.parse(schemaData);
@@ -465,7 +534,7 @@ export class DatabaseManager {
       const newPlayers = currentPlayers.filter(p => !removeSet.has(p.id));
 
       parsed.initialData.players = newPlayers;
-      await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+      await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
     } catch (error) {
       console.error('Failed to remove players:', error);
     }
@@ -476,7 +545,7 @@ export class DatabaseManager {
    */
   async updateTeams(updatedTeams: any[]): Promise<void> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) return;
 
       const parsed = JSON.parse(schemaData);
@@ -493,7 +562,7 @@ export class DatabaseManager {
       });
 
       parsed.initialData.teams = newTeams;
-      await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+      await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
     } catch (error) {
       console.error('Failed to update teams:', error);
     }
@@ -774,7 +843,7 @@ export class DatabaseManager {
    */
   async saveGameState(gameState: any): Promise<void> {
     try {
-      await AsyncStorage.setItem(
+      await this.setItem(
         'simbaseball_game_state',
         JSON.stringify(gameState)
       );
@@ -789,7 +858,7 @@ export class DatabaseManager {
    */
   async loadGameState(): Promise<any | null> {
     try {
-      const stateData = await AsyncStorage.getItem('simbaseball_game_state');
+      const stateData = await this.getItem('simbaseball_game_state');
       return stateData ? JSON.parse(stateData) : null;
     } catch (error) {
       console.error('Failed to load game state:', error);
@@ -803,14 +872,14 @@ export class DatabaseManager {
   async saveGameHistory(gameResult: any): Promise<void> {
     try {
       const historyKey = `simbaseball_game_history_${gameResult.id}`;
-      await AsyncStorage.setItem(historyKey, JSON.stringify(gameResult));
+      await this.setItem(historyKey, JSON.stringify(gameResult));
 
       // 履歴リストを更新
-      const historyList = await AsyncStorage.getItem('simbaseball_game_history_list');
+      const historyList = await this.getItem('simbaseball_game_history_list');
       const list = historyList ? JSON.parse(historyList) : [];
       list.push(gameResult.id);
 
-      await AsyncStorage.setItem(
+      await this.setItem(
         'simbaseball_game_history_list',
         JSON.stringify(list)
       );
@@ -825,7 +894,7 @@ export class DatabaseManager {
    */
   async cleanupOldGameHistory(currentSeason: number): Promise<void> {
     try {
-      const historyListStr = await AsyncStorage.getItem('simbaseball_game_history_list');
+      const historyListStr = await this.getItem('simbaseball_game_history_list');
       if (!historyListStr) return;
       
       const list = JSON.parse(historyListStr) as string[];
@@ -834,7 +903,7 @@ export class DatabaseManager {
 
       for (const id of list) {
           const key = `simbaseball_game_history_${id}`;
-          const itemStr = await AsyncStorage.getItem(key);
+          const itemStr = await this.getItem(key);
           if (itemStr) {
               try {
                   const item = JSON.parse(itemStr);
@@ -850,8 +919,8 @@ export class DatabaseManager {
       }
       
       if (removeKeys.length > 0) {
-          await AsyncStorage.multiRemove(removeKeys);
-          await AsyncStorage.setItem('simbaseball_game_history_list', JSON.stringify(keepList));
+          await this.multiRemove(removeKeys);
+          await this.setItem('simbaseball_game_history_list', JSON.stringify(keepList));
           console.log(`Cleaned up ${removeKeys.length} old game history items.`);
       }
     } catch (error) {
@@ -864,14 +933,14 @@ export class DatabaseManager {
    */
   async loadGameHistory(): Promise<any[]> {
     try {
-      const historyList = await AsyncStorage.getItem('simbaseball_game_history_list');
+      const historyList = await this.getItem('simbaseball_game_history_list');
       if (!historyList) return [];
 
       const list = JSON.parse(historyList);
       const results = [];
 
       for (const id of list) {
-        const gameData = await AsyncStorage.getItem(`simbaseball_game_history_${id}`);
+        const gameData = await this.getItem(`simbaseball_game_history_${id}`);
         if (gameData) {
           results.push(JSON.parse(gameData));
         }
@@ -932,11 +1001,11 @@ export class DatabaseManager {
 
       if (updated) {
         // Save back to AsyncStorage
-        const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+        const schemaData = await this.getItem('simbaseball_db_schema');
         if (schemaData) {
           const parsed = JSON.parse(schemaData);
           parsed.initialData.teams = Array.from(teamMap.values());
-          await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+          await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         }
       }
     } catch (error) {
@@ -949,7 +1018,7 @@ export class DatabaseManager {
    */
   async saveTitle(title: Title): Promise<void> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (schemaData) {
         const parsed = JSON.parse(schemaData);
         if (!parsed.initialData.titles) {
@@ -958,7 +1027,7 @@ export class DatabaseManager {
         // ID付与
         const newTitle = { ...title, id: parsed.initialData.titles.length + 1 };
         parsed.initialData.titles.push(newTitle);
-        await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+        await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
       }
     } catch (error) {
       console.error('Failed to save title:', error);
@@ -970,7 +1039,7 @@ export class DatabaseManager {
    */
   async getTitlesByYear(year: number): Promise<Title[]> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) return [];
       
       const parsed = JSON.parse(schemaData);
@@ -987,7 +1056,7 @@ export class DatabaseManager {
    */
   async getPlayerTitles(playerId: number | string): Promise<Title[]> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) return [];
       
       const parsed = JSON.parse(schemaData);
@@ -1072,11 +1141,11 @@ export class DatabaseManager {
 
       if (updated) {
         console.log('Recalculated stats for players.');
-        const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+        const schemaData = await this.getItem('simbaseball_db_schema');
         if (schemaData) {
             const parsed = JSON.parse(schemaData);
             parsed.initialData.players = players;
-            await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+            await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         }
       }
     } catch (error) {
@@ -1254,12 +1323,12 @@ export class DatabaseManager {
       }
 
       if (playersUpdated || teamsUpdated) {
-        const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+        const schemaData = await this.getItem('simbaseball_db_schema');
         if (schemaData) {
           const parsed = JSON.parse(schemaData);
           if (playersUpdated) parsed.initialData.players = Array.from(playerMap.values());
           if (teamsUpdated) parsed.initialData.teams = Array.from(teamMap.values());
-          await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+          await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         }
       }
     } catch (error) {
@@ -1404,11 +1473,11 @@ export class DatabaseManager {
 
       if (updated) {
         // Save back to DB
-        const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+        const schemaData = await this.getItem('simbaseball_db_schema');
         if (schemaData) {
             const parsed = JSON.parse(schemaData);
             parsed.initialData.players = Array.from(playerMap.values());
-            await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+            await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         }
       }
     } catch (error) {
@@ -1433,11 +1502,11 @@ export class DatabaseManager {
       });
 
       if (updated) {
-        const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+        const schemaData = await this.getItem('simbaseball_db_schema');
         if (schemaData) {
             const parsed = JSON.parse(schemaData);
             parsed.initialData.players = players;
-            await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+            await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         }
       }
     } catch (error) {
@@ -1450,11 +1519,11 @@ export class DatabaseManager {
    */
   async savePlayers(players: Player[]): Promise<void> {
     try {
-        const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+        const schemaData = await this.getItem('simbaseball_db_schema');
         if (schemaData) {
             const parsed = JSON.parse(schemaData);
             parsed.initialData.players = players;
-            await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+            await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         }
     } catch (error) {
         console.error('Failed to save players:', error);
@@ -1466,7 +1535,7 @@ export class DatabaseManager {
    */
   async saveDraftCandidates(candidates: Player[]): Promise<void> {
     try {
-      await AsyncStorage.setItem('simbaseball_draft_candidates', JSON.stringify(candidates));
+      await this.setItem('simbaseball_draft_candidates', JSON.stringify(candidates));
     } catch (error) {
       console.error('Failed to save draft candidates:', error);
       throw error;
@@ -1478,7 +1547,7 @@ export class DatabaseManager {
    */
   async getDraftCandidates(): Promise<Player[]> {
     try {
-      const data = await AsyncStorage.getItem('simbaseball_draft_candidates');
+      const data = await this.getItem('simbaseball_draft_candidates');
       return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error('Failed to get draft candidates:', error);
@@ -1491,7 +1560,7 @@ export class DatabaseManager {
    */
   async addNews(newsItems: NewsItem[]): Promise<void> {
       try {
-          const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+          const schemaData = await this.getItem('simbaseball_db_schema');
           if (schemaData) {
               const parsed = JSON.parse(schemaData);
               if (!parsed.news) parsed.news = [];
@@ -1502,7 +1571,7 @@ export class DatabaseManager {
               
               if (newItems.length > 0) {
                   parsed.news.push(...newItems);
-                  await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+                  await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
               }
           }
       } catch (error) {
@@ -1515,7 +1584,7 @@ export class DatabaseManager {
    */
   async getNews(): Promise<NewsItem[]> {
       try {
-          const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+          const schemaData = await this.getItem('simbaseball_db_schema');
           if (schemaData) {
               const parsed = JSON.parse(schemaData);
               const news = parsed.news || [];
@@ -1536,11 +1605,11 @@ export class DatabaseManager {
    */
   async clearNews(): Promise<void> {
       try {
-          const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+          const schemaData = await this.getItem('simbaseball_db_schema');
           if (schemaData) {
               const parsed = JSON.parse(schemaData);
               parsed.news = [];
-              await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+              await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
           }
       } catch (error) {
           console.error('Failed to clear news:', error);
@@ -1552,12 +1621,12 @@ export class DatabaseManager {
    */
   async updateSchedule(newSchedule: any[]): Promise<void> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (schemaData) {
         const parsed = JSON.parse(schemaData);
         if (!parsed.initialData) parsed.initialData = {};
         parsed.initialData.schedule = newSchedule;
-        await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+        await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
       }
     } catch (error) {
       console.error('Failed to update schedule:', error);
@@ -1569,7 +1638,7 @@ export class DatabaseManager {
    */
   async registerDraftPlayers(newPlayers: Player[]): Promise<void> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (schemaData) {
         const parsed = JSON.parse(schemaData);
         if (!parsed.initialData) parsed.initialData = {};
@@ -1578,7 +1647,7 @@ export class DatabaseManager {
         const currentPlayers = parsed.initialData.players || [];
         parsed.initialData.players = [...currentPlayers, ...newPlayers];
         
-        await AsyncStorage.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+        await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         console.log(`Registered ${newPlayers.length} drafted players.`);
       }
     } catch (error) {
@@ -2012,7 +2081,7 @@ export class DatabaseManager {
    */
   async getSchedule(): Promise<any[]> {
     try {
-      const schemaData = await AsyncStorage.getItem('simbaseball_db_schema');
+      const schemaData = await this.getItem('simbaseball_db_schema');
       if (!schemaData) return INITIAL_SCHEDULE;
       const parsed = JSON.parse(schemaData);
       return parsed.initialData?.schedule || INITIAL_SCHEDULE;
@@ -2189,7 +2258,7 @@ export class DatabaseManager {
    */
   async saveYearlyStats(year: number, players: Player[]): Promise<void> {
     try {
-      const statsData = await AsyncStorage.getItem('simbaseball_yearly_stats');
+      const statsData = await this.getItem('simbaseball_yearly_stats');
       let allStats: YearlyStats[] = statsData ? JSON.parse(statsData) : [];
 
       const newStats: YearlyStats[] = players.map(p => ({
@@ -2206,7 +2275,7 @@ export class DatabaseManager {
       
       const mergedStats = Array.from(statsMap.values());
 
-      await AsyncStorage.setItem('simbaseball_yearly_stats', JSON.stringify(mergedStats));
+      await this.setItem('simbaseball_yearly_stats', JSON.stringify(mergedStats));
     } catch (error) {
       console.error('Failed to save yearly stats:', error);
     }
@@ -2217,7 +2286,7 @@ export class DatabaseManager {
    */
   async getYearlyStats(playerId: string | number): Promise<YearlyStats[]> {
     try {
-      const statsData = await AsyncStorage.getItem('simbaseball_yearly_stats');
+      const statsData = await this.getItem('simbaseball_yearly_stats');
       if (!statsData) return [];
 
       const allStats: YearlyStats[] = JSON.parse(statsData);
