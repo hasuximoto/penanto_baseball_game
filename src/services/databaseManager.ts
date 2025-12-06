@@ -655,7 +655,7 @@ export class DatabaseManager {
         pitcher = roster.find(p => p.position === 'P' || p.position === '投') || roster[roster.length - 1];
     }
 
-    // 2. 野手スタメン選出 (Excelロジック)
+    // 2. 野手スタメン選出
     // まず、各ポジションのベストプレイヤーを選出する
     const fielders = roster.filter(p => p.position !== 'P' && p.position !== '投' && p.id !== pitcher?.id);
     const starters = this.selectBestStarters(fielders);

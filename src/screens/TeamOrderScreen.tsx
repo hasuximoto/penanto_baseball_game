@@ -48,15 +48,23 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
         setPlayers(activePlayers);
 
         // Organize Batters
-        const currentLineupIds = targetTeam.lineup || [];
         const lineup: Player[] = [];
         const bench: Player[] = [];
-        
-        // Fill lineup based on IDs
-        currentLineupIds.forEach(id => {
-            const p = activePlayers.find(ap => ap.id === id);
-            if (p) lineup.push(p);
-        });
+
+
+        // フォールバック: getStartingLineup を使用して現在のベストオーダーを生成
+        try {
+            const { batters } = await dbManager.getStartingLineup(teamId, activePlayers, gameState.currentDate);
+            batters.forEach(p => lineup.push(p));
+        } catch (e) {
+            console.error("Failed to generate starting lineup", e);
+            // さらにフォールバック: チーム設定のラインナップを使用
+            const currentLineupIds = targetTeam.lineup || [];
+            currentLineupIds.forEach(id => {
+                const p = activePlayers.find(ap => ap.id === id);
+                if (p) lineup.push(p);
+            });
+        }
 
         // If lineup is empty or incomplete, just take first 9 non-pitchers (fallback)
         if (lineup.length === 0) {
@@ -115,9 +123,14 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
     const sb = stats.stolenBases !== undefined ? stats.stolenBases : 0;
     const obp = stats.obp !== undefined ? stats.obp.toFixed(3).substring(1) : '.---';
 
+    // スタメンの場合、打順を表示する (index + 1)
+    // ベンチの場合は '-'
+    const orderDisplay = isBench ? '-' : (index + 1).toString();
+
     return (
       <View style={styles.row} key={player.id}>
-        <Text style={[styles.cell, styles.posCell]}>{isBench ? '-' : player.position}</Text>
+        <Text style={[styles.cell, styles.posCell]}>{orderDisplay}</Text>
+        <Text style={[styles.cell, styles.posCell]}>{player.position}</Text>
         <Text style={[styles.cell, styles.nameCell, { color: '#0000EE' }]}>{player.name}</Text>
         <Text style={styles.cell}>{avg}</Text>
         <Text style={styles.cell}>{hr}</Text>
@@ -192,8 +205,9 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
             <View style={styles.column}>
                 {/* Header Row */}
                 <View style={[styles.row, styles.headerRow]}>
-                    <Text style={[styles.cell, styles.posCell]}></Text>
-                    <Text style={[styles.cell, styles.nameCell]}></Text>
+                    <Text style={[styles.cell, styles.posCell]}>順</Text>
+                    <Text style={[styles.cell, styles.posCell]}>守</Text>
+                    <Text style={[styles.cell, styles.nameCell]}>選手名</Text>
                     <Text style={styles.cell}>AVG</Text>
                     <Text style={styles.cell}>HR</Text>
                     <Text style={styles.cell}>RBI</Text>
