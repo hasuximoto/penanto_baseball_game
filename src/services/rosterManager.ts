@@ -73,7 +73,27 @@ export class RosterManager {
         await dbManager.addNews(news);
     }
 
+    // 1軍登録日数の加算
+    await this.updateRegisteredDays(players);
+
     return news;
+  }
+
+  /**
+   * 1軍登録日数を加算する
+   */
+  private async updateRegisteredDays(players: Player[]): Promise<void> {
+    let updated = false;
+    for (const player of players) {
+      // 1軍登録中 (active) または登録ステータスがない場合 (デフォルト1軍)
+      if (player.registrationStatus === 'active' || !player.registrationStatus) {
+        player.currentYearRegisteredDays = (player.currentYearRegisteredDays || 0) + 1;
+        updated = true;
+      }
+    }
+    if (updated) {
+      await dbManager.savePlayers(players);
+    }
   }
 
   /**

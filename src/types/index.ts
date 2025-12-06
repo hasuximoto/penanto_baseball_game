@@ -17,7 +17,7 @@ export type GameStatus = "before" | "during" | "after" | "season_end";
 
 export type SeasonPhase = "regular" | "off_season" | "draft" | "signing";
 
-export type OffSeasonStep = "draft" | "contract" | "camp" | "next_season";
+export type OffSeasonStep = "draft" | "contract" | "reinforcement" | "camp" | "next_season";
 
 // ========== 選手データ ==========
 
@@ -101,9 +101,25 @@ export interface Player {
   age: number;
   draftYear?: number;               // ドラフト指名年度
   experienceYears?: number;         // プロ年数
+  faQualifiedYears?: number;        // FA資格取得年数
+  currentYearRegisteredDays?: number; // 当年の1軍登録日数
   isRookieEligible?: boolean;       // 新人王資格
-  team: TeamId;
+  team: TeamId | "free_agent";
   draftRank?: number;               // ドラフト順位
+  
+  // FA・交渉関連
+  faState?: {
+    declared: boolean;              // FA宣言したか
+    negotiating: boolean;           // 交渉中か
+    offers: {
+      teamId: TeamId;
+      salary: number;
+      years: number;
+      date: number; // ターン数など
+    }[];
+    decisionTurn?: number;          // 決断するターン（ランダムで決める）
+  };
+
   origin?: "High School" | "University" | "Industrial" | "Foreign" | "Unknown"; // 出身
   scoutInfo?: {
     // 投手
@@ -333,6 +349,7 @@ export interface GameState {
   
   // オフシーズン進行状況
   offSeasonStep?: OffSeasonStep;
+  reinforcementTurn?: number;
 }
 
 // ========== UI/UX 状態 ==========

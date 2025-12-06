@@ -23,6 +23,7 @@ import { DraftScreen } from '../screens/DraftScreen';
 import { TitleHistoryScreen } from '../screens/TitleHistoryScreen';
 import { TeamOrderScreen } from '../screens/TeamOrderScreen';
 import { ReleasePlayersScreen } from '../screens/ReleasePlayersScreen';
+import { OffSeasonMarketScreen } from '../screens/OffSeasonMarketScreen';
 // import { PlayerDataScreen } from '../screens/PlayerDataScreen';
 
 const Stack = createStackNavigator();
@@ -85,6 +86,11 @@ const MainStack = () => (
       name="ReleasePlayers"
       component={ReleasePlayersScreen}
       options={{ title: '戦力外通告' }}
+    />
+    <Stack.Screen
+      name="OffSeasonMarket"
+      component={OffSeasonMarketScreen}
+      options={{ title: '戦力補強' }}
     />
     {/* <Stack.Screen
       name="Game"

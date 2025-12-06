@@ -28,7 +28,8 @@ export const TEAM_ABBREVIATIONS: Record<string, string> = {
   'fighters': 'F',
   'buffaloes': 'B',
   'eagles': 'E',
-  'marines': 'M'
+  'marines': 'M',
+  'free_agent': 'FA'
 };
 
 // ポジション
@@ -46,6 +47,9 @@ export const POSITIONS = {
 } as const;
 
 export const POSITION_IDS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH'] as const;
+
+// オフシーズン設定
+export const OFF_SEASON_TURNS = 10;
 
 // ゲーム定数
 export const GAME_CONSTANTS = {

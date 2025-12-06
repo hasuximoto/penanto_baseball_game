@@ -1,5 +1,6 @@
-import { Player, TeamId, NewsItem } from '../types';
+import { Player, TeamId, NewsItem, GameState } from '../types';
 import { dbManager } from './databaseManager';
+import { OFF_SEASON_TURNS } from '../utils/constants';
 
 export class ContractManager {
 
@@ -9,10 +10,20 @@ export class ContractManager {
    * 2. 引退処理
    * 3. 戦力外通告 (支配下登録枠調整)
    */
-  static async processOffSeasonContracts(userTeamId?: TeamId | null): Promise<string[]> {
+  static async processOffSeasonContracts(userTeamId: TeamId | null | undefined, season: number): Promise<string[]> {
     const logs: string[] = [];
     const newsItems: NewsItem[] = [];
     const date = Date.now();
+    
+    // 年度別成績を保存 (FAなどでチームが変わる前に保存)
+    const allPlayers = await dbManager.getInitialPlayers();
+    // ドラフトで入団したばかりの選手（experienceYearsがない、または0）は除外しない（新人王資格などで必要になる可能性があるため）
+    // ただし、SeasonManagerでのロジックに合わせてフィルタリングする場合は以下
+    // const playersToSave = allPlayers.filter(p => p.experienceYears && p.experienceYears > 0);
+    // ここでは全選手保存する
+    await dbManager.saveYearlyStats(season, allPlayers);
+    logs.push(`[システム] ${season}年度の成績を保存しました`);
+
     const teams = await dbManager.getInitialTeams();
 
     for (const team of teams) {
@@ -20,9 +31,30 @@ export class ContractManager {
       
       // 1. 年俸更新
       const roster = await dbManager.getTeamRoster(team.id);
+
+      // 0. FA宣言
+      const { remainingPlayers, faPlayers } = this.processFADeclaration(roster);
+      if (faPlayers.length > 0) {
+        logs.push(`[FA宣言] ${faPlayers.map(p => p.name).join(', ')}`);
+        
+        // FA宣言した選手のチームをfree_agentに変更し、faStateを含めて保存する
+        // releasePlayersToFreeAgencyを使うとfaStateが消えてしまうため、updatePlayersを使用
+        faPlayers.forEach(p => p.team = 'free_agent');
+        await dbManager.updatePlayers(faPlayers);
+        
+        newsItems.push({
+            id: `fa_${team.id}_${date}`,
+            date: date,
+            title: `${team.name} FA宣言選手`,
+            content: faPlayers.map(p => `${p.name} (${p.position}・${p.age}歳)`).join('\n'),
+            type: 'contract',
+            affectedTeams: [team.id]
+        });
+      }
+
       const updatedRoster: Player[] = [];
       
-      for (const player of roster) {
+      for (const player of remainingPlayers) {
         const newSalary = this.calculateNewSalary(player);
         const salaryDiff = newSalary - (player.contract?.salary || 0);
         
@@ -67,7 +99,8 @@ export class ContractManager {
       // TeamStrategyManagerのロジックを利用して候補を選定
       // ここでは実際に削除を行う
       let currentRoster = activePlayers;
-      const ROSTER_LIMIT = 70;
+      // FA補強や新外国人獲得のために枠を空けておく (70 -> 65)
+      const ROSTER_LIMIT = 67;
       
       if (team.id === userTeamId) {
         logs.push(`[戦力外] ${team.name} (ユーザー操作待ち)`);
@@ -79,7 +112,18 @@ export class ContractManager {
         
         if (releaseCandidates.length > 0) {
             logs.push(`[戦力外] ${releaseCandidates.map(p => p.name).join(', ')}`);
-            await dbManager.removePlayers(releaseCandidates.map(p => p.id));
+            
+            // 戦力外選手にもfaStateを設定して市場に出す
+            releaseCandidates.forEach(p => {
+                p.team = 'free_agent';
+                p.faState = {
+                    declared: false, // FA宣言ではない
+                    negotiating: true,
+                    offers: [],
+                    decisionTurn: Math.floor(Math.random() * (OFF_SEASON_TURNS - 2)) + 2
+                };
+            });
+            await dbManager.updatePlayers(releaseCandidates);
             
             // currentRosterから削除
             const releaseIds = releaseCandidates.map(p => p.id);
@@ -297,5 +341,295 @@ export class ContractManager {
       } else {
           return (p.abilities.contact || 0) + (p.abilities.power || 0) + (p.abilities.fielding || 0);
       }
+  }
+
+  private static processFADeclaration(roster: Player[]): { remainingPlayers: Player[], faPlayers: Player[] } {
+    const remainingPlayers: Player[] = [];
+    const faPlayers: Player[] = [];
+
+    for (const player of roster) {
+      // FA権取得条件: FA資格取得年数が7年以上
+      // また、シーズン終了時に登録日数145日以上でfaQualifiedYearsを加算する処理が必要だが、
+      // ここでは「既に加算済み」であることを前提とするか、ここで加算するか。
+      // 契約更改はシーズン終了後なので、ここで今シーズンの評価を行って加算するのが適切。
+      
+      // 1. 今シーズンの登録日数チェックとFA資格年数加算
+      // (注意: rosterは参照渡しではないので、ここで変更しても呼び出し元のオブジェクトは変わらない可能性があるが、
+      //  後続の処理でDB保存されることを期待する。ただし、processOffSeasonContracts内では
+      //  remainingPlayersのみが保存対象になりがちなので、faPlayersも含めて更新が必要)
+      
+      let qualifiedYears = player.faQualifiedYears || 0;
+      const registeredDays = player.currentYearRegisteredDays || 0;
+      
+      // 145日以上登録で1年加算
+      if (registeredDays >= 145) {
+          qualifiedYears++;
+          // オブジェクト更新 (後続の保存処理のため)
+          player.faQualifiedYears = qualifiedYears;
+          player.currentYearRegisteredDays = 0; // リセット
+      } else {
+          // 満たさなくてもリセットはしておく
+          player.currentYearRegisteredDays = 0;
+          player.faQualifiedYears = qualifiedYears; // 初期化されていない場合のためにセット
+      }
+
+      // 2. FA宣言判定
+      // 国内FA権取得は一般的に9年(大卒・社会人7年)だが、ここでは簡易的に一律7年とする
+      if (qualifiedYears >= 7 && Math.random() < 0.1) {
+        // FA宣言状態をセット
+        player.faState = {
+            declared: true,
+            negotiating: true,
+            offers: [],
+            decisionTurn: Math.floor(Math.random() * (OFF_SEASON_TURNS - 5)) + 5 // 5~OFF_SEASON_TURNSターンの間で決断
+        };
+        faPlayers.push(player);
+      } else {
+        remainingPlayers.push(player);
+      }
+    }
+    return { remainingPlayers, faPlayers };
+  }
+
+  /**
+   * ユーザーからのオファーを登録する
+   */
+  static async makeOffer(playerId: string | number, teamId: TeamId, salary: number, years: number, turn: number): Promise<void> {
+    const players = await dbManager.getInitialPlayers();
+    const player = players.find(p => p.id === playerId);
+    
+    if (!player) {
+        throw new Error("Player not found");
+    }
+
+    // faStateがない場合は初期化 (自由契約選手へのオファーなど)
+    if (!player.faState) {
+        player.faState = {
+            declared: false, // FA宣言ではない
+            negotiating: true,
+            offers: [],
+            decisionTurn: turn + 1 // 即決断、または次のターン
+        };
+    }
+
+    // 既存のオファーがあれば更新、なければ追加
+    const existingOfferIndex = player.faState.offers.findIndex(o => o.teamId === teamId);
+    const newOffer = { teamId, salary, years, date: turn };
+
+    if (existingOfferIndex >= 0) {
+        player.faState.offers[existingOfferIndex] = newOffer;
+    } else {
+        player.faState.offers.push(newOffer);
+    }
+
+    await dbManager.savePlayers(players);
+  }
+
+  /**
+   * FAターンの処理 (CPUオファー、移籍決断)
+   */
+  static async processFATurn(gameState: GameState, turn: number): Promise<string[]> {
+      const logs: string[] = [];
+      const players = await dbManager.getInitialPlayers();
+      const faPlayers = players.filter(p => p.team === 'free_agent' && p.faState?.negotiating);
+      const teams = await dbManager.getInitialTeams();
+      const date = Date.now();
+      const newsItems: NewsItem[] = [];
+
+      // チームごとのロースター状況を分析
+      const teamRosterInfo = new Map<TeamId, { count: number, positions: Record<string, number>, maxAbility: Record<string, number> }>();
+      
+      for (const team of teams) {
+          const roster = players.filter(p => p.team === team.id);
+          const positions: Record<string, number> = {};
+          const maxAbility: Record<string, number> = {};
+
+          roster.forEach(p => {
+              const pos = p.position;
+              positions[pos] = (positions[pos] || 0) + 1;
+              
+              const ability = this.getAbilitySum(p);
+              if (ability > (maxAbility[pos] || 0)) {
+                  maxAbility[pos] = ability;
+              }
+          });
+          
+          // 既にオファー中の選手数をカウントして加算 (ロースター枠 + オファー数 <= 70)
+          const offeringCount = faPlayers.filter(p => p.faState?.offers.some(o => o.teamId === team.id)).length;
+
+          teamRosterInfo.set(team.id, { count: roster.length + offeringCount, positions, maxAbility });
+      }
+
+      for (const player of faPlayers) {
+          if (!player.faState) continue;
+          const playerAbility = this.getAbilitySum(player);
+
+          // 1. CPU球団からのオファー (戦力状況に基づく)
+          for (const team of teams) {
+              if (team.id === gameState.selectedTeamId) continue; // ユーザーチームはスキップ
+
+              const info = teamRosterInfo.get(team.id);
+              if (!info) continue;
+
+              // ロースター枠チェック (70人以上は獲得不可)
+              if (info.count >= 70) continue;
+
+              // 補強ニーズ判定
+              let offerChance = 0.0;
+              
+              // ポジション不足判定
+              const posCount = info.positions[player.position] || 0;
+              if (player.position === 'P') {
+                  if (posCount < 28) offerChance += 0.5; // 投手不足
+                  else if (posCount < 32) offerChance += 0.2;
+              } else {
+                  if (posCount < 2) offerChance += 0.5; // 野手不足
+                  else if (posCount < 3) offerChance += 0.2;
+              }
+
+              // 戦力アップ判定 (既存の最高戦力より強い、またはそれに準ずる)
+              const maxAb = info.maxAbility[player.position] || 0;
+              if (playerAbility > maxAb) offerChance += 0.4; // エース/4番候補
+              else if (playerAbility > maxAb * 0.8) offerChance += 0.1; // 準レギュラー
+
+              // 若手有望株 (25歳以下でそこそこの能力)
+              if (player.age < 25 && playerAbility > 15) offerChance += 0.1;
+
+              // バックアップ要員としての獲得 (戦力外選手救済)
+              // 能力が一定以上(25)あり、まだオファーがない場合、低確率で獲得に動く
+              if (playerAbility > 25 && player.faState.offers.length === 0) {
+                  offerChance += 0.05;
+              }
+
+              // 既にオファー済みならスキップ
+              const existingOfferIndex = player.faState.offers.findIndex(o => o.teamId === team.id);
+              if (existingOfferIndex >= 0) continue;
+
+              // 判定実行
+              if (Math.random() < offerChance) {
+                  // オファー作成
+                  const baseSalary = player.contract?.salary || 1000;
+                  // 評価が高いほど高額オファー
+                  const salaryMultiplier = 0.8 + (playerAbility / 50) + Math.random() * 0.5; 
+                  const offerSalary = Math.floor(baseSalary * salaryMultiplier);
+                  const offerYears = playerAbility > 25 ? (Math.floor(Math.random() * 3) + 2) : (Math.floor(Math.random() * 2) + 1);
+
+                  const newOffer = { teamId: team.id, salary: offerSalary, years: offerYears, date: turn };
+                  player.faState.offers.push(newOffer);
+                  
+                  // 獲得予定としてカウントを増やす (このターンの乱獲防止)
+                  info.count++;
+              }
+          }
+
+          // 即決ロジック: 非常に良い条件があれば即決断
+          if (player.faState.offers.length > 0) {
+              const bestOffer = player.faState.offers.reduce((prev, current) => {
+                  const prevScore = prev.salary * (1 + prev.years * 0.1);
+                  const currentScore = current.salary * (1 + current.years * 0.1);
+                  return currentScore > prevScore ? current : prev;
+              });
+
+              const currentSalary = player.contract?.salary || 1000;
+              // 評価値が前年俸の2.5倍以上なら即決
+              const bestScore = bestOffer.salary * (1 + bestOffer.years * 0.1);
+              
+              if (bestScore > currentSalary * 2.5) {
+                  player.faState.decisionTurn = turn;
+              }
+          }
+
+          // 2. 決断判定
+          // 決断ターンが来た、または最終ターン(OFF_SEASON_TURNS)
+          if (turn >= (player.faState.decisionTurn || OFF_SEASON_TURNS) || turn === OFF_SEASON_TURNS) {
+              if (player.faState.offers.length > 0) {
+                  // 最も良い条件を選択
+                  // 評価値 = 年俸 * (1 + 年数 * 0.1)
+                  // ※ 本来は球団の強さや地元なども考慮するが簡易実装
+                  const bestOffer = player.faState.offers.reduce((prev, current) => {
+                      const prevScore = prev.salary * (1 + prev.years * 0.1);
+                      const currentScore = current.salary * (1 + current.years * 0.1);
+                      return currentScore > prevScore ? current : prev;
+                  });
+
+                  // 移籍決定
+                  player.team = bestOffer.teamId;
+                  player.contract = {
+                      salary: bestOffer.salary,
+                      yearsRemaining: bestOffer.years,
+                      totalYears: bestOffer.years,
+                      expirationYear: 0 // 計算省略
+                  };
+                  player.faState.negotiating = false;
+                  player.faState.decisionTurn = undefined; // クリーンアップ
+                  player.faState.offers = []; // オファー履歴をクリア
+
+                  logs.push(`${player.name} が ${bestOffer.teamId} に移籍決定 (年俸${bestOffer.salary}万 ${bestOffer.years}年)`);
+                  
+                  // FA選手と自由契約選手でニュースを分ける
+                  const isFAPlayer = player.faState?.declared;
+                  if(isFAPlayer) {
+                    newsItems.push({
+                      id: `fa_sign_${player.id}_${date}`,
+                      date: date,
+                      title: `FA移籍: ${player.name}`,
+                      content: `${player.name}選手が${teams.find(t => t.id === bestOffer.teamId)?.name}への移籍を表明しました。\n契約条件: ${bestOffer.years}年 総額${bestOffer.salary * bestOffer.years}万円(推定)`,
+                      type: 'contract',
+                      affectedTeams: [bestOffer.teamId]
+                    });
+                  } else {
+                    newsItems.push({
+                      id: `released_sign_${player.id}_${date}`,
+                      date: date,
+                      title: `自由契約移籍: ${player.name}`,
+                      content: `${player.name}選手が${teams.find(t => t.id === bestOffer.teamId)?.name}への移籍を表明しました。\n契約条件: ${bestOffer.years}年 総額${bestOffer.salary * bestOffer.years}万円(推定)`,
+                      type: 'contract',
+                      affectedTeams: [bestOffer.teamId]
+                    });
+                  }
+              } else if (turn === OFF_SEASON_TURNS) {
+                  // オファーなしで期間終了 -> 自由契約継続 (来シーズンも無所属、または引退？)
+                  // ここでは何もしない (free_agentのまま)
+                  logs.push(`${player.name} は所属先が決まりませんでした`);
+              }
+          }
+      }
+
+      if (newsItems.length > 0) {
+          await dbManager.savePlayers(players);
+          await dbManager.addNews(newsItems);
+      } else if (faPlayers.length > 0) {
+          // オファー情報の更新だけでも保存
+          await dbManager.savePlayers(players);
+      }
+
+      return logs;
+  }
+
+  /**
+   * 未所属選手の引退処理 (シーズン移行時)
+   */
+  static async retireUnsignedPlayers(): Promise<string[]> {
+    const logs: string[] = [];
+    const players = await dbManager.getInitialPlayers();
+    const unsignedPlayers = players.filter(p => p.team === 'free_agent');
+
+    if (unsignedPlayers.length > 0) {
+        logs.push(`[引退] 所属先が決まらなかった以下の選手が引退します: ${unsignedPlayers.map(p => p.name).join(', ')}`);
+        await dbManager.removePlayers(unsignedPlayers.map(p => p.id));
+        
+        // ニュース追加
+        const date = Date.now();
+        await dbManager.addNews([{
+            id: `retired_unsigned_${date}`,
+            date: date,
+            title: "未所属選手 引退",
+            content: `所属先が決まらなかった以下の選手が引退を表明しました。\n${unsignedPlayers.map(p => `${p.name} (${p.position}・${p.age}歳)`).join('\n')}`,
+            type: 'contract',
+            affectedTeams: []
+        }]);
+    }
+
+    return logs;
   }
 }

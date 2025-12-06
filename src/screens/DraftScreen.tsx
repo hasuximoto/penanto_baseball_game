@@ -8,7 +8,6 @@ import { DraftManager } from '@/services/draftManager';
 import { dbManager } from '@/services/databaseManager';
 import { TeamStrategyManager } from '@/services/teamStrategyManager';
 import { Player, TeamId, NewsItem } from '@/types';
-import { Ionicons } from '@expo/vector-icons';
 
 const getRank = (value: number | undefined): string => {
   if (value === undefined) return '-';
@@ -62,7 +61,7 @@ export const DraftScreen = () => {
   const MAX_ROUNDS = 15;
   const ROSTER_LIMIT = 85;
   const ROSTER_SOFT_LIMIT = 75;
-  const MIN_ABILITY_THRESHOLD = 200; // CPUが指名を続ける最低限のスコア閾値
+  const MIN_ABILITY_THRESHOLD = 220; // CPUが指名を続ける最低限のスコア閾値
   const scrollViewRef = useRef<ScrollView>(null);
   const isExiting = useRef(false);
 

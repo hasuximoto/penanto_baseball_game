@@ -541,6 +541,32 @@ export class DatabaseManager {
   }
 
   /**
+   * 複数の選手を自由契約にする (チームをfree_agentに変更)
+   */
+  async releasePlayersToFreeAgency(playerIds: (string | number)[]): Promise<void> {
+    try {
+      const schemaData = await this.getItem('simbaseball_db_schema');
+      if (!schemaData) return;
+
+      const parsed = JSON.parse(schemaData);
+      const currentPlayers = parsed.initialData.players as Player[];
+      
+      const releaseSet = new Set(playerIds);
+      const newPlayers = currentPlayers.map(p => {
+        if (releaseSet.has(p.id)) {
+          return { ...p, team: 'free_agent' };
+        }
+        return p;
+      });
+
+      parsed.initialData.players = newPlayers;
+      await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+    } catch (error) {
+      console.error('Failed to release players to free agency:', error);
+    }
+  }
+
+  /**
    * 複数のチーム情報を更新する
    */
   async updateTeams(updatedTeams: any[]): Promise<void> {

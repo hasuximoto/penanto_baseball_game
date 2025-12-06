@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Animated } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { dbManager } from '../services/databaseManager';
 import { Player, TeamId } from '../types';
 import { TEAM_ABBREVIATIONS } from '../utils/constants';
@@ -17,11 +17,13 @@ const PACIFIC_TEAMS: TeamId[] = ["hawks", "lions", "fighters", "buffaloes", "eag
 const CENTRAL_TEAMS: TeamId[] = ["giants", "tigers", "dragons", "baystars", "carp", "swallows"];
 
 export const PlayerListScreen = () => {
+  const route = useRoute<any>();
+  const initialFilter = route.params?.filter;
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('batter');
-  const [selectedTeam, setSelectedTeam] = useState<TeamId | 'all' | 'central' | 'pacific'>('all');
+  const [selectedTeam, setSelectedTeam] = useState<TeamId | 'all' | 'central' | 'pacific' | 'free_agent'>(initialFilter === 'free_agent' ? 'free_agent' : 'all');
   const [sortField, setSortField] = useState<string>('average'); // Default sort
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [showRegulationOnly, setShowRegulationOnly] = useState(false);
@@ -76,9 +78,11 @@ export const PlayerListScreen = () => {
     // 2. Filter by Team
     if (selectedTeam !== 'all') {
       if (selectedTeam === 'central') {
-        result = result.filter(p => CENTRAL_TEAMS.includes(p.team));
+        result = result.filter(p => CENTRAL_TEAMS.includes(p.team as TeamId));
       } else if (selectedTeam === 'pacific') {
-        result = result.filter(p => PACIFIC_TEAMS.includes(p.team));
+        result = result.filter(p => PACIFIC_TEAMS.includes(p.team as TeamId));
+      } else if (selectedTeam === 'free_agent') {
+        result = result.filter(p => p.team === 'free_agent');
       } else {
         result = result.filter(p => p.team === selectedTeam);
       }
@@ -393,7 +397,6 @@ export const PlayerListScreen = () => {
           >
             <Text style={[styles.teamText, selectedTeam === 'central' && styles.activeTeamText]}>セ</Text>
           </TouchableOpacity>
-
           <TouchableOpacity 
             style={[styles.teamButton, selectedTeam === 'pacific' && styles.activeTeamButton]}
             onPress={() => setSelectedTeam('pacific')}
@@ -412,6 +415,12 @@ export const PlayerListScreen = () => {
               </Text>
             </TouchableOpacity>
           ))}
+          <TouchableOpacity 
+            style={[styles.teamButton, selectedTeam === 'free_agent' && styles.activeTeamButton]}
+            onPress={() => setSelectedTeam('free_agent')}
+          >
+            <Text style={[styles.teamText, selectedTeam === 'free_agent' && styles.activeTeamText]}>FA</Text>
+          </TouchableOpacity>
         </ScrollView>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.teamFilter}>

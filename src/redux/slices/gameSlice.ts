@@ -20,6 +20,7 @@ const initialState: GameState = {
   baseRunners: [false, false, false],
   selectedDifficulty: 1,
   offSeasonStep: 'draft', // Default to draft when off-season starts
+  reinforcementTurn: 0,
 };
 
 const gameSlice = createSlice({
@@ -77,6 +78,9 @@ const gameSlice = createSlice({
     setOffSeasonStep: (state, action: PayloadAction<OffSeasonStep>) => {
       state.offSeasonStep = action.payload;
     },
+    setReinforcementTurn: (state, action: PayloadAction<number>) => {
+      state.reinforcementTurn = action.payload;
+    },
     startNewSeason: (state) => {
       state.season += 1;
       state.currentDate = 1;
@@ -115,6 +119,7 @@ export const {
   setDifficulty,
   setGameState,
   setOffSeasonStep,
+  setReinforcementTurn,
   startNewSeason,
   resetGameState,
   resetGame,

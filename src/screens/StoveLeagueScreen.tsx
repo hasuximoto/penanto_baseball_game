@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'rea
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { startNewSeason, setOffSeasonStep } from '../redux/slices/gameSlice';
+import { TEAM_ABBREVIATIONS, OFF_SEASON_TURNS } from '../utils/constants';
+import { startNewSeason, setOffSeasonStep, setReinforcementTurn } from '../redux/slices/gameSlice';
 import { ContractManager } from '../services/contractManager';
 import { SpringCampManager } from '../services/springCampManager';
 import { SeasonManager } from '../services/seasonManager';
@@ -48,10 +49,11 @@ export const StoveLeagueScreen = () => {
           text: "実行する", 
           onPress: async () => {
             try {
-              const logs = await ContractManager.processOffSeasonContracts(gameState.selectedTeamId);
+              const logs = await ContractManager.processOffSeasonContracts(gameState.selectedTeamId, currentSeason);
               
               // 次のフェーズへ
-              dispatch(setOffSeasonStep('camp'));
+              dispatch(setOffSeasonStep('reinforcement'));
+              dispatch(setReinforcementTurn(1));
 
               // モーダルの開閉タイミングを調整するために少し待つ
               setTimeout(() => {
@@ -81,6 +83,50 @@ export const StoveLeagueScreen = () => {
         }
       ]
     );
+  };
+  const handleReinforcement = () => {
+    const turn = gameState.reinforcementTurn || 1;
+    
+    showAlert(
+      `戦力補強期間 (ターン ${turn}/${OFF_SEASON_TURNS})`,
+      "行うアクションを選択してください。",
+      [
+        { text: "キャンセル", style: "cancel" },
+        { 
+            text: "FA交渉", 
+            onPress: () => (navigation as any).navigate('OffSeasonMarket')
+        },
+        { 
+            text: "トレード", 
+            onPress: () => showAlert("トレード", "トレード機能は仮実装です。") 
+        },
+        {
+            text: "次のターンへ",
+            onPress: () => processNextTurn(turn)
+        }
+      ]
+    );
+  };
+
+  const processNextTurn = async (currentTurn: number) => {
+      // 他球団の動向などをシミュレート
+      try {
+        const logs = await ContractManager.processFATurn(gameState, currentTurn);
+        if (logs.length > 0) {
+            // 移籍決定などのニュースがあれば表示したいが、ここではログ出力のみ
+            console.log(logs);
+        }
+      } catch (e) {
+        console.error("FA turn processing failed", e);
+      }
+      
+      if (currentTurn >= OFF_SEASON_TURNS) {
+          dispatch(setOffSeasonStep('camp'));
+          showAlert("期間終了", "戦力補強期間が終了しました。\n次は春季キャンプです。");
+      } else {
+          dispatch(setReinforcementTurn(currentTurn + 1));
+          showAlert("ターン経過", `ターン ${currentTurn + 1} になりました。`);
+      }
   };
 
   const handleSpringCamp = async () => {
@@ -120,6 +166,9 @@ export const StoveLeagueScreen = () => {
           text: "翌シーズンへ", 
           onPress: async () => {
             try {
+              // 0. 未所属選手の引退処理
+              await ContractManager.retireUnsignedPlayers();
+
               // 1. DBデータの更新 (スケジュール、成績リセット)
               await SeasonManager.startNewSeason(currentSeason + 1);
               
@@ -161,7 +210,7 @@ export const StoveLeagueScreen = () => {
               showAlert("新シーズン開始", `${currentSeason + 1}年シーズンを開始します！`);
             } catch (error) {
               console.error(error);
-              showAlert("エラー", "シーズン移行中にエラーが発生しました。");
+                            showAlert("エラー", "シーズン移行中にエラーが発生しました。");
             }
           }
         }
@@ -193,6 +242,16 @@ export const StoveLeagueScreen = () => {
         >
           <Text style={styles.menuButtonText}>契約更改</Text>
           <Text style={styles.menuDescription}>所属選手と契約を更新します</Text>
+          {offSeasonStep === 'reinforcement' || offSeasonStep === 'camp' || offSeasonStep === 'next_season' ? <Text style={styles.completedText}>完了</Text> : null}
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+            style={[styles.menuButton, offSeasonStep !== 'reinforcement' && styles.disabledButton]} 
+            onPress={handleReinforcement}
+            disabled={offSeasonStep !== 'reinforcement'}
+        >
+          <Text style={styles.menuButtonText}>戦力補強期間</Text>
+          <Text style={styles.menuDescription}>FA交渉・トレード・外国人獲得 (残り{OFF_SEASON_TURNS + 1 - (gameState.reinforcementTurn || 1)}ターン)</Text>
           {offSeasonStep === 'camp' || offSeasonStep === 'next_season' ? <Text style={styles.completedText}>完了</Text> : null}
         </TouchableOpacity>
 
@@ -333,7 +392,8 @@ const styles = StyleSheet.create({
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   modalButton: {
     paddingVertical: 10,
@@ -341,6 +401,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     minWidth: 100,
     alignItems: 'center',
+    margin: 5,
   },
   okButton: {
     backgroundColor: '#2196F3',
