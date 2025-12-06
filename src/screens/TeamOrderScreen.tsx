@@ -173,15 +173,7 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.teamInfo}>
-            {/* Placeholder for Logo */}
-            <View style={[styles.logoPlaceholder, { backgroundColor: teamId === 'lions' ? '#1f366a' : '#ccc' }]}>
-                <Text style={styles.logoText}>{team.name.substring(0, 1)}</Text>
-            </View>
             <Text style={styles.teamName}>{team.name}</Text>
-        </View>
-        <Text style={styles.dateText}>{currentDateStr}</Text>
-        <View style={styles.headerRight}>
-            <Text style={styles.headerTitle}>最新一軍オーダー</Text>
         </View>
       </View>
 
