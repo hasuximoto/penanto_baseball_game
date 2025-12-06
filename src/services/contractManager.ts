@@ -9,7 +9,7 @@ export class ContractManager {
    * 2. 引退処理
    * 3. 戦力外通告 (支配下登録枠調整)
    */
-  static async processOffSeasonContracts(): Promise<string[]> {
+  static async processOffSeasonContracts(userTeamId?: TeamId | null): Promise<string[]> {
     const logs: string[] = [];
     const newsItems: NewsItem[] = [];
     const date = Date.now();
@@ -69,7 +69,9 @@ export class ContractManager {
       let currentRoster = activePlayers;
       const ROSTER_LIMIT = 70;
       
-      if (currentRoster.length > ROSTER_LIMIT) {
+      if (team.id === userTeamId) {
+        logs.push(`[戦力外] ${team.name} (ユーザー操作待ち)`);
+      } else if (currentRoster.length > ROSTER_LIMIT) {
         // 放出候補を取得 (TeamStrategyManagerのロジックを再利用または独自実装)
         // TeamStrategyManager.identifyReleaseCandidates は private なので、ここで似たロジックを実装するか、publicにする必要がある。
         // ここでは簡易的に実装する

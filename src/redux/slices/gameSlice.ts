@@ -19,7 +19,6 @@ const initialState: GameState = {
   currentOuts: 0,
   baseRunners: [false, false, false],
   selectedDifficulty: 1,
-  selectedTeamHuman: null,
   offSeasonStep: 'draft', // Default to draft when off-season starts
 };
 

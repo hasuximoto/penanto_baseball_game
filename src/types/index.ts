@@ -99,6 +99,7 @@ export interface Player {
   position: Position;
   handedness: "R" | "L" | "B";      // 右・左・両打ち
   age: number;
+  draftYear?: number;               // ドラフト指名年度
   experienceYears?: number;         // プロ年数
   isRookieEligible?: boolean;       // 新人王資格
   team: TeamId;
@@ -316,7 +317,7 @@ export interface GameState {
   
   // ゲーム設定
   autoPlay: boolean;
-  selectedTeamId: TeamId | null;
+  selectedTeamId: TeamId | null; // プレイヤーが操作するチーム
   
   // スコア
   homeTeamScore: number;
@@ -329,7 +330,6 @@ export interface GameState {
   
   // その他
   selectedDifficulty: number;       // 難易度
-  selectedTeamHuman: TeamId | null; // プレイヤーが操作するチーム
   
   // オフシーズン進行状況
   offSeasonStep?: OffSeasonStep;

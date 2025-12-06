@@ -81,7 +81,7 @@ export class GameEngine {
         for (const result of results) {
           // ユーザーのチームの試合のみ詳細を保存する (容量節約のため)
           // saveDetailsがfalseの場合は強制的に詳細なし
-          const isUserGame = gameState.selectedTeamHuman && (result.homeTeam === gameState.selectedTeamHuman || result.awayTeam === gameState.selectedTeamHuman);
+          const isUserGame = gameState.selectedTeamId && (result.homeTeam === gameState.selectedTeamId || result.awayTeam === gameState.selectedTeamId);
           const shouldSaveDetails = saveDetails && isUserGame;
 
           const resultForHistory = shouldSaveDetails ? result : { ...result, details: undefined };

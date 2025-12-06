@@ -22,6 +22,7 @@ import { StoveLeagueScreen } from '../screens/StoveLeagueScreen';
 import { DraftScreen } from '../screens/DraftScreen';
 import { TitleHistoryScreen } from '../screens/TitleHistoryScreen';
 import { TeamOrderScreen } from '../screens/TeamOrderScreen';
+import { ReleasePlayersScreen } from '../screens/ReleasePlayersScreen';
 // import { PlayerDataScreen } from '../screens/PlayerDataScreen';
 
 const Stack = createStackNavigator();
@@ -79,6 +80,11 @@ const MainStack = () => (
       name="TitleHistory"
       component={TitleHistoryScreen}
       options={{ title: '年度別タイトル獲得者一覧' }}
+    />
+    <Stack.Screen
+      name="ReleasePlayers"
+      component={ReleasePlayersScreen}
+      options={{ title: '戦力外通告' }}
     />
     {/* <Stack.Screen
       name="Game"

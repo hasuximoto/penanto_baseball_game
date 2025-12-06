@@ -48,15 +48,34 @@ export const StoveLeagueScreen = () => {
           text: "実行する", 
           onPress: async () => {
             try {
-              const logs = await ContractManager.processOffSeasonContracts();
+              const logs = await ContractManager.processOffSeasonContracts(gameState.selectedTeamId);
               
               // 次のフェーズへ
               dispatch(setOffSeasonStep('camp'));
 
-              showAlert("完了", "契約更改が完了しました。\n\n" + "引退・戦力外はニュースを確認してください。");
+              // モーダルの開閉タイミングを調整するために少し待つ
+              setTimeout(() => {
+                if (gameState.selectedTeamId) {
+                  showAlert(
+                    "契約更改完了", 
+                    "契約更改と引退処理が完了しました。\n続いて戦力外通告を行います。",
+                    [{ 
+                        text: "戦力外通告へ", 
+                        onPress: () => {
+                          console.log("Navigating to ReleasePlayers");
+                          navigation.navigate('ReleasePlayers' as never);
+                        }
+                    }]
+                  );
+                } else {
+                  showAlert("完了", "契約更改が完了しました。\n\n" + "引退・戦力外はニュースを確認してください。");
+                }
+              }, 500);
             } catch (error) {
               console.error(error);
-              showAlert("エラー", "処理中にエラーが発生しました。");
+              setTimeout(() => {
+                showAlert("エラー", "処理中にエラーが発生しました。");
+              }, 500);
             }
           }
         }

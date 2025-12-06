@@ -58,11 +58,11 @@ export const DraftScreen = () => {
   // 1巡目入札用
   const [draftPhase, setDraftPhase] = useState<'nomination' | 'lottery' | 'waiver'>('nomination');
   const [nominations, setNominations] = useState<Record<string, Player>>({}); // teamId -> Player
-  const [lotteryResults, setLotteryResults] = useState<string[]>([]); // ログ用
-
+  
   const MAX_ROUNDS = 15;
-  const ROSTER_LIMIT = 75;
-  const MIN_ABILITY_THRESHOLD = 150; // CPUが指名を続ける最低限のスコア閾値
+  const ROSTER_LIMIT = 85;
+  const ROSTER_SOFT_LIMIT = 75;
+  const MIN_ABILITY_THRESHOLD = 200; // CPUが指名を続ける最低限のスコア閾値
   const scrollViewRef = useRef<ScrollView>(null);
   const isExiting = useRef(false);
 
@@ -409,9 +409,11 @@ export const DraftScreen = () => {
             bestPlayer = p;
         }
     });
+    // 75名を超えた場合は閾値を上げる
+    const adjustedMinThreshold = currentRosterCount >= ROSTER_SOFT_LIMIT ? MIN_ABILITY_THRESHOLD + 80 : MIN_ABILITY_THRESHOLD;
 
     // 閾値チェック (能力不足なら指名終了)
-    if (!bestPlayer || maxScore < MIN_ABILITY_THRESHOLD) {
+    if (!bestPlayer || maxScore < adjustedMinThreshold) {
         addLog(`${teams.find(t => t.id === teamId)?.name || teamId} は選択を終了します。`);
         setFinishedTeams(prev => [...prev, teamId]);
         advancePick();
@@ -635,8 +637,11 @@ export const DraftScreen = () => {
   const performSave = async () => {
     try {
         setLoading(true);
-        // 指名された全選手を収集
-        const allDraftedPlayers = Object.values(draftResults).flat();
+        // 指名された全選手を収集し、ドラフト年度を付与
+        const allDraftedPlayers = Object.values(draftResults).flat().map(p => ({
+          ...p,
+          draftYear: gameState.season
+        }));
         
         // DBに保存
         await dbManager.registerDraftPlayers(allDraftedPlayers);
