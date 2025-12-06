@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,6 +8,13 @@ import { Player } from '../types';
 import { ContractManager } from '../services/contractManager';
 
 type TabType = 'fa' | 'released' | 'foreign';
+type SortKey = 'position' | 'age' | 'salary';
+type SortOrder = 'asc' | 'desc';
+
+const POSITION_ORDER: Record<string, number> = {
+  'P': 1, 'C': 2, '1B': 3, '2B': 4, '3B': 5, 'SS': 6,
+  'LF': 7, 'CF': 8, 'RF': 9, 'OF': 10, 'DH': 11
+};
 
 export const OffSeasonMarketScreen = () => {
   const navigation = useNavigation();
@@ -17,6 +24,9 @@ export const OffSeasonMarketScreen = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('fa');
   
+  const [sortKey, setSortKey] = useState<SortKey>('position');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+
   // Negotiation Modal
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -53,6 +63,38 @@ export const OffSeasonMarketScreen = () => {
       setLoading(false);
     }
   };
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortOrder('asc'); // Default to asc for new key
+    }
+  };
+
+  const sortedPlayers = useMemo(() => {
+    return [...players].sort((a, b) => {
+      let result = 0;
+      if (sortKey === 'position') {
+        const orderA = POSITION_ORDER[a.position] || 99;
+        const orderB = POSITION_ORDER[b.position] || 99;
+        result = orderA - orderB;
+
+        // ポジションが同じ場合は年齢降順（年長順）でソート
+        if (result === 0) {
+            const ageDiff = b.age - a.age;
+            return sortOrder === 'asc' ? ageDiff : -ageDiff;
+        }
+      } else if (sortKey === 'age') {
+        result = a.age - b.age;
+      } else if (sortKey === 'salary') {
+        result = (a.contract?.salary || 0) - (b.contract?.salary || 0);
+      }
+
+      return sortOrder === 'asc' ? result : -result;
+    });
+  }, [players, sortKey, sortOrder]);
 
   const handlePlayerPress = (player: Player) => {
     setSelectedPlayer(player);
@@ -151,8 +193,35 @@ export const OffSeasonMarketScreen = () => {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.sortContainer}>
+        <TouchableOpacity 
+            style={[styles.sortButton, sortKey === 'position' && styles.activeSortButton]} 
+            onPress={() => handleSort('position')}
+        >
+            <Text style={[styles.sortButtonText, sortKey === 'position' && styles.activeSortButtonText]}>
+                守備位置 {sortKey === 'position' && (sortOrder === 'asc' ? '▲' : '▼')}
+            </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+            style={[styles.sortButton, sortKey === 'age' && styles.activeSortButton]} 
+            onPress={() => handleSort('age')}
+        >
+            <Text style={[styles.sortButtonText, sortKey === 'age' && styles.activeSortButtonText]}>
+                年齢 {sortKey === 'age' && (sortOrder === 'asc' ? '▲' : '▼')}
+            </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+            style={[styles.sortButton, sortKey === 'salary' && styles.activeSortButton]} 
+            onPress={() => handleSort('salary')}
+        >
+            <Text style={[styles.sortButtonText, sortKey === 'salary' && styles.activeSortButtonText]}>
+                年俸 {sortKey === 'salary' && (sortOrder === 'asc' ? '▲' : '▼')}
+            </Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
-        data={players}
+        data={sortedPlayers}
         renderItem={renderPlayerItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContent}
@@ -238,6 +307,32 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 10,
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  sortButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 15,
+    backgroundColor: '#f0f0f0',
+    marginRight: 8,
+  },
+  activeSortButton: {
+    backgroundColor: '#007AFF',
+  },
+  sortButtonText: {
+    fontSize: 12,
+    color: '#333',
+  },
+  activeSortButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   playerRow: {
     backgroundColor: '#fff',
