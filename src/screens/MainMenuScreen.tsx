@@ -440,6 +440,10 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         teamName={selectedTeamName}
         groupedRoster={groupedRoster}
         onSelectTeam={handleSelectTeam}
+        onViewDetails={() => {
+            setRosterModalVisible(false);
+            navigation.navigate('TeamOrder', { teamId: viewingTeamId });
+        }}
         isMyTeam={viewingTeamId === gameState.selectedTeamId}
       />
       

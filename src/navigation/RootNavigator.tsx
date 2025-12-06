@@ -21,6 +21,7 @@ import { DebugScreen } from '../screens/DebugScreen';
 import { StoveLeagueScreen } from '../screens/StoveLeagueScreen';
 import { DraftScreen } from '../screens/DraftScreen';
 import { TitleHistoryScreen } from '../screens/TitleHistoryScreen';
+import { TeamOrderScreen } from '../screens/TeamOrderScreen';
 // import { PlayerDataScreen } from '../screens/PlayerDataScreen';
 
 const Stack = createStackNavigator();
@@ -43,6 +44,11 @@ const MainStack = () => (
       name="MainMenu"
       component={MainMenuScreen}
       options={{ title: 'SimBaseBall' }}
+    />
+    <Stack.Screen
+      name="TeamOrder"
+      component={TeamOrderScreen}
+      options={{ title: 'Team Order', headerShown: false }}
     />
     <Stack.Screen
       name="DailyResults"
@@ -205,35 +211,35 @@ export const RootNavigator = () => (
         name="HomeTab"
         component={MainStack}
         options={{
-          tabBarLabel: 'Home',
+          tabBarLabel: 'ホーム',
         }}
       />
       <Tab.Screen
         name="PlayersTab"
         component={PlayerStack}
         options={{
-          tabBarLabel: 'Players',
+          tabBarLabel: '選手一覧',
         }}
       />
       <Tab.Screen
         name="ScheduleTab"
         component={ScheduleScreen}
         options={{
-          tabBarLabel: 'Schedule',
+          tabBarLabel: '日程',
         }}
       />
       <Tab.Screen
         name="StatsTab"
         component={TeamStatsStack}
         options={{
-          tabBarLabel: 'Stats',
+          tabBarLabel: '順位表',
         }}
       />
       <Tab.Screen
         name="NewsTab"
         component={NewsStack}
         options={{
-          tabBarLabel: 'News',
+          tabBarLabel: 'ニュース',
         }}
       />
     </Tab.Navigator>

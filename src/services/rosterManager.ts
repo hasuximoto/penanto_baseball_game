@@ -1,9 +1,36 @@
 import { Player, TeamId, NewsItem, GameState } from '../types';
 import { dbManager } from './databaseManager';
+import { getGameDateString } from '../utils/dateUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export class RosterManager {
   
+  /**
+   * 日次ロスター処理
+   * 一軍・二軍の入れ替え判定を行う
+   */
+  /**
+   * 週次更新処理 (月曜日またはシーズン開始時に実行)
+   * 試合前に実行することを想定
+   */
+  async processWeeklyUpdates(gameState: GameState): Promise<void> {
+      const dateStr = getGameDateString(gameState.currentDate, gameState.season);
+      const isMonday = new Date(dateStr).getDay() === 1;
+      const isSeasonStart = gameState.currentDate === 1;
+      
+      if (!isMonday && !isSeasonStart) return;
+
+      const players = await dbManager.getInitialPlayers();
+      const teams = await dbManager.getInitialTeams();
+      
+      for (const team of teams) {
+          const teamPlayers = players.filter(p => p.team === team.id);
+          this.updatePitcherRoles(teamPlayers);
+      }
+      
+      await dbManager.savePlayers(players);
+  }
+
   /**
    * 日次ロスター処理
    * 一軍・二軍の入れ替え判定を行う
@@ -17,6 +44,8 @@ export class RosterManager {
     const players = await dbManager.getInitialPlayers();
     const teams = await dbManager.getInitialTeams();
     const news: NewsItem[] = [];
+
+    // processWeeklyUpdates は GameEngine から試合前に呼ばれるため、ここでは削除
 
     for (const team of teams) {
       const teamPlayers = players.filter(p => p.team === team.id);
@@ -45,6 +74,50 @@ export class RosterManager {
     }
 
     return news;
+  }
+
+  /**
+   * 投手起用区分を更新 (先発6人、抑え1人、残り中継ぎ)
+   */
+  private updatePitcherRoles(teamPlayers: Player[]) {
+      const activePitchers = teamPlayers.filter(p => p.position === 'P' && p.registrationStatus === 'active');
+      
+      // 一旦リセット
+      activePitchers.forEach(p => p.pitcherRole = undefined);
+
+      // 評価関数
+      const getStarterScore = (p: Player) => {
+          // 先発適性 > スタミナ > 総合値
+          // starter_aptitude も考慮
+          const aptitude = p.abilities.starterAptitude || p.starter_aptitude || 0;
+          return aptitude * 2 + (p.abilities.stamina || 0) + (p.abilities.overall || 0);
+      };
+      
+      const getCloserScore = (p: Player) => {
+          // 抑え適性 > 球威 > 総合値
+          // closer_aptitude も考慮
+          const aptitude = p.abilities.closerAptitude || p.closer_aptitude || 0;
+          return aptitude * 2 + (p.abilities.stuff || 0) + (p.abilities.overall || 0);
+      };
+
+      // 1. 先発 (6人)
+      activePitchers.sort((a, b) => getStarterScore(b) - getStarterScore(a));
+      const starters = activePitchers.slice(0, 6);
+      starters.forEach(p => p.pitcherRole = 'starter');
+      
+      // 残りの投手
+      const remaining = activePitchers.slice(6);
+      
+      if (remaining.length > 0) {
+          // 2. 抑え (1人)
+          remaining.sort((a, b) => getCloserScore(b) - getCloserScore(a));
+          const closer = remaining[0];
+          closer.pitcherRole = 'closer';
+          
+          // 3. 中継ぎ (残り)
+          const relievers = remaining.slice(1);
+          relievers.forEach(p => p.pitcherRole = 'reliever');
+      }
   }
 
   private processTeamMoves(teamId: TeamId, players: Player[], currentDate: number): { promoted: Player[], demoted: Player[] } {

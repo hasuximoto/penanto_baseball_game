@@ -15,6 +15,7 @@ interface RosterModalProps {
   teamName: string;
   groupedRoster: Record<string, Player[]>;
   onSelectTeam?: () => void;
+  onViewDetails?: () => void;
   isMyTeam?: boolean;
 }
 
@@ -24,6 +25,7 @@ export const RosterModal: React.FC<RosterModalProps> = ({
   teamName,
   groupedRoster,
   onSelectTeam,
+  onViewDetails,
   isMyTeam,
 }) => {
   return (
@@ -37,15 +39,25 @@ export const RosterModal: React.FC<RosterModalProps> = ({
         <View style={[styles.modalView, { width: '90%', maxHeight: '80%' }]}>
           <Text style={styles.modalTitle}>{teamName} - 一軍登録選手</Text>
           
-          {onSelectTeam && (
-            <TouchableOpacity
-                style={[styles.button, isMyTeam ? styles.disabledButton : styles.selectButton, { marginBottom: 10, width: '100%' }]}
-                onPress={onSelectTeam}
-                disabled={isMyTeam}
-            >
-                <Text style={styles.buttonText}>{isMyTeam ? '選択中のチーム' : 'このチームでプレイする'}</Text>
-            </TouchableOpacity>
-          )}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 10 }}>
+              {onSelectTeam && (
+                <TouchableOpacity
+                    style={[styles.button, isMyTeam ? styles.disabledButton : styles.selectButton, { flex: 1, marginRight: 5 }]}
+                    onPress={onSelectTeam}
+                    disabled={isMyTeam}
+                >
+                    <Text style={styles.buttonText}>{isMyTeam ? '選択中' : 'プレイする'}</Text>
+                </TouchableOpacity>
+              )}
+              {onViewDetails && (
+                  <TouchableOpacity
+                      style={[styles.button, { backgroundColor: '#2196F3', flex: 1, marginLeft: 5 }]}
+                      onPress={onViewDetails}
+                  >
+                      <Text style={styles.buttonText}>オーダー確認</Text>
+                  </TouchableOpacity>
+              )}
+          </View>
 
           <ScrollView style={{ width: '100%' }}>
             {Object.entries(groupedRoster).map(([position, players]) => (

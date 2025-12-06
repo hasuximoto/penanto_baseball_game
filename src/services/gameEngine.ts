@@ -18,6 +18,9 @@ export class GameEngine {
    * リーグ全体の1日分の試合をシミュレート
    */
   async simulateLeagueDay(gameState: GameState, saveDetails: boolean = true): Promise<GameResult[]> {
+    // 週次更新 (月曜日の試合前)
+    await rosterManager.processWeeklyUpdates(gameState);
+
     // リーグ平均能力値を取得 (キャッシュがない場合、またはシーズンが変わった場合)
     if (!this.leagueAverages || this.lastCalculatedSeason !== gameState.season) {
         console.log(`Recalculating league averages for season ${gameState.season}...`);
@@ -173,6 +176,31 @@ export class GameEngine {
     // スターティングラインナップと先発投手を取得
     let { batters: homeLineup, pitcher: homeStarter } = await databaseManager.getStartingLineup(homeTeamId, homeRoster, gameState.currentDate);
     let { batters: awayLineup, pitcher: awayStarter } = await databaseManager.getStartingLineup(awayTeamId, awayRoster, gameState.currentDate);
+
+    // --- ローテーション適用 (火～日) ---
+    const dateStr = getGameDateString(gameState.currentDate, gameState.season);
+    const dayOfWeek = new Date(dateStr).getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    // 火(2) -> 0, 水(3) -> 1, ..., 土(6) -> 4, 日(0) -> 5
+    let rotationIndex = -1;
+    if (dayOfWeek >= 2) rotationIndex = dayOfWeek - 2;
+    else if (dayOfWeek === 0) rotationIndex = 5;
+
+    if (rotationIndex !== -1) {
+        // Home Team Rotation
+        const homeStarters = homeRoster.filter(p => p.pitcherRole === 'starter');
+        // ソート (rosterManagerと同じロジックで)
+        homeStarters.sort((a, b) => this.evaluatePitcherForRotation(b) - this.evaluatePitcherForRotation(a));
+        if (homeStarters[rotationIndex]) {
+            homeStarter = homeStarters[rotationIndex];
+        }
+
+        // Away Team Rotation
+        const awayStarters = awayRoster.filter(p => p.pitcherRole === 'starter');
+        awayStarters.sort((a, b) => this.evaluatePitcherForRotation(b) - this.evaluatePitcherForRotation(a));
+        if (awayStarters[rotationIndex]) {
+            awayStarter = awayStarters[rotationIndex];
+        }
+    }
 
     // 安全策: 先発投手がいない場合
     if (!homeStarter) homeStarter = homeRoster.find(p => p.position === 'P') || homeRoster[0];
@@ -774,7 +802,8 @@ export class GameEngine {
     inning: number,
     currentInningRuns: number,
     roster: Player[],
-    gameStarterId: string
+    gameStarterId: string,
+    lead: number = 0
   ): Player | null {
     const stat = pitcherStats.find(s => s.playerId === currentPitcher.id);
     if (!stat) return null;
@@ -809,6 +838,44 @@ export class GameEngine {
     // 交代条件2: 炎上 (このイニング5失点以上、または合計8失点以上)
     const isExploded = currentInningRuns >= 5 || (stat.earnedRuns || 0) >= 8;
 
+    // --- 完投・完封ペース判定 ---
+    // 先発投手で、9回以降、リードしていて、炎上していない場合
+    if (isStarter && inning >= 9 && lead > 0 && !isExploded) {
+        const earnedRuns = stat.earnedRuns || 0;
+        const isShutoutPace = earnedRuns === 0;
+        
+        // 許容球数 (通常より多めに設定)
+        let limit = 115;
+        if (isShutoutPace) limit += 10; // 完封ペースなら135球まで
+        
+        // 球数が許容範囲内で、疲労が極端でなければ続投
+        if (currentPitchCount < limit && (currentPitcher.fatigue || 0) < 30) {
+             return null; 
+        }
+    }
+
+    // リリーフ候補を探す (ベンチ入り投手で、まだ登板していない選手)
+    const usedPitcherIds = new Set(pitcherStats.filter(s => s.inningsPitched && s.inningsPitched > 0).map(s => s.playerId));
+    usedPitcherIds.add(currentPitcher.id);
+
+    // --- 抑え投手判定 ---
+    // セーブシチュエーション: 3点差以内のリード、9回以降
+    const isSaveSituation = lead > 0 && lead <= 3 && inning >= 9;
+    
+    if (isSaveSituation) {
+        // 現在の投手が抑えなら、炎上していない限り続投
+        if (currentPitcher.pitcherRole === 'closer') {
+             if (!isExploded) return null;
+        } else {
+            // 抑え投手を優先的に探す
+            const closer = roster.find(p => p.pitcherRole === 'closer' && !usedPitcherIds.has(p.id));
+            // 疲労が溜まりすぎていなければ投入
+            if (closer && (closer.fatigue || 0) < 20) {
+                return closer;
+            }
+        }
+    }
+
     // 交代条件3: 終盤の疲労考慮
     let fatiguePenalty = 0;
     if (inning >= 7) {
@@ -831,20 +898,16 @@ export class GameEngine {
         }
     }
 
-    // リリーフ候補を探す (ベンチ入り投手で、まだ登板していない選手)
-    const usedPitcherIds = new Set(pitcherStats.filter(s => s.inningsPitched && s.inningsPitched > 0).map(s => s.playerId));
-    usedPitcherIds.add(currentPitcher.id);
-
     // チームIDを特定
     const teamId = roster.length > 0 ? roster[0].team : null;
     
     // ローテーション投手を特定（リリーフ登板させないため）
-    let rotationPlayerIds: (string | number)[] = [];
+    // let rotationPlayerIds: (string | number)[] = []; // 不要
 
     const reliefCandidates = roster.filter(p => 
       p.position === 'P' && 
       !usedPitcherIds.has(p.id) &&
-      !rotationPlayerIds.some(id => String(id) === String(p.id)) // ローテーション投手を除外
+      p.pitcherRole !== 'starter' // 先発投手はリリーフ登板しない
     );
 
     let bestRelief: Player | null = null;
@@ -1005,7 +1068,8 @@ export class GameEngine {
     // 最大 27 アウトまでシミュレート（安全性のため）
     while (outs < 3) {
       // 投手交代チェック
-      const reliefPitcher = this.checkPitcherChange(currentPitcher, pitchingStats, inning, runs, roster, gameStarterId);
+      const pitchingTeamLead = phase === 'top' ? scoreDiff : -scoreDiff;
+      const reliefPitcher = this.checkPitcherChange(currentPitcher, pitchingStats, inning, runs, roster, gameStarterId, pitchingTeamLead);
       if (reliefPitcher) {
         currentPitcher = reliefPitcher;
         pitcherStat = pitchingStats.find(s => s.playerId === currentPitcher.id);
@@ -1487,32 +1551,29 @@ export class GameEngine {
 
           const speed = runner.abilities.speed || 0;
           
-          // 盗塁判断 (SimBaseBall.xml 試合aシート BQ列参考)
-          // 走力8未満は走らない
-          if (speed < 8) return;
+          // 盗塁判断
+          // 走力6未満は走らない (緩和)
+          if (speed < 6) return;
           
           // 試行確率計算
           // 基準: (Speed - 5) * 係数
-          // 捕手補正: (10 - Arm) / 7 * (10.2 - Aptitude) / 7 (Excelの式を参考)
+          // 捕手補正: (10 - Arm) / 7 * (10.2 - Aptitude) / 7
           
-          // 走力要素: Speed 10で50, 15で100程度
-          let speedFactor = (speed - 5) * 10;
+          // 走力要素: Speed 10で75, 15で150程度 (走力の影響を強化)
+          let speedFactor = (speed - 5) * 15;
           
           // 捕手肩補正: Arm 3->1.0, Arm 5->0.7
           let armFactor = Math.max(0, (10 - catcherArm) / 7);
           
           // 捕手適性補正: Apt 5->0.74, Apt 10->0.02 (適性が高いと激減)
-          // Excel式: (10.2 - Aptitude) / 7
-          let aptitudeFactor = Math.max(0, (10.2 - catcherAptitude) / 7);
+          let aptitudeFactor = Math.max(0, (10.2 - catcherAptitude) / 5);
           
           // 総合スコア
           let stealScore = speedFactor * armFactor * aptitudeFactor;
           
           // 閾値 (ランダム要素)
-          // Excelでは RAND()*100 と比較していたが、頻度調整のため確率化
           // スコア50の場合 -> 5%程度にしたい -> 0.001だと5%
-          // ユーザー要望「減りすぎ」のため、係数を上げる (0.001 -> 0.0035)
-          const attemptChance = stealScore * 0.0035; 
+          const attemptChance = stealScore * 0.008; 
 
           if (Math.random() > attemptChance) return;
 
@@ -1977,6 +2038,16 @@ export class GameEngine {
     }
 
     return Math.round(overall * 100) / 100;
+  }
+
+  /**
+   * ローテーション順序決定用の投手評価
+   * rosterManager.getStarterScore と同じロジック
+   */
+  private evaluatePitcherForRotation(p: Player): number {
+      // 先発適性 > スタミナ > 総合値
+      const aptitude = p.abilities.starterAptitude || p.starter_aptitude || 0;
+      return aptitude * 2 + (p.abilities.stamina || 0) + (p.abilities.overall || 0);
   }
 
   /**

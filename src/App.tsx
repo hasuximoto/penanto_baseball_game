@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Provider } from 'react-redux';
-import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { store } from './redux/store';
 import { DataManager } from './services/dataManager';
@@ -28,6 +27,7 @@ const styles = StyleSheet.create({
 
 /**
  * メインアプリケーション
+ * 日本語版アプリのエントリーポイント
  */
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
@@ -63,7 +63,7 @@ export default function App() {
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#4CAF50" />
         <Text style={styles.statusText}>
-          {initError ? `エラー: ${initError}` : '初期化中...'}
+          {initError ? `エラー: ${initError}` : '初期化中... (日本語版)'}
         </Text>
       </View>
     );

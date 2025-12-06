@@ -178,6 +178,7 @@ export interface Player {
   registrationStatus?: "active" | "farm"; // 一軍登録状況
   lastDemotionDate?: number;         // 最終抹消日 (再登録制限用)
   isForeign?: boolean;               // 外国人選手フラグ
+  pitcherRole?: 'starter' | 'reliever' | 'closer'; // 投手起用区分
 }
 
 // ========== チームデータ ==========
