@@ -128,6 +128,9 @@ export const PlayerListScreen = () => {
       } else if (sortField === 'age') {
         valA = a.age || 0;
         valB = b.age || 0;
+      } else if (sortField === 'experienceYears') {
+        valA = a.experienceYears || 0;
+        valB = b.experienceYears || 0;
       } else if (sortField === 'team') {
         valA = a.team;
         valB = b.team;

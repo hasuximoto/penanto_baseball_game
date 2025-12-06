@@ -12,11 +12,27 @@ export const PlayerDetailScreen = ({ route }: any) => {
 
   useEffect(() => {
     const loadYearlyStats = async () => {
-      const stats = await dbManager.getYearlyStats(player.id);
+      const [stats, gameState] = await Promise.all([
+        dbManager.getYearlyStats(player.id),
+        dbManager.loadGameState()
+      ]);
+
+      if (gameState && gameState.season && player.stats) {
+        const hasCurrentYear = stats.some(s => s.year === gameState.season);
+        if (!hasCurrentYear) {
+          stats.push({
+            playerId: player.id,
+            year: gameState.season,
+            teamId: player.team,
+            stats: player.stats
+          });
+          stats.sort((a, b) => a.year - b.year);
+        }
+      }
       setYearlyStats(stats);
     };
     loadYearlyStats();
-  }, [player.id]);
+  }, [player.id, player.stats, player.team]);
 
   const renderStats = () => {
     const stats = player.stats;

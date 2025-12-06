@@ -40,7 +40,9 @@ export class SeasonManager {
     const players = await dbManager.getInitialPlayers();
 
     // 現在の成績を年度別成績として保存 (前年度の成績)
-    await dbManager.saveYearlyStats(newSeasonYear - 1, players);
+    // ドラフトで入団したばかりの選手（experienceYearsがない、または0）は除外
+    const playersToSave = players.filter(p => p.experienceYears && p.experienceYears > 0);
+    await dbManager.saveYearlyStats(newSeasonYear - 1, playersToSave);
 
     const resetPlayers = await Promise.all(players.map(async p => {
         // プロ年数の更新
