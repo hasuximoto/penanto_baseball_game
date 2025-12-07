@@ -1233,10 +1233,11 @@ export class GameEngine {
       }
 
       // UZR記録
-      if (result.defenseStats) {
-          const fielderStat = defenseBattingStats.find(s => s.playerId === result.defenseStats.fielderId);
+      const defenseStats = result.defenseStats;
+      if (defenseStats) {
+          const fielderStat = defenseBattingStats.find(s => s.playerId === defenseStats.fielderId);
           if (fielderStat) {
-              fielderStat.uzrChange = (fielderStat.uzrChange || 0) + result.defenseStats.uzrChange;
+              fielderStat.uzrChange = (fielderStat.uzrChange || 0) + defenseStats.uzrChange;
           }
       }
 
@@ -1845,7 +1846,7 @@ export class GameEngine {
         isGroundBall,
         defenseStats: fielder ? {
             fielderId: fielder.id,
-            uzrChange
+            uzrChange: uzrChange || 0
         } : undefined
     };
   }

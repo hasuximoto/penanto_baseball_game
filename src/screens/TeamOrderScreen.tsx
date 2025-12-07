@@ -60,7 +60,7 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
             console.error("Failed to generate starting lineup", e);
             // さらにフォールバック: チーム設定のラインナップを使用
             const currentLineupIds = targetTeam.lineup || [];
-            currentLineupIds.forEach(id => {
+            currentLineupIds.forEach((id: any) => {
                 const p = activePlayers.find(ap => ap.id === id);
                 if (p) lineup.push(p);
             });

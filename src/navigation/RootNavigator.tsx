@@ -49,7 +49,7 @@ const MainStack = () => (
     />
     <Stack.Screen
       name="TeamOrder"
-      component={TeamOrderScreen}
+      component={TeamOrderScreen as any}
       options={{ title: 'Team Order', headerShown: false }}
     />
     <Stack.Screen

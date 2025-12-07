@@ -124,7 +124,7 @@ export const ReleasePlayersScreen = () => {
   }, [roster, sortKey, sortOrder]);
 
   const renderItem = ({ item }: { item: Player }) => {
-    const isSelected = selectedPlayers.includes(item.id);
+    const isSelected = selectedPlayers.includes(Number(item.id));
     const isPitcher = item.position === 'P';
     
     // 戦力外不可の条件チェック
@@ -139,7 +139,7 @@ export const ReleasePlayersScreen = () => {
             isSelected && styles.selectedItem,
             isProtected && styles.protectedItem
         ]} 
-        onPress={() => !isProtected && toggleSelection(item.id)}
+        onPress={() => !isProtected && toggleSelection(Number(item.id))}
         disabled={isProtected}
       >
         <View style={styles.playerInfo}>

@@ -11,7 +11,7 @@ export type Position =
 
 export type TeamId = 
   | "hawks" | "lions" | "fighters" | "buffaloes" | "eagles" | "marines"
-  | "giants" | "tigers" | "dragons" | "baystars" | "carp" | "swallows";
+  | "giants" | "tigers" | "dragons" | "baystars" | "carp" | "swallows" | "free_agent";
 
 export type GameStatus = "before" | "during" | "after" | "season_end";
 
@@ -445,7 +445,7 @@ export interface NewsItem {
   date: number;
   title: string;
   content: string;
-  type: "trade" | "injury" | "signing" | "record" | "event" | "roster_move" | "game" | "award" | "draft" | "contract";
+  type: "trade" | "injury" | "signing" | "record" | "event" | "roster_move" | "game" | "award" | "draft" | "contract" | "roster";
   affectedTeams: TeamId[];
 }
 

@@ -413,7 +413,7 @@ export class ContractManager {
     }
 
     // 既存のオファーがあれば更新、なければ追加
-    const existingOfferIndex = player.faState.offers.findIndex(o => o.teamId === teamId);
+    const existingOfferIndex = player.faState.offers.findIndex((o: { teamId: string; }) => o.teamId === teamId);
     const newOffer = { teamId, salary, years, date: turn };
 
     if (existingOfferIndex >= 0) {
@@ -455,7 +455,7 @@ export class ContractManager {
           });
           
           // 既にオファー中の選手数をカウントして加算 (ロースター枠 + オファー数 <= 70)
-          const offeringCount = faPlayers.filter(p => p.faState?.offers.some(o => o.teamId === team.id)).length;
+          const offeringCount = faPlayers.filter(p => p.faState?.offers.some((o: { teamId: any; }) => o.teamId === team.id)).length;
 
           teamRosterInfo.set(team.id, { count: roster.length + offeringCount, positions, maxAbility });
       }
@@ -502,7 +502,7 @@ export class ContractManager {
               }
 
               // 既にオファー済みならスキップ
-              const existingOfferIndex = player.faState.offers.findIndex(o => o.teamId === team.id);
+              const existingOfferIndex = player.faState.offers.findIndex((o: { teamId: any; }) => o.teamId === team.id);
               if (existingOfferIndex >= 0) continue;
 
               // 判定実行
@@ -524,7 +524,7 @@ export class ContractManager {
 
           // 即決ロジック: 非常に良い条件があれば即決断
           if (player.faState.offers.length > 0) {
-              const bestOffer = player.faState.offers.reduce((prev, current) => {
+              const bestOffer = player.faState.offers.reduce((prev: { teamId: TeamId; salary: number; years: number; date: number }, current: { teamId: TeamId; salary: number; years: number; date: number }) => {
                   const prevScore = prev.salary * (1 + prev.years * 0.1);
                   const currentScore = current.salary * (1 + current.years * 0.1);
                   return currentScore > prevScore ? current : prev;
@@ -546,7 +546,7 @@ export class ContractManager {
                   // 最も良い条件を選択
                   // 評価値 = 年俸 * (1 + 年数 * 0.1)
                   // ※ 本来は球団の強さや地元なども考慮するが簡易実装
-                  const bestOffer = player.faState.offers.reduce((prev, current) => {
+                  const bestOffer = player.faState.offers.reduce((prev: { teamId: TeamId; salary: number; years: number; date: number }, current: { teamId: TeamId; salary: number; years: number; date: number }) => {
                       const prevScore = prev.salary * (1 + prev.years * 0.1);
                       const currentScore = current.salary * (1 + current.years * 0.1);
                       return currentScore > prevScore ? current : prev;

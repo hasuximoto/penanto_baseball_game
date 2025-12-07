@@ -59,10 +59,10 @@ export class SpringCampManager {
     // 変動対象の能力パラメータ
     // 投手・野手共通または固有のパラメータをリストアップ
     // 弾道、選球眼、バント、盗塁、球威は変動しない
-    const abilityKeys: (keyof typeof player.abilities)[] = [
+    const abilityKeys = [
         'contact', 'power', 'speed', 'arm', 'fielding', 
         'control', 'stamina'
-    ];
+    ] as const;
 
     abilityKeys.forEach(key => {
         // 値が存在し、数値である場合のみ処理

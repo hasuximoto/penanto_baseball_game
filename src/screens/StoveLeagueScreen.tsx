@@ -31,7 +31,7 @@ export const StoveLeagueScreen = () => {
   };
 
   const handleDraft = () => {
-    navigation.navigate('Draft');
+    navigation.navigate('Draft' as never);
   };
 
   const handleFA = () => {
