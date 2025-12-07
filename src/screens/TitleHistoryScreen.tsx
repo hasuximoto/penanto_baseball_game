@@ -72,7 +72,7 @@ export const TitleHistoryScreen = () => {
       </View>
       <View style={styles.playerInfo}>
         <Text style={styles.teamName}>{getTeamName(title.teamId)}</Text>
-        <Text style={styles.playerName}>{getPlayerName(title.playerId)}</Text>
+        <Text style={styles.playerName}>{title.playerName || getPlayerName(title.playerId)}</Text>
         <Text style={styles.value}>{title.value}</Text>
       </View>
     </View>

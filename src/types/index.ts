@@ -536,6 +536,7 @@ export interface Title {
   year: number;
   name: string;
   playerId: number | string;
+  playerName?: string;
   teamId: TeamId;
   value?: string;
   league: 'central' | 'pacific';

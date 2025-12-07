@@ -27,6 +27,7 @@ export class AwardManager {
                 year: season,
                 name: `ベストナイン(${posName})`,
                 playerId: p.id,
+                playerName: p.name,
                 teamId: p.team as TeamId,
                 value: '',
                 league: league as 'central' | 'pacific',
@@ -43,6 +44,7 @@ export class AwardManager {
                 year: season,
                 name: `ゴールデングラブ賞(${posName})`,
                 playerId: p.id,
+                playerName: p.name,
                 teamId: p.team as TeamId,
                 value: '',
                 league: league as 'central' | 'pacific',
@@ -58,6 +60,7 @@ export class AwardManager {
                 year: season,
                 name: 'MVP',
                 playerId: mvp.id,
+                playerName: mvp.name,
                 teamId: mvp.team as TeamId,
                 value: '',
                 league: league as 'central' | 'pacific',
@@ -80,6 +83,7 @@ export class AwardManager {
                 year: season,
                 name: '新人王',
                 playerId: rookie.id,
+                playerName: rookie.name,
                 teamId: rookie.team as TeamId,
                 value: '',
                 league: league as 'central' | 'pacific',
@@ -162,27 +166,27 @@ export class AwardManager {
 
       // 首位打者
       const avg = qualifiedBatters.sort((a, b) => (b.stats.average || 0) - (a.stats.average || 0))[0];
-      if (avg) await dbManager.saveTitle({ year: season, name: '首位打者', playerId: avg.id, teamId: avg.team as TeamId, value: `.${(avg.stats.average || 0).toFixed(3).substring(2)}`, league: leagueType, category: 'batting' });
+      if (avg) await dbManager.saveTitle({ year: season, name: '首位打者', playerId: avg.id, playerName: avg.name, teamId: avg.team as TeamId, value: `.${(avg.stats.average || 0).toFixed(3).substring(2)}`, league: leagueType, category: 'batting' });
 
       // 本塁打王
       const hr = batters.sort((a, b) => (b.stats.homeRuns || 0) - (a.stats.homeRuns || 0))[0];
-      if (hr) await dbManager.saveTitle({ year: season, name: '本塁打王', playerId: hr.id, teamId: hr.team as TeamId, value: `${hr.stats.homeRuns}本`, league: leagueType, category: 'batting' });
+      if (hr) await dbManager.saveTitle({ year: season, name: '本塁打王', playerId: hr.id, playerName: hr.name, teamId: hr.team as TeamId, value: `${hr.stats.homeRuns}本`, league: leagueType, category: 'batting' });
 
       // 打点王
       const rbi = batters.sort((a, b) => (b.stats.rbi || 0) - (a.stats.rbi || 0))[0];
-      if (rbi) await dbManager.saveTitle({ year: season, name: '打点王', playerId: rbi.id, teamId: rbi.team as TeamId, value: `${rbi.stats.rbi}打点`, league: leagueType, category: 'batting' });
+      if (rbi) await dbManager.saveTitle({ year: season, name: '打点王', playerId: rbi.id, playerName: rbi.name, teamId: rbi.team as TeamId, value: `${rbi.stats.rbi}打点`, league: leagueType, category: 'batting' });
 
       // 盗塁王
       const sb = batters.sort((a, b) => (b.stats.stolenBases || 0) - (a.stats.stolenBases || 0))[0];
-      if (sb) await dbManager.saveTitle({ year: season, name: '盗塁王', playerId: sb.id, teamId: sb.team as TeamId, value: `${sb.stats.stolenBases}個`, league: leagueType, category: 'batting' });
+      if (sb) await dbManager.saveTitle({ year: season, name: '盗塁王', playerId: sb.id, playerName: sb.name, teamId: sb.team as TeamId, value: `${sb.stats.stolenBases}個`, league: leagueType, category: 'batting' });
 
       // 最多安打
       const hits = batters.sort((a, b) => (b.stats.hits || 0) - (a.stats.hits || 0))[0];
-      if (hits) await dbManager.saveTitle({ year: season, name: '最多安打', playerId: hits.id, teamId: hits.team as TeamId, value: `${hits.stats.hits}本`, league: leagueType, category: 'batting' });
+      if (hits) await dbManager.saveTitle({ year: season, name: '最多安打', playerId: hits.id, playerName: hits.name, teamId: hits.team as TeamId, value: `${hits.stats.hits}本`, league: leagueType, category: 'batting' });
 
       // 最高出塁率
       const obp = qualifiedBatters.sort((a, b) => (b.stats.obp || 0) - (a.stats.obp || 0))[0];
-      if (obp) await dbManager.saveTitle({ year: season, name: '最高出塁率', playerId: obp.id, teamId: obp.team as TeamId, value: `.${(obp.stats.obp || 0).toFixed(3).substring(2)}`, league: leagueType, category: 'batting' });
+      if (obp) await dbManager.saveTitle({ year: season, name: '最高出塁率', playerId: obp.id, playerName: obp.name, teamId: obp.team as TeamId, value: `.${(obp.stats.obp || 0).toFixed(3).substring(2)}`, league: leagueType, category: 'batting' });
 
       let content = '';
       if (avg) content += `首位打者: ${avg.name} (${getTeamName(avg)}) .${(avg.stats.average || 0).toFixed(3).substring(2)}\n`;
@@ -207,19 +211,19 @@ export class AwardManager {
 
       // 最多勝
       const wins = pitchers.sort((a, b) => (b.stats.wins || 0) - (a.stats.wins || 0))[0];
-      if (wins) await dbManager.saveTitle({ year: season, name: '最多勝', playerId: wins.id, teamId: wins.team as TeamId, value: `${wins.stats.wins}勝`, league: leagueType, category: 'pitching' });
+      if (wins) await dbManager.saveTitle({ year: season, name: '最多勝', playerId: wins.id, playerName: wins.name, teamId: wins.team as TeamId, value: `${wins.stats.wins}勝`, league: leagueType, category: 'pitching' });
 
       // 最優秀防御率
       const era = qualifiedPitchers.sort((a, b) => (a.stats.era || 99) - (b.stats.era || 99))[0];
-      if (era) await dbManager.saveTitle({ year: season, name: '最優秀防御率', playerId: era.id, teamId: era.team as TeamId, value: `${(era.stats.era || 0).toFixed(2)}`, league: leagueType, category: 'pitching' });
+      if (era) await dbManager.saveTitle({ year: season, name: '最優秀防御率', playerId: era.id, playerName: era.name, teamId: era.team as TeamId, value: `${(era.stats.era || 0).toFixed(2)}`, league: leagueType, category: 'pitching' });
 
       // 最多奪三振
       const so = pitchers.sort((a, b) => (b.stats.strikeOuts || 0) - (a.stats.strikeOuts || 0))[0];
-      if (so) await dbManager.saveTitle({ year: season, name: '最多奪三振', playerId: so.id, teamId: so.team as TeamId, value: `${so.stats.strikeOuts}個`, league: leagueType, category: 'pitching' });
+      if (so) await dbManager.saveTitle({ year: season, name: '最多奪三振', playerId: so.id, playerName: so.name, teamId: so.team as TeamId, value: `${so.stats.strikeOuts}個`, league: leagueType, category: 'pitching' });
 
       // 最多セーブ
       const saves = pitchers.sort((a, b) => (b.stats.saves || 0) - (a.stats.saves || 0))[0];
-      if (saves) await dbManager.saveTitle({ year: season, name: '最多セーブ', playerId: saves.id, teamId: saves.team as TeamId, value: `${saves.stats.saves}S`, league: leagueType, category: 'pitching' });
+      if (saves) await dbManager.saveTitle({ year: season, name: '最多セーブ', playerId: saves.id, playerName: saves.name, teamId: saves.team as TeamId, value: `${saves.stats.saves}S`, league: leagueType, category: 'pitching' });
 
       // 最高勝率 (13勝以上)
       const wpPitchers = pitchers.filter(p => (p.stats.wins || 0) >= 13);
@@ -230,7 +234,7 @@ export class AwardManager {
       })[0];
       if (wp) {
           const rate = (wp.stats.wins || 0) / ((wp.stats.wins || 0) + (wp.stats.losses || 0));
-          await dbManager.saveTitle({ year: season, name: '最高勝率', playerId: wp.id, teamId: wp.team as TeamId, value: `.${rate.toFixed(3).substring(2)}`, league: leagueType, category: 'pitching' });
+          await dbManager.saveTitle({ year: season, name: '最高勝率', playerId: wp.id, playerName: wp.name, teamId: wp.team as TeamId, value: `.${rate.toFixed(3).substring(2)}`, league: leagueType, category: 'pitching' });
       }
 
       content = '';
