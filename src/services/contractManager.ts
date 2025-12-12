@@ -17,11 +17,9 @@ export class ContractManager {
     
     // 年度別成績を保存 (FAなどでチームが変わる前に保存)
     const allPlayers = await dbManager.getInitialPlayers();
-    // ドラフトで入団したばかりの選手（experienceYearsがない、または0）は除外しない（新人王資格などで必要になる可能性があるため）
-    // ただし、SeasonManagerでのロジックに合わせてフィルタリングする場合は以下
-    // const playersToSave = allPlayers.filter(p => p.experienceYears && p.experienceYears > 0);
-    // ここでは全選手保存する
-    await dbManager.saveYearlyStats(season, allPlayers);
+
+    const playersToSave = allPlayers.filter(p => p.experienceYears && p.experienceYears > 0);
+    await dbManager.saveYearlyStats(season, playersToSave);
     logs.push(`[システム] ${season}年度の成績を保存しました`);
 
     const teams = await dbManager.getInitialTeams();

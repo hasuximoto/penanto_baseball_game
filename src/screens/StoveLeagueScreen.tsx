@@ -34,11 +34,6 @@ export const StoveLeagueScreen = () => {
     navigation.navigate('Draft' as never);
   };
 
-  const handleFA = () => {
-    // TODO
-    showAlert('FA交渉', 'FA交渉機能はまだ実装されていません');
-  };
-
   const handleContract = async () => {
     showAlert(
       "契約更改",
