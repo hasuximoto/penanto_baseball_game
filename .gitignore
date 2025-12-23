@@ -44,3 +44,6 @@ unit_xml/
 
 # Data Tools
 data_tools/
+
+# github
+.github/
