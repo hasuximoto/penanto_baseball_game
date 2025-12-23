@@ -253,21 +253,6 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     navigation.navigate('Settings');
   };
 
-  const handleResetDatabase = async () => {
-    try {
-      setLoading(true);
-      await dbManager.reset();
-      await dbManager.initialize();
-      dispatch(resetGame());
-      showAlert("完了", 'Database reset complete!');
-    } catch (error) {
-      console.error('Failed to reset DB:', error);
-      showAlert("エラー", 'Failed to reset DB');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -383,15 +368,6 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
           disabled={loading}
         >
           <Text style={styles.buttonText}>設定</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#FF5252' }, loading && styles.disabledButton]}
-          onPress={handleResetDatabase}
-          activeOpacity={0.7}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>DB初期化 (Debug)</Text>
         </TouchableOpacity>
       </View>
 

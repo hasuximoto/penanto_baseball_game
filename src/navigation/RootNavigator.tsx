@@ -24,6 +24,8 @@ import { TitleHistoryScreen } from '../screens/TitleHistoryScreen';
 import { TeamOrderScreen } from '../screens/TeamOrderScreen';
 import { ReleasePlayersScreen } from '../screens/ReleasePlayersScreen';
 import { OffSeasonMarketScreen } from '../screens/OffSeasonMarketScreen';
+import { TitleScreen } from '../screens/TitleScreen';
+import { TeamSelectionScreen } from '../screens/TeamSelectionScreen';
 // import { PlayerDataScreen } from '../screens/PlayerDataScreen';
 
 const Stack = createStackNavigator();
@@ -190,11 +192,9 @@ const PlaceholderScreen = () => {
   return null;
 };
 
-/**
- * ルートナビゲーション
- */
-export const RootNavigator = () => (
-  <NavigationContainer>
+
+
+const MainTabNavigator = () => (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -255,5 +255,17 @@ export const RootNavigator = () => (
         }}
       />
     </Tab.Navigator>
+);
+
+/**
+ * ルートナビゲーション
+ */
+export const RootNavigator = () => (
+  <NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Title" component={TitleScreen} />
+      <Stack.Screen name="TeamSelection" component={TeamSelectionScreen} />
+      <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+    </Stack.Navigator>
   </NavigationContainer>
 );
