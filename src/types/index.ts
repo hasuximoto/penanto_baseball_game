@@ -211,12 +211,29 @@ export interface TeamRecord {
   runsAllowed: number;
 }
 
+export interface LineupSlot {
+  slotNumber: number; // 1-9 (DH制の場合はDHも含む)
+  playerId: string | number;
+  position: Position;
+  isLocked: boolean;
+}
+
+export interface PitcherSetting {
+  playerId: string | number;
+  role: 'starter' | 'reliever' | 'closer';
+  isLocked: boolean;
+  slotNumber?: number; // For rotation order (1-6)
+}
+
 export interface Team {
   id: TeamId;
   name: string;
   league: 'central' | 'pacific';
   players: Player[];
   lineup: number[];                 // 選手ID の配列
+  lineupSettings?: LineupSlot[];    // スタメン固定設定
+  pitcherSettings?: PitcherSetting[]; // 投手起用設定 (旧 rotationSettings)
+  rotationSettings?: any[];         // Deprecated: for migration
   pitchers: number[];               // 投手の選手ID
   record: TeamRecord;
   budget: number;

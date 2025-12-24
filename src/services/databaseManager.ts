@@ -616,6 +616,11 @@ export class DatabaseManager {
   async getStartingLineup(teamId: string, providedRoster?: any[], gameDate: number = 1): Promise<{ batters: any[], pitcher: any }> {
     const roster = providedRoster || await this.getTeamRoster(teamId);
     
+    // チーム情報を取得して固定設定を確認
+    const teams = await this.getInitialTeams();
+    const team = teams.find(t => t.id === teamId);
+    const lineupSettings = team?.lineupSettings || [];
+    
     // 1. 投手選出 (ローテーション + 疲労考慮)
     let pitcher = null;
     const pitchers = roster.filter(p => p.position === 'P' || p.position === '投');
@@ -658,10 +663,10 @@ export class DatabaseManager {
     // 2. 野手スタメン選出
     // まず、各ポジションのベストプレイヤーを選出する
     const fielders = roster.filter(p => p.position !== 'P' && p.position !== '投' && p.id !== pitcher?.id);
-    const starters = this.selectBestStarters(fielders);
+    const starters = this.selectBestStarters(fielders, lineupSettings);
     
     // 3. 打順決定 (Excelロジック: 逐次グリーディ法)
-    const orderedBatters = this.optimizeBattingOrder(starters);
+    const orderedBatters = this.optimizeBattingOrder(starters, lineupSettings);
 
     return { batters: orderedBatters, pitcher };
   }
@@ -669,10 +674,19 @@ export class DatabaseManager {
   /**
    * 各ポジションのベストプレイヤーを選出する
    */
-  private selectBestStarters(fielders: any[]): any[] {
+  private selectBestStarters(fielders: any[], lineupSettings: any[] = []): any[] {
       const positions = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH'];
       const selectedPlayers: any[] = [];
       const usedPlayerIds = new Set<string | number>();
+
+      // 固定選手マップ作成
+      const lockedPositionMap: Record<string, any> = {};
+      lineupSettings.filter(s => s.isLocked).forEach(s => {
+          const p = fielders.find(f => f.id === s.playerId);
+          if (p) {
+              lockedPositionMap[s.position] = p;
+          }
+      });
 
       // DHありと仮定 (パ・リーグ仕様)
       // まず守備位置を埋める
@@ -685,6 +699,16 @@ export class DatabaseManager {
       };
 
       for (const pos of defensivePositions) {
+          // 固定選手チェック
+          if (lockedPositionMap[pos]) {
+              const p = lockedPositionMap[pos];
+              if (!usedPlayerIds.has(p.id)) {
+                  selectedPlayers.push({ ...p, position: pos });
+                  usedPlayerIds.add(p.id);
+                  continue;
+              }
+          }
+
           const aptitudeKey = posMap[pos];
           
           // 候補者: まだ選ばれていない選手
@@ -725,6 +749,16 @@ export class DatabaseManager {
       }
 
       // DH選出 (残りの選手で最も打撃力が高い選手)
+      // 固定DHチェック
+      if (lockedPositionMap['DH']) {
+          const p = lockedPositionMap['DH'];
+          if (!usedPlayerIds.has(p.id)) {
+              selectedPlayers.push({ ...p, position: 'DH' });
+              usedPlayerIds.add(p.id);
+              return selectedPlayers;
+          }
+      }
+
       const dhCandidates = fielders.filter(p => !usedPlayerIds.has(p.id));
       if (dhCandidates.length > 0) {
           dhCandidates.sort((a, b) => {
@@ -743,12 +777,33 @@ export class DatabaseManager {
   /**
    * 打順を最適化する (Excelロジック再現)
    */
-  private optimizeBattingOrder(starters: any[]): any[] {
-      const ordered: any[] = [];
+  private optimizeBattingOrder(starters: any[], lineupSettings: any[] = []): any[] {
+      const ordered: any[] = new Array(9).fill(null);
       const remaining = [...starters];
+      const usedPlayerIds = new Set<string | number>();
+
+      // 固定打順を埋める
+      lineupSettings.filter(s => s.isLocked).forEach(s => {
+          const slotIndex = s.slotNumber - 1;
+          if (slotIndex >= 0 && slotIndex < 9) {
+              const p = remaining.find(r => r.id === s.playerId);
+              if (p) {
+                  ordered[slotIndex] = p;
+                  usedPlayerIds.add(p.id);
+              }
+          }
+      });
       
       // 1番から9番まで順番に決定
       for (let slot = 1; slot <= 9; slot++) {
+          if (ordered[slot - 1]) {
+              // 既に埋まっている場合はremainingから削除して次へ
+              const p = ordered[slot - 1];
+              const idx = remaining.findIndex(r => r.id === p.id);
+              if (idx !== -1) remaining.splice(idx, 1);
+              continue;
+          }
+
           if (remaining.length === 0) break;
 
           let bestPlayerIndex = -1;
@@ -765,12 +820,12 @@ export class DatabaseManager {
           }
 
           if (bestPlayerIndex !== -1) {
-              ordered.push(remaining[bestPlayerIndex]);
+              ordered[slot - 1] = remaining[bestPlayerIndex];
               remaining.splice(bestPlayerIndex, 1);
           }
       }
       
-      return ordered;
+      return ordered.filter(p => p !== null);
   }
 
   /**

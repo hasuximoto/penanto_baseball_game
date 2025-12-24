@@ -1,4 +1,4 @@
-import { Player, TeamId, NewsItem, GameState } from '../types';
+import { Player, TeamId, NewsItem, GameState, Team } from '../types';
 import { dbManager } from './databaseManager';
 import { getGameDateString } from '../utils/dateUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,7 +25,7 @@ export class RosterManager {
       
       for (const team of teams) {
           const teamPlayers = players.filter(p => p.team === team.id);
-          this.updatePitcherRoles(teamPlayers);
+          this.updatePitcherRoles(teamPlayers, team);
       }
       
       await dbManager.savePlayers(players);
@@ -49,7 +49,7 @@ export class RosterManager {
 
     for (const team of teams) {
       const teamPlayers = players.filter(p => p.team === team.id);
-      const { promoted, demoted } = this.processTeamMoves(team.id, teamPlayers, gameState.currentDate);
+      const { promoted, demoted } = this.processTeamMoves(team, teamPlayers, gameState.currentDate);
       
       if (promoted.length > 0 || demoted.length > 0) {
           let content = '';
@@ -98,12 +98,50 @@ export class RosterManager {
 
   /**
    * 投手起用区分を更新 (先発6人、抑え1人、残り中継ぎ)
+   * 固定設定を考慮する
    */
-  private updatePitcherRoles(teamPlayers: Player[]) {
+  private updatePitcherRoles(teamPlayers: Player[], team: Team) {
       const activePitchers = teamPlayers.filter(p => p.position === 'P' && p.registrationStatus === 'active');
       
       // 一旦リセット
       activePitchers.forEach(p => p.pitcherRole = undefined);
+
+      // 固定設定の取得
+      let pitcherSettings = team.pitcherSettings || [];
+      if (pitcherSettings.length === 0 && team.rotationSettings && team.rotationSettings.length > 0) {
+           pitcherSettings = team.rotationSettings.map((s: any) => ({
+               playerId: s.playerId,
+               role: 'starter',
+               isLocked: s.isLocked,
+               slotNumber: s.slotNumber
+           }));
+      }
+
+      // 固定されている選手を特定
+      const lockedStarters: Player[] = [];
+      const lockedClosers: Player[] = [];
+      const lockedRelievers: Player[] = [];
+
+      pitcherSettings.forEach(s => {
+          if (s.isLocked) {
+              const p = activePitchers.find(ap => ap.id === s.playerId);
+              if (p) {
+                  if (s.role === 'starter') {
+                      p.pitcherRole = 'starter';
+                      lockedStarters.push(p);
+                  } else if (s.role === 'closer') {
+                      p.pitcherRole = 'closer';
+                      lockedClosers.push(p);
+                  } else {
+                      p.pitcherRole = 'reliever';
+                      lockedRelievers.push(p);
+                  }
+              }
+          }
+      });
+
+      // 未割り当ての投手
+      let availablePitchers = activePitchers.filter(p => !p.pitcherRole);
 
       // 評価関数
       const getStarterScore = (p: Player) => {
@@ -120,27 +158,34 @@ export class RosterManager {
           return aptitude * 2 + (p.abilities.stuff || 0) + (p.abilities.overall || 0);
       };
 
-      // 1. 先発 (6人)
-      activePitchers.sort((a, b) => getStarterScore(b) - getStarterScore(a));
-      const starters = activePitchers.slice(0, 6);
-      starters.forEach(p => p.pitcherRole = 'starter');
-      
-      // 残りの投手
-      const remaining = activePitchers.slice(6);
-      
-      if (remaining.length > 0) {
-          // 2. 抑え (1人)
-          remaining.sort((a, b) => getCloserScore(b) - getCloserScore(a));
-          const closer = remaining[0];
-          closer.pitcherRole = 'closer';
+      // 1. 先発 (合計6人になるまで補充)
+      const startersNeeded = 6 - lockedStarters.length;
+      if (startersNeeded > 0) {
+          availablePitchers.sort((a, b) => getStarterScore(b) - getStarterScore(a));
+          const newStarters = availablePitchers.slice(0, startersNeeded);
+          newStarters.forEach(p => p.pitcherRole = 'starter');
           
-          // 3. 中継ぎ (残り)
-          const relievers = remaining.slice(1);
-          relievers.forEach(p => p.pitcherRole = 'reliever');
+          // リスト更新
+          availablePitchers = availablePitchers.filter(p => !newStarters.includes(p));
       }
+      
+      // 2. 抑え (合計1人になるまで補充)
+      // 既にロックされた抑えがいる場合は補充しない（複数抑えロックはUI上許容されるかもしれないが、ロジック上は1枠あれば十分）
+      // ただし、ロックされた抑えがいない場合のみ補充する
+      if (lockedClosers.length === 0 && availablePitchers.length > 0) {
+          availablePitchers.sort((a, b) => getCloserScore(b) - getCloserScore(a));
+          const newCloser = availablePitchers[0];
+          newCloser.pitcherRole = 'closer';
+          
+          // リスト更新
+          availablePitchers = availablePitchers.filter(p => p !== newCloser);
+      }
+
+      // 3. 中継ぎ (残り全員)
+      availablePitchers.forEach(p => p.pitcherRole = 'reliever');
   }
 
-  private processTeamMoves(teamId: TeamId, players: Player[], currentDate: number): { promoted: Player[], demoted: Player[] } {
+  private processTeamMoves(team: Team, players: Player[], currentDate: number): { promoted: Player[], demoted: Player[] } {
     const promoted: Player[] = [];
     const demoted: Player[] = [];
     
@@ -153,16 +198,16 @@ export class RosterManager {
     });
 
     // 定数定義
-    const MAX_ACTIVE = 31;
+    const MAX_ACTIVE = 29;
     const MAX_FOREIGN_ACTIVE = 5;
     // 入れ替えの閾値。低いほど活発に入れ替わる。
     // 能力が高い選手が二軍に塩漬けになるのを防ぐため緩和
     const THRESHOLD = 10;
     const TARGET_COUNTS = {
-        pitcher: 13, // 10-12人目安だが枠31なので少し余裕を持たせる
+        pitcher: 13, // 10-12人目安だが枠29なので少し余裕を持たせる
         catcher: 3,
-        infielder: 8,
-        outfielder: 7
+        infielder: 7,
+        outfielder: 6
     };
 
     const getPositionCategory = (pos: string): 'pitcher' | 'catcher' | 'infielder' | 'outfielder' => {
@@ -202,6 +247,16 @@ export class RosterManager {
             demotionCandidates = activePlayers;
         }
 
+        // 固定選手を除外
+        demotionCandidates = demotionCandidates.filter(p => !this.isLocked(p, team));
+
+        // もし全員固定選手なら、固定選手も含めて検討せざるを得ないが、
+        // 基本的には固定選手以外から選ぶ。
+        // 全員固定の場合は、スコアが一番低い人を落とす（固定設定を無視する形になるが、枠超過は解消必須）
+        if (demotionCandidates.length === 0) {
+             demotionCandidates = activePlayers;
+        }
+
         // 評価スコアでソート (昇順 = 低い順)
         demotionCandidates.sort((a, b) => this.evaluatePlayer(a) - this.evaluatePlayer(b));
         
@@ -234,15 +289,22 @@ export class RosterManager {
         const currentForeigners = activePlayers.filter(p => p.isForeign).length;
         if (candidate.isForeign && currentForeigners >= MAX_FOREIGN_ACTIVE) {
             // 外国人枠が一杯の場合、一軍の外国人選手との入れ替えのみ検討
-            const activeForeigners = activePlayers.filter(p => p.isForeign).sort((a, b) => this.evaluatePlayer(a) - this.evaluatePlayer(b));
-            const worstForeigner = activeForeigners[0];
+            let activeForeigners = activePlayers.filter(p => p.isForeign);
             
-            if (worstForeigner && this.evaluatePlayer(candidate) > this.evaluatePlayer(worstForeigner) + THRESHOLD) {
-                 this.demotePlayer(worstForeigner, currentDate);
-                 this.promotePlayer(candidate);
-                 demoted.push(worstForeigner);
-                 promoted.push(candidate);
-                 activePlayers = players.filter(p => p.registrationStatus === 'active');
+            // 固定選手を除外
+            activeForeigners = activeForeigners.filter(p => !this.isLocked(p, team));
+
+            if (activeForeigners.length > 0) {
+                activeForeigners.sort((a, b) => this.evaluatePlayer(a) - this.evaluatePlayer(b));
+                const worstForeigner = activeForeigners[0];
+                
+                if (worstForeigner && this.evaluatePlayer(candidate) > this.evaluatePlayer(worstForeigner) + THRESHOLD) {
+                     this.demotePlayer(worstForeigner, currentDate);
+                     this.promotePlayer(candidate);
+                     demoted.push(worstForeigner);
+                     promoted.push(candidate);
+                     activePlayers = players.filter(p => p.registrationStatus === 'active');
+                }
             }
             continue;
         }
@@ -282,23 +344,52 @@ export class RosterManager {
             }
         }
 
-        // ターゲット候補を評価順にソート
-        targetCandidates.sort((a, b) => this.evaluatePlayer(a) - this.evaluatePlayer(b));
-        const worstActive = targetCandidates[0];
-        
-        // 候補のスコアが、ターゲット最低スコア + 閾値 を上回る場合に入れ替え
-        if (worstActive && this.evaluatePlayer(candidate) > this.evaluatePlayer(worstActive) + THRESHOLD) {
-            this.demotePlayer(worstActive, currentDate);
-            this.promotePlayer(candidate);
-            demoted.push(worstActive);
-            promoted.push(candidate);
+        // 固定選手を除外
+        targetCandidates = targetCandidates.filter(p => !this.isLocked(p, team));
+
+        if (targetCandidates.length > 0) {
+            // ターゲット候補を評価順にソート
+            targetCandidates.sort((a, b) => this.evaluatePlayer(a) - this.evaluatePlayer(b));
+            const worstActive = targetCandidates[0];
             
-            // リスト更新
-            activePlayers = players.filter(p => p.registrationStatus === 'active');
+            // 候補のスコアが、ターゲット最低スコア + 閾値 を上回る場合に入れ替え
+            if (worstActive && this.evaluatePlayer(candidate) > this.evaluatePlayer(worstActive) + THRESHOLD) {
+                this.demotePlayer(worstActive, currentDate);
+                this.promotePlayer(candidate);
+                demoted.push(worstActive);
+                promoted.push(candidate);
+                
+                // リスト更新
+                activePlayers = players.filter(p => p.registrationStatus === 'active');
+            }
         }
     }
 
     return { promoted, demoted };
+  }
+
+  private isLocked(player: Player, team: Team): boolean {
+      // Check Lineup
+      if (team.lineupSettings?.some(s => s.playerId === player.id && s.isLocked)) {
+          return true;
+      }
+      
+      // Check Pitcher Settings
+      let pitcherSettings = team.pitcherSettings || [];
+      if (pitcherSettings.length === 0 && team.rotationSettings && team.rotationSettings.length > 0) {
+           pitcherSettings = team.rotationSettings.map((s: any) => ({
+               playerId: s.playerId,
+               role: 'starter',
+               isLocked: s.isLocked,
+               slotNumber: s.slotNumber
+           }));
+      }
+      
+      if (pitcherSettings.some(s => s.playerId === player.id && s.isLocked)) {
+          return true;
+      }
+      
+      return false;
   }
 
   /**

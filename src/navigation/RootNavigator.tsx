@@ -26,6 +26,8 @@ import { ReleasePlayersScreen } from '../screens/ReleasePlayersScreen';
 import { OffSeasonMarketScreen } from '../screens/OffSeasonMarketScreen';
 import { TitleScreen } from '../screens/TitleScreen';
 import { TeamSelectionScreen } from '../screens/TeamSelectionScreen';
+import { TeamMenuScreen } from '../screens/TeamMenuScreen';
+import { RosterMoveScreen } from '../screens/RosterMoveScreen';
 // import { PlayerDataScreen } from '../screens/PlayerDataScreen';
 
 const Stack = createStackNavigator();
@@ -186,6 +188,42 @@ const TeamStatsStack = () => (
 );
 
 /**
+ * チーム管理スタック
+ */
+const TeamStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: true,
+      headerStyle: { backgroundColor: '#4CAF50' },
+      headerTintColor: '#fff',
+      headerTitleStyle: { fontWeight: 'bold' },
+      headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
+    }}
+  >
+    <Stack.Screen
+      name="TeamMenu"
+      component={TeamMenuScreen}
+      options={{ title: '球団管理' }}
+    />
+    <Stack.Screen
+      name="RosterMove"
+      component={RosterMoveScreen as any}
+      options={{ title: '一軍登録・抹消' }}
+    />
+    <Stack.Screen
+      name="TeamOrder"
+      component={TeamOrderScreen as any}
+      options={{ title: 'オーダー設定', headerShown: false }}
+    />
+    <Stack.Screen
+      name="TeamStats"
+      component={TeamStatsScreen}
+      options={{ title: 'チーム成績' }}
+    />
+  </Stack.Navigator>
+);
+
+/**
  * プレースホルダースクリーン（実装待ち）
  */
 const PlaceholderScreen = () => {
@@ -205,6 +243,8 @@ const MainTabNavigator = () => (
 
           if (route.name === 'HomeTab') {
             iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'TeamTab') {
+            iconName = focused ? 'shirt' : 'shirt-outline';
           } else if (route.name === 'PlayersTab') {
             iconName = focused ? 'people' : 'people-outline';
           } else if (route.name === 'ScheduleTab') {
@@ -224,6 +264,13 @@ const MainTabNavigator = () => (
         component={MainStack}
         options={{
           tabBarLabel: 'ホーム',
+        }}
+      />
+      <Tab.Screen
+        name="TeamTab"
+        component={TeamStack}
+        options={{
+          tabBarLabel: '球団',
         }}
       />
       <Tab.Screen
