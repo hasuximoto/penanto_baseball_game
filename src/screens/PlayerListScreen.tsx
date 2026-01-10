@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Animated, SafeAreaView } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { dbManager } from '../services/databaseManager';
 import { Player, TeamId } from '../types';
 import { TEAM_ABBREVIATIONS } from '../utils/constants';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 type ViewMode = 'batter' | 'pitcher';
 type SortOrder = 'asc' | 'desc';
@@ -159,7 +161,7 @@ export const PlayerListScreen = () => {
     const isSticky = field === 'name';
     const cellContent = (
       <TouchableOpacity 
-        style={[styles.headerCell, { width }, isSticky ? { borderRightWidth: 1, borderRightColor: '#ccc' } : null]} 
+        style={[styles.headerCell, { width }, isSticky ? { borderRightWidth: 1, borderRightColor: COLORS.border } : null]} 
         onPress={() => handleSort(field)}
       >
         <Text style={[
@@ -177,7 +179,7 @@ export const PlayerListScreen = () => {
           style={{
             width,
             zIndex: 100,
-            backgroundColor: '#e0e0e0',
+            backgroundColor: COLORS.card,
             transform: [{ translateX: scrollX }]
           }}
         >
@@ -259,9 +261,9 @@ export const PlayerListScreen = () => {
       <Animated.View style={{
         width: 120,
         zIndex: 100,
-        backgroundColor: 'white',
+        backgroundColor: COLORS.card,
         borderRightWidth: 1,
-        borderRightColor: '#eee',
+        borderRightColor: COLORS.border,
         transform: [{ translateX: scrollX }]
       }}>
         <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
@@ -315,9 +317,9 @@ export const PlayerListScreen = () => {
         <Animated.View style={{
           width: 120,
           zIndex: 100,
-          backgroundColor: 'white',
+          backgroundColor: COLORS.card,
           borderRightWidth: 1,
-          borderRightColor: '#eee',
+          borderRightColor: COLORS.border,
           transform: [{ translateX: scrollX }]
         }}>
           <Text style={[styles.cell, { width: 120 }]} numberOfLines={1}>{item.name}</Text>
@@ -352,7 +354,7 @@ export const PlayerListScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -480,37 +482,42 @@ export const PlayerListScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
   abilityLinkButton: {
-    backgroundColor: '#FF9800',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: COLORS.card,
+    padding: SPACING.sm,
+    borderRadius: 8,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
   abilityLinkText: {
-    color: 'white',
+    color: COLORS.primary,
     fontWeight: 'bold',
     fontSize: 14,
   },
   filterContainer: {
-    backgroundColor: 'white',
-    padding: 10,
+    backgroundColor: COLORS.card,
+    padding: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: COLORS.border,
   },
   modeSwitch: {
     flexDirection: 'row',
-    marginBottom: 10,
-    backgroundColor: '#eee',
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.background,
     borderRadius: 8,
     padding: 2,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   modeButton: {
     flex: 1,
@@ -523,45 +530,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     paddingHorizontal: 4,
+    marginRight: 16,
   },
   checkbox: {
     width: 20,
     height: 20,
     borderWidth: 1,
-    borderColor: '#999',
+    borderColor: COLORS.textSecondary,
     borderRadius: 4,
     marginRight: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: COLORS.card,
   },
   checkboxChecked: {
-    backgroundColor: '#2196F3',
-    borderColor: '#2196F3',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   checkmark: {
-    color: 'white',
+    color: COLORS.background,
     fontSize: 14,
     fontWeight: 'bold',
   },
   checkboxLabel: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.textPrimary,
   },
   activeModeButton: {
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-    elevation: 2,
+    backgroundColor: COLORS.primary,
   },
   modeText: {
     fontWeight: 'bold',
-    color: '#666',
+    color: COLORS.textSecondary,
   },
   activeModeText: {
-    color: '#2196F3',
+    color: COLORS.background,
+    fontWeight: 'bold',
   },
   teamFilter: {
     flexDirection: 'row',
@@ -569,28 +573,30 @@ const styles = StyleSheet.create({
   teamButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 15,
-    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    backgroundColor: COLORS.background,
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   activeTeamButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   teamText: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textSecondary,
   },
   activeTeamText: {
-    color: 'white',
+    color: COLORS.background,
     fontWeight: 'bold',
   },
   headerRow: {
     flexDirection: 'row',
-    backgroundColor: '#e0e0e0',
+    backgroundColor: COLORS.card,
     paddingVertical: 10,
-    // paddingHorizontal: 5, // 左端固定のために削除
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: COLORS.border,
   },
   headerCell: {
     justifyContent: 'center',
@@ -599,22 +605,21 @@ const styles = StyleSheet.create({
   headerText: {
     fontWeight: 'bold',
     fontSize: 12,
-    color: '#333',
+    color: COLORS.textMuted,
   },
   activeSortText: {
-    color: '#2196F3',
+    color: COLORS.primary,
   },
   row: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: COLORS.card,
     paddingVertical: 12,
-    // paddingHorizontal: 5, // 左端固定のために削除
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
   },
   cell: {
     fontSize: 13,
     textAlign: 'center',
-    color: '#333',
+    color: COLORS.textPrimary,
   },
 });

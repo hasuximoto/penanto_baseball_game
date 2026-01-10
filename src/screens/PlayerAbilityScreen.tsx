@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { dbManager } from '../services/databaseManager';
 import { Player, TeamId } from '../types';
+import { COLORS, SPACING, FONTS } from '../utils/theme';
 
 type ViewMode = 'batter' | 'pitcher';
 type SortOrder = 'asc' | 'desc';
@@ -275,7 +276,7 @@ export const PlayerAbilityScreen = () => {
             style={[styles.teamFilterButton, selectedTeam === 'all' && styles.activeTeamFilter]} 
             onPress={() => setSelectedTeam('all')}
           >
-            <Text style={styles.teamFilterText}>全チーム</Text>
+            <Text style={[styles.teamFilterText, selectedTeam === 'all' && styles.activeTeamFilterText]}>全チーム</Text>
           </TouchableOpacity>
           {teams.map(team => (
             <TouchableOpacity 
@@ -283,14 +284,14 @@ export const PlayerAbilityScreen = () => {
               style={[styles.teamFilterButton, selectedTeam === team.id && styles.activeTeamFilter]} 
               onPress={() => setSelectedTeam(team.id)}
             >
-              <Text style={styles.teamFilterText}>{team.name}</Text>
+              <Text style={[styles.teamFilterText, selectedTeam === team.id && styles.activeTeamFilterText]}>{team.name}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+        <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
       ) : (
         <View style={styles.listContainer}>
           {renderHeader()}

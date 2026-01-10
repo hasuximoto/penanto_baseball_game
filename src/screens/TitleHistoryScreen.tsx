@@ -4,6 +4,7 @@ import { dbManager } from '../services/databaseManager';
 import { Title, Team, Player } from '../types';
 import { useNavigation } from '@react-navigation/native';
 import { TEAM_ABBREVIATIONS } from '../utils/constants';
+import { COLORS } from '../utils/theme';
 
 export const TitleHistoryScreen = () => {
   const navigation = useNavigation();
@@ -87,7 +88,7 @@ export const TitleHistoryScreen = () => {
     } else if (activeTab === 'pitching') {
       order = ['最多勝', '最優秀防御率', '最多奪三振', '最多セーブ', '最高勝率'];
     } else {
-      order = ['MVP', '新人王', 'ベストナイン(投手)', 'ベストナイン(捕手)', 'ベストナイン(一塁手)', 'ベストナイン(二塁手)', 'ベストナイン(三塁手)', 'ベストナイン(遊撃手)', 'ベストナイン(外野手)', 'ベストナイン(指名打者)', 'ゴールデングラブ賞(投手)', 'ゴールデングラブ賞(捕手)', 'ゴールデングラブ賞(一塁手)', 'ゴールデングラブ賞(二塁手)', 'ゴールデングラブ賞(三塁手)', 'ゴールデングラブ賞(遊撃手)', 'ゴールデングラブ賞(外野手)'];
+      order = ['MVP', '新人王', 'B9(投手)', 'B9(捕手)', 'B9(一塁手)', 'B9(二塁手)', 'B9(三塁手)', 'B9(遊撃手)', 'B9(外野手)', 'B9(指名打者)', 'GG賞(投手)', 'GG賞(捕手)', 'GG賞(一塁手)', 'GG賞(二塁手)', 'GG賞(三塁手)', 'GG賞(遊撃手)', 'GG賞(外野手)'];
     }
     
     // Sort titles based on predefined order
@@ -115,7 +116,7 @@ export const TitleHistoryScreen = () => {
   if (year === null) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+        <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
       </View>
     );
   }
@@ -154,7 +155,7 @@ export const TitleHistoryScreen = () => {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+        <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
       ) : (
         <ScrollView style={styles.content}>
           <View style={styles.leaguesRow}>
@@ -170,17 +171,19 @@ export const TitleHistoryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#333',
+    backgroundColor: COLORS.card,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   yearText: {
-    color: 'white',
+    color: COLORS.textPrimary,
     fontSize: 20,
     fontWeight: 'bold',
     marginHorizontal: 20,
@@ -189,12 +192,14 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   yearButtonText: {
-    color: 'white',
+    color: COLORS.primary,
     fontSize: 16,
   },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: '#ddd',
+    backgroundColor: COLORS.card,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   tab: {
     flex: 1,
@@ -204,15 +209,15 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomColor: '#d4af37', // Gold color
-    backgroundColor: '#fff',
+    borderBottomColor: COLORS.primary,
+    backgroundColor: COLORS.card,
   },
   tabText: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textMuted,
   },
   activeTabText: {
-    color: '#000',
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
   loader: {
@@ -228,13 +233,15 @@ const styles = StyleSheet.create({
   leagueContainer: {
     flex: 1,
     margin: 5,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.card,
     borderRadius: 5,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   leagueHeader: {
-    backgroundColor: '#000',
-    color: '#fff',
+    backgroundColor: COLORS.header,
+    color: COLORS.textPrimary,
     textAlign: 'center',
     padding: 5,
     fontWeight: 'bold',
@@ -242,7 +249,7 @@ const styles = StyleSheet.create({
   row: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
   },
   titleNameContainer: {
     marginBottom: 5,
@@ -250,6 +257,7 @@ const styles = StyleSheet.create({
   titleName: {
     fontWeight: 'bold',
     fontSize: 14,
+    color: COLORS.accent,
   },
   playerInfo: {
     flexDirection: 'row',
@@ -258,7 +266,7 @@ const styles = StyleSheet.create({
   },
   teamName: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.textMuted,
     marginRight: 5,
     width: 30,
     textAlign: 'center',
@@ -267,14 +275,16 @@ const styles = StyleSheet.create({
   playerName: {
     fontSize: 16,
     flex: 1,
+    color: COLORS.textPrimary,
   },
   value: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    color: COLORS.textPrimary,
   },
   noData: {
     padding: 20,
     textAlign: 'center',
-    color: '#999',
+    color: COLORS.textMuted,
   },
 });

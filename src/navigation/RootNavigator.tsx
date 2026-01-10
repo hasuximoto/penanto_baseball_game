@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../utils/theme';
 
 // スクリーンはここにインポートします
 // Re-trigger bundle
@@ -40,9 +41,10 @@ const MainStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerShown: true,
-      headerStyle: { backgroundColor: '#4CAF50' },
-      headerTintColor: '#fff',
-      headerTitleStyle: { fontWeight: 'bold' },
+      headerStyle: { backgroundColor: COLORS.header, shadowColor: 'transparent', borderBottomWidth: 0, elevation: 0 },
+      headerTintColor: COLORS.primary,
+      headerTitleStyle: { fontWeight: 'bold', color: COLORS.textPrimary },
+      cardStyle: { backgroundColor: COLORS.background },
       headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
@@ -116,9 +118,10 @@ const PlayerStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerShown: true,
-      headerStyle: { backgroundColor: '#2196F3' },
-      headerTintColor: '#fff',
-      headerTitleStyle: { fontWeight: 'bold' },
+      headerStyle: { backgroundColor: COLORS.header, shadowColor: 'transparent', borderBottomWidth: 0, elevation: 0 },
+      headerTintColor: COLORS.primary,
+      headerTitleStyle: { fontWeight: 'bold', color: COLORS.textPrimary },
+      cardStyle: { backgroundColor: COLORS.background },
       headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
@@ -147,9 +150,10 @@ const NewsStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerShown: true,
-      headerStyle: { backgroundColor: '#607D8B' },
-      headerTintColor: '#fff',
-      headerTitleStyle: { fontWeight: 'bold' },
+      headerStyle: { backgroundColor: COLORS.header, shadowColor: 'transparent', borderBottomWidth: 0, elevation: 0 },
+      headerTintColor: COLORS.primary,
+      headerTitleStyle: { fontWeight: 'bold', color: COLORS.textPrimary },
+      cardStyle: { backgroundColor: COLORS.background },
       headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
@@ -173,9 +177,10 @@ const TeamStatsStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerShown: true,
-      headerStyle: { backgroundColor: '#9C27B0' },
-      headerTintColor: '#fff',
-      headerTitleStyle: { fontWeight: 'bold' },
+      headerStyle: { backgroundColor: COLORS.header, shadowColor: 'transparent', borderBottomWidth: 0, elevation: 0 },
+      headerTintColor: COLORS.primary,
+      headerTitleStyle: { fontWeight: 'bold', color: COLORS.textPrimary },
+      cardStyle: { backgroundColor: COLORS.background },
       headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
@@ -194,9 +199,10 @@ const TeamStack = () => (
   <Stack.Navigator
     screenOptions={{
       headerShown: true,
-      headerStyle: { backgroundColor: '#4CAF50' },
-      headerTintColor: '#fff',
-      headerTitleStyle: { fontWeight: 'bold' },
+      headerStyle: { backgroundColor: COLORS.header, shadowColor: 'transparent', borderBottomWidth: 0, elevation: 0 },
+      headerTintColor: COLORS.primary,
+      headerTitleStyle: { fontWeight: 'bold', color: COLORS.textPrimary },
+      cardStyle: { backgroundColor: COLORS.background },
       headerBackImage: ({ tintColor }) => <Ionicons name="arrow-back" size={24} color={tintColor} />,
     }}
   >
@@ -236,8 +242,16 @@ const MainTabNavigator = () => (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#4CAF50',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarStyle: {
+          backgroundColor: COLORS.header,
+          borderTopColor: COLORS.border,
+          borderTopWidth: 1,
+          paddingBottom: 4,
+          paddingTop: 4,
+          height: 60,
+        },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
@@ -255,7 +269,8 @@ const MainTabNavigator = () => (
             iconName = focused ? 'newspaper' : 'newspaper-outline';
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          // 光るようなエフェクトを色の濃淡で表現（実際のglowは本来はshadowなどのスタイルが必要）
+          return <Ionicons name={iconName} size={size} color={color} style={focused ? { textShadowColor: COLORS.primary, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10 } : {}} />;
         },
       })}
     >

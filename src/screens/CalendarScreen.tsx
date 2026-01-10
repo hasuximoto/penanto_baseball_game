@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { dbManager } from '@/services/databaseManager';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export const CalendarScreen: React.FC = () => {
   const [schedule, setSchedule] = useState<any[]>([]);
@@ -60,16 +62,16 @@ export const CalendarScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => changeMonth(-1)}>
-          <Text style={styles.arrow}>{'<'}</Text>
+        <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.arrowButton}>
+          <Ionicons name="chevron-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.monthTitle}>
           {currentMonth.getFullYear()}年 {currentMonth.getMonth() + 1}月
         </Text>
-        <TouchableOpacity onPress={() => changeMonth(1)}>
-          <Text style={styles.arrow}>{'>'}</Text>
+        <TouchableOpacity onPress={() => changeMonth(1)} style={styles.arrowButton}>
+          <Ionicons name="chevron-forward" size={24} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
 
@@ -79,47 +81,54 @@ export const CalendarScreen: React.FC = () => {
         ))}
       </View>
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.calendarScroll}>
         <View style={styles.calendarGrid}>
           {renderCalendar()}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#f5f5f5',
+    padding: SPACING.m,
+    backgroundColor: COLORS.card,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   monthTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
-  arrow: {
-    fontSize: 24,
-    paddingHorizontal: 20,
-    color: '#2196F3',
+  arrowButton: {
+    padding: SPACING.s,
   },
   weekHeader: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
     paddingVertical: 10,
+    backgroundColor: COLORS.surface,
   },
   weekDayText: {
     flex: 1,
     textAlign: 'center',
     fontWeight: 'bold',
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bold,
+  },
+  calendarScroll: {
+    flexGrow: 1,
   },
   calendarGrid: {
     flexDirection: 'row',
@@ -131,19 +140,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 0.5,
-    borderColor: '#eee',
+    borderColor: COLORS.border,
   },
   gameDay: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: 'rgba(212, 175, 55, 0.2)', // COLORS.primary with opacity
   },
   dayText: {
     fontSize: 16,
+    color: COLORS.textMain,
+    fontFamily: FONTS.medium,
   },
   dot: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
     marginTop: 4,
   },
 });

@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
 
 export const TeamMenuScreen = () => {
   const navigation = useNavigation<any>();
@@ -32,35 +33,27 @@ export const TeamMenuScreen = () => {
       onPress: () => navigation.navigate('TeamStats', { teamId: selectedTeamId }),
       disabled: !selectedTeamId
     },
-    // 将来的な機能
-    // {
-    //   title: '投手起用設定',
-    //   icon: 'baseball',
-    //   description: '先発ローテーションや中継ぎの役割を設定します',
-    //   onPress: () => {},
-    //   disabled: true
-    // }
   ];
 
   if (!selectedTeamId) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.messageContainer}>
-          <Ionicons name="alert-circle-outline" size={64} color="#ccc" />
+          <Ionicons name="alert-circle-outline" size={64} color={COLORS.textSecondary} />
           <Text style={styles.messageText}>チームが選択されていません</Text>
           <Text style={styles.subMessageText}>メインメニューから「プレイする」を選択してチームを選んでください</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>球団管理</Text>
       </View>
       
-      <View style={styles.menuContainer}>
+      <ScrollView contentContainerStyle={styles.menuContainer}>
         {menuItems.map((item, index) => (
           <TouchableOpacity
             key={index}
@@ -69,64 +62,61 @@ export const TeamMenuScreen = () => {
             disabled={item.disabled}
           >
             <View style={styles.iconContainer}>
-              <Ionicons name={item.icon as any} size={32} color={item.disabled ? '#ccc' : '#4CAF50'} />
+              <Ionicons name={item.icon as any} size={32} color={item.disabled ? COLORS.textSecondary : COLORS.primary} />
             </View>
             <View style={styles.textContainer}>
               <Text style={[styles.menuTitle, item.disabled && styles.disabledText]}>{item.title}</Text>
               <Text style={styles.menuDescription}>{item.description}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+            <Ionicons name="chevron-forward" size={24} color={COLORS.textSecondary} />
           </TouchableOpacity>
         ))}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   header: {
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: SPACING.md,
+    backgroundColor: COLORS.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: COLORS.border,
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.text,
+    fontFamily: FONTS.bold,
   },
   menuContainer: {
-    padding: 15,
+    padding: SPACING.md,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    backgroundColor: COLORS.card,
+    padding: SPACING.md,
+    borderRadius: 12,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
   disabledItem: {
-    backgroundColor: '#f9f9f9',
-    elevation: 0,
+    backgroundColor: COLORS.background,
+    borderColor: COLORS.border,
+    opacity: 0.6,
   },
   iconContainer: {
     width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f0f8f0',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    justifyContent: 'center',
+    marginRight: SPACING.sm,
   },
   textContainer: {
     flex: 1,
@@ -134,32 +124,34 @@ const styles = StyleSheet.create({
   menuTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: COLORS.text,
+    marginBottom: 4,
+    fontFamily: FONTS.regular,
   },
   disabledText: {
-    color: '#999',
+    color: COLORS.textSecondary,
   },
   menuDescription: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.regular,
   },
   messageContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: SPACING.lg,
   },
   messageText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#666',
-    marginTop: 20,
-    marginBottom: 10,
+    color: COLORS.text,
+    marginTop: SPACING.md,
   },
   subMessageText: {
-    fontSize: 16,
-    color: '#999',
+    fontSize: 14,
+    color: COLORS.textSecondary,
     textAlign: 'center',
+    marginTop: SPACING.sm,
   },
 });

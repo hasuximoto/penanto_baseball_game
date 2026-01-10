@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Player } from '@/types';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
 
 interface RosterModalProps {
   visible: boolean;
@@ -30,7 +31,7 @@ export const RosterModal: React.FC<RosterModalProps> = ({
 }) => {
   return (
     <Modal
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       visible={visible}
       onRequestClose={onClose}
@@ -51,10 +52,10 @@ export const RosterModal: React.FC<RosterModalProps> = ({
               )}
               {onViewDetails && (
                   <TouchableOpacity
-                      style={[styles.button, { backgroundColor: '#2196F3', flex: 1, marginLeft: 5 }]}
+                      style={[styles.button, { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.primary, flex: 1, marginLeft: 5 }]}
                       onPress={onViewDetails}
                   >
-                      <Text style={styles.buttonText}>オーダー確認</Text>
+                      <Text style={[styles.buttonText, { color: COLORS.primary }]}>オーダー確認</Text>
                   </TouchableOpacity>
               )}
           </View>
@@ -96,32 +97,32 @@ export const RosterModal: React.FC<RosterModalProps> = ({
 
 const styles = StyleSheet.create({
   selectButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: COLORS.primary,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.textMuted,
+    borderWidth: 1,
   },
   modalCenteredView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
-    backgroundColor: 'rgba(0,0,0,0.5)'
+    paddingTop: 22,
+    backgroundColor: 'rgba(0,0,0,0.7)'
   },
   modalView: {
     margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 24,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.primary,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
     width: '80%'
   },
   modalTitle: {
@@ -129,57 +130,65 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     textAlign: 'center',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   rosterSection: {
     marginBottom: 15,
     width: '100%',
   },
   rosterSectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
-    backgroundColor: '#eee',
-    padding: 5,
+    backgroundColor: 'rgba(212, 175, 55, 0.1)', // Gold tint
+    padding: 6,
     marginBottom: 5,
+    color: COLORS.primary,
+    fontFamily: FONTS.medium,
   },
   rosterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.border,
   },
   rosterPosition: {
     width: 40,
     fontWeight: 'bold',
+    color: COLORS.textMain,
   },
   rosterName: {
     flex: 1,
+    color: COLORS.textMain,
+    fontFamily: FONTS.medium,
   },
   rosterStats: {
     width: 100,
     textAlign: 'right',
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: 'monospace',
   },
   emptyText: {
-    color: '#999',
+    color: COLORS.textMuted,
     textAlign: 'center',
     paddingVertical: 12,
   },
   button: {
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     marginVertical: 8,
     alignItems: 'center',
-    elevation: 3,
   },
   primaryButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.primary,
   },
   buttonText: {
-    color: '#fff',
+    color: COLORS.background,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
 });

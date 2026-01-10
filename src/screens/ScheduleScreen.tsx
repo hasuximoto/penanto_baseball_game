@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, SectionList, TouchableOpacity, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, FlatList, SectionList, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { dbManager } from '@/services/databaseManager';
 import { formatDateJP, getGameDateString } from '@/utils/dateUtils';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export const ScheduleScreen: React.FC = () => {
   const [sections, setSections] = useState<any[]>([]);
@@ -94,7 +95,7 @@ export const ScheduleScreen: React.FC = () => {
   const months = [3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.monthSelector}>
         <ScrollView 
           horizontal 
@@ -130,13 +131,13 @@ export const ScheduleScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   monthSelector: {
     height: 60,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: COLORS.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: COLORS.border,
   },
   monthScrollContent: {
     paddingHorizontal: 10,
@@ -151,32 +152,36 @@ const styles = StyleSheet.create({
   },
   selectedMonthButton: {
     borderBottomWidth: 3,
-    borderBottomColor: '#4CAF50',
+    borderBottomColor: COLORS.primary,
   },
   monthText: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   selectedMonthText: {
-    color: '#4CAF50',
+    color: COLORS.primary,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   header: {
-    backgroundColor: '#f0f0f0',
-    padding: 10,
+    backgroundColor: COLORS.primary,
+    padding: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: COLORS.border,
   },
   headerText: {
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   row: {
     flexDirection: 'row',
-    padding: 15,
+    padding: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
     alignItems: 'center',
+    backgroundColor: COLORS.card,
   },
   matchup: {
     flex: 1,
@@ -188,27 +193,32 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontWeight: 'bold',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   vs: {
     marginHorizontal: 10,
-    color: '#999',
+    color: COLORS.textMuted,
     width: 40,
     textAlign: 'center',
+    fontFamily: FONTS.regular,
   },
   score: {
     marginHorizontal: 10,
-    color: '#333',
+    color: COLORS.primary,
     fontWeight: 'bold',
     width: 60,
     textAlign: 'center',
+    fontFamily: FONTS.bold,
   },
   interleague: {
     fontSize: 10,
-    color: '#fff',
-    backgroundColor: '#FF9800',
+    color: COLORS.background,
+    backgroundColor: COLORS.accent,
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 4,
     marginLeft: 10,
+    fontFamily: FONTS.bold,
   },
 });

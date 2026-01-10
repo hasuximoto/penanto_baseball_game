@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, ScrollView, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -8,6 +8,8 @@ import { DraftManager } from '@/services/draftManager';
 import { dbManager } from '@/services/databaseManager';
 import { TeamStrategyManager } from '@/services/teamStrategyManager';
 import { Player, TeamId, NewsItem } from '@/types';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 const getRank = (value: number | undefined): string => {
   if (value === undefined) return '-';
@@ -752,13 +754,13 @@ export const DraftScreen = () => {
         </View>
         <View style={styles.rankContainer}>
             <Text style={styles.rankLabel}>総合</Text>
-            <Text style={[styles.rankValue, { color: rank === 'S' ? '#FFD700' : rank === 'A' ? '#FF5722' : '#333' }]}>{rank}</Text>
+            <Text style={[styles.rankValue, { color: rank === 'S' ? COLORS.primary : rank === 'A' ? COLORS.accent : COLORS.textMain }]}>{rank}</Text>
         </View>
         <View style={styles.candidateStats}>
             {item.position === 'P' ? (
-                <Text style={styles.statText}>MAX: {item.scoutInfo?.speed}km | ：制球: {getRank(item.scoutInfo?.control)} | スタミナ: {getRank(item.scoutInfo?.stamina)}</Text>
+                <Text style={styles.statText}>MAX: {item.scoutInfo?.speed}km | 制球: {getRank(item.scoutInfo?.control)} | スタミナ: {getRank(item.scoutInfo?.stamina)}</Text>
             ) : (
-                <Text style={styles.statText}>弾道: {item.scoutInfo?.trajectory ? Math.round(item.scoutInfo.trajectory) : '-'} | コンタクト: {getRank(item.scoutInfo?.contact)} | パワー: {getRank(item.scoutInfo?.power)} | 走力: {getRank(item.scoutInfo?.speedFielder)} | 肩: {getRank(item.scoutInfo?.arm)} | 守備: {getRank(item.scoutInfo?.fielding)}</Text>
+                <Text style={styles.statText}>弾道: {item.scoutInfo?.trajectory ? Math.round(item.scoutInfo.trajectory) : '-'} | ミート: {getRank(item.scoutInfo?.contact)} | パワー: {getRank(item.scoutInfo?.power)} | 走力: {getRank(item.scoutInfo?.speedFielder)} | 肩: {getRank(item.scoutInfo?.arm)} | 守備: {getRank(item.scoutInfo?.fielding)}</Text>
             )}
             {isTaken && (
                 <Text style={styles.takenText}>
@@ -806,18 +808,26 @@ export const DraftScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>ドラフト会議</Text>
-        {!isDraftOver ? (
-            <Text style={styles.roundText}>
-              {draftPhase === 'nomination' ? '第1巡目 - 入札' :
-               draftPhase === 'lottery' ? '第1巡目 - 抽選' :
-               `第${currentRound}巡目 - 指名中: ${currentTeamName}`}
-            </Text>
-        ) : (
-            <Text style={styles.roundText}>終了</Text>
-        )}
+        <View style={styles.headerLeft}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color={COLORS.textMain} />
+            </TouchableOpacity>
+        </View>
+        <View style={styles.headerCenter}>
+            <Text style={styles.title}>ドラフト会議</Text>
+            {!isDraftOver ? (
+                <Text style={styles.roundText}>
+                {draftPhase === 'nomination' ? '第1巡目 - 入札' :
+                draftPhase === 'lottery' ? '第1巡目 - 抽選' :
+                `第${currentRound}巡目 - 指名中: ${currentTeamName}`}
+                </Text>
+            ) : (
+                <Text style={styles.roundText}>終了</Text>
+            )}
+        </View>
+        <View style={styles.headerRight} />
       </View>
 
       <View style={styles.content}>
@@ -830,20 +840,20 @@ export const DraftScreen = () => {
                 contentContainerStyle={styles.filterContentContainer}
             >
                 <TouchableOpacity style={[styles.filterButton, filterPosition === 'All' && styles.activeFilter]} onPress={() => setFilterPosition('All')}>
-                    <Text style={styles.filterText}>全て</Text>
+                    <Text style={[styles.filterText, filterPosition === 'All' && { color: COLORS.background }]}>全て</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.filterButton, filterPosition === 'P' && styles.activeFilter]} onPress={() => setFilterPosition('P')}>
-                    <Text style={styles.filterText}>投手</Text>
+                    <Text style={[styles.filterText, filterPosition === 'P' && { color: COLORS.background }]}>投手</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.filterButton, filterPosition === 'Fielder' && styles.activeFilter]} onPress={() => setFilterPosition('Fielder')}>
-                    <Text style={styles.filterText}>野手</Text>
+                    <Text style={[styles.filterText, filterPosition === 'Fielder' && { color: COLORS.background }]}>野手</Text>
                 </TouchableOpacity>
                 <View style={styles.separator} />
                 <TouchableOpacity style={[styles.filterButton, sortType === 'Evaluation' && styles.activeFilter]} onPress={() => setSortType('Evaluation')}>
-                    <Text style={styles.filterText}>評価順</Text>
+                    <Text style={[styles.filterText, sortType === 'Evaluation' && { color: COLORS.background }]}>評価順</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.filterButton, sortType === 'Position' && styles.activeFilter]} onPress={() => setSortType('Position')}>
-                    <Text style={styles.filterText}>ポジション順</Text>
+                    <Text style={[styles.filterText, sortType === 'Position' && { color: COLORS.background }]}>ポジション順</Text>
                 </TouchableOpacity>
             </ScrollView>
             <FlatList
@@ -861,7 +871,7 @@ export const DraftScreen = () => {
                 {selectedCandidate ? (
                     <View>
                         <Text style={styles.selectedName}>{selectedCandidate.name}</Text>
-                        <Text>{selectedCandidate.position} / {selectedCandidate.age}歳</Text>
+                        <Text style={styles.selectedDetail}>{selectedCandidate.position} / {selectedCandidate.age}歳</Text>
                         {/* ここに詳細を追加 */}
                     </View>
                 ) : (
@@ -873,7 +883,7 @@ export const DraftScreen = () => {
                     onPress={handleUserPick}
                     disabled={!isUserTurn || !selectedCandidate}
                 >
-                    <Text style={styles.draftButtonText}>指名する</Text>
+                    <Text style={[styles.draftButtonText, (!isUserTurn || !selectedCandidate) && {color: COLORS.textMuted}]}>指名する</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
@@ -881,7 +891,7 @@ export const DraftScreen = () => {
                     onPress={handleAutoPick}
                     disabled={!isUserTurn}
                 >
-                    <Text style={styles.draftButtonText}>お任せ (CPU指名)</Text>
+                    <Text style={[styles.draftButtonText, !isUserTurn && {color: COLORS.textMuted}]}>お任せ (CPU指名)</Text>
                 </TouchableOpacity>
 
                 {isUserTurn && (
@@ -930,36 +940,52 @@ export const DraftScreen = () => {
                     if (btn.onPress) btn.onPress();
                   }}
                 >
-                  <Text style={styles.modalButtonText}>{btn.text}</Text>
+                  <Text style={[styles.modalButtonText, btn.style === 'cancel' ? { color: COLORS.textMuted } : { color: COLORS.background }]}>{btn.text}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   header: {
-    padding: 15,
-    backgroundColor: '#3F51B5',
+    padding: SPACING.md,
+    backgroundColor: COLORS.card,
     alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    flexDirection: 'row',
+  },
+  headerLeft: {
+    width: 40,
+    alignItems: 'flex-start',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerRight: {
+    width: 40,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   roundText: {
-    fontSize: 16,
-    color: '#E8EAF6',
-    marginTop: 5,
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginTop: 2,
   },
   content: {
     flex: 1,
@@ -968,19 +994,20 @@ const styles = StyleSheet.create({
   leftPanel: {
     flex: 2,
     borderRightWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.background,
   },
   rightPanel: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#FAFAFA',
+    padding: SPACING.sm,
+    backgroundColor: COLORS.primary,
   },
   filterContainer: {
-    padding: 10,
+    padding: SPACING.sm,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderColor: COLORS.border,
     flexGrow: 0,
+    backgroundColor: COLORS.card,
   },
   filterContentContainer: {
     flexDirection: 'row',
@@ -990,38 +1017,44 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 15,
-    backgroundColor: '#eee',
+    backgroundColor: COLORS.primary,
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   activeFilter: {
-    backgroundColor: '#3F51B5',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   separator: {
     width: 1,
     height: '100%',
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.border,
     marginHorizontal: 5,
   },
   filterText: {
     fontSize: 12,
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   list: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
   candidateRow: {
     padding: 10,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderColor: COLORS.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: COLORS.card,
   },
   selectedRow: {
-    backgroundColor: '#E8EAF6',
+    backgroundColor: 'rgba(212, 175, 55, 0.2)', // COLORS.primary with opacity
   },
   takenRow: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.primary,
     opacity: 0.6,
   },
   candidateInfo: {
@@ -1035,22 +1068,27 @@ const styles = StyleSheet.create({
   },
   rankLabel: {
     fontSize: 10,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   rankValue: {
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   candidateName: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   candidateDetail: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   finishTurnButton: {
-    backgroundColor: '#757575',
+    backgroundColor: COLORS.textMuted,
     marginTop: 10,
   },
   candidateStats: {
@@ -1059,60 +1097,74 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 11,
-    color: '#444',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   takenText: {
     fontSize: 12,
-    color: '#F44336',
+    color: COLORS.accent,
     fontWeight: 'bold',
     marginTop: 2,
+    fontFamily: FONTS.bold,
   },
   selectedInfo: {
-    padding: 15,
-    backgroundColor: '#fff',
+    padding: SPACING.md,
+    backgroundColor: COLORS.card,
     borderRadius: 8,
     marginBottom: 15,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   panelTitle: {
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#555',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bold,
   },
   selectedName: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
+  },
+  selectedDetail: {
+    fontSize: 14,
+    color: COLORS.textMain,
+    marginBottom: 8,
   },
   placeholderText: {
-    color: '#999',
+    color: COLORS.textMuted,
     fontStyle: 'italic',
   },
   draftButton: {
     marginTop: 15,
-    backgroundColor: '#E91E63',
+    backgroundColor: COLORS.primary,
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',
   },
   autoButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.secondary,
     marginTop: 10,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.primary,
+    opacity: 0.5,
   },
   draftButtonText: {
-    color: '#fff',
+    color: COLORS.background,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   logsContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.card,
     borderRadius: 8,
     padding: 10,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   logsList: {
     flex: 1,
@@ -1120,48 +1172,51 @@ const styles = StyleSheet.create({
   logText: {
     fontSize: 12,
     marginBottom: 4,
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   finishButton: {
     marginTop: 10,
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.primary,
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',
   },
   finishButtonText: {
-    color: '#fff',
+    color: COLORS.background,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 24,
     width: '80%',
     maxWidth: 400,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
   },
   modalMessage: {
     fontSize: 16,
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -1175,13 +1230,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   okButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
   },
   cancelButton: {
-    backgroundColor: '#999',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.textMuted,
   },
   modalButtonText: {
-    color: 'white',
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
 });

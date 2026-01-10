@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { GameResult } from '../types';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export const DailyResultsScreen = ({ route, navigation }: any) => {
   const { results } = route.params;
@@ -10,70 +12,114 @@ export const DailyResultsScreen = ({ route, navigation }: any) => {
       style={styles.gameContainer}
       onPress={() => navigation.navigate('BoxScore', { gameResult: item })}
     >
-      <View style={styles.teamRow}>
-        <Text style={styles.teamName}>{item.homeTeam.toUpperCase()}</Text>
-        <Text style={styles.score}>{item.homeScore}</Text>
+      <View style={styles.matchupContainer}>
+          <View style={styles.teamColumn}>
+              <Text style={styles.teamName}>{item.homeTeam.toUpperCase()}</Text>
+              <Text style={styles.score}>{item.homeScore}</Text>
+          </View>
+          <View style={styles.divider}>
+              <Text style={styles.vsText}>-</Text>
+          </View>
+          <View style={styles.teamColumn}>
+              <Text style={styles.teamName}>{item.awayTeam.toUpperCase()}</Text>
+              <Text style={styles.score}>{item.awayScore}</Text>
+          </View>
       </View>
-      <View style={styles.teamRow}>
-        <Text style={styles.teamName}>{item.awayTeam.toUpperCase()}</Text>
-        <Text style={styles.score}>{item.awayScore}</Text>
+      <View style={styles.footer}>
+          <Text style={styles.status}>試合終了</Text>
+          <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
       </View>
-      <Text style={styles.status}>Final</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Today's Games</Text>
+    <SafeAreaView style={styles.container}>
       <FlatList
         data={results}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 10,
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.card,
+  },
+  backButton: {
+    marginRight: SPACING.md,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   listContent: {
-    paddingBottom: 20,
+    padding: SPACING.md,
   },
   gameContainer: {
-    backgroundColor: 'white',
-    padding: 15,
-    marginBottom: 10,
+    backgroundColor: COLORS.card,
     borderRadius: 8,
-    elevation: 2,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  teamRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
+  matchupContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SPACING.sm,
+  },
+  teamColumn: {
+      alignItems: 'center',
+      flex: 1,
+  },
+  divider: {
+      width: 20,
+      alignItems: 'center',
   },
   teamName: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: 'bold',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
+    marginBottom: 4,
   },
   score: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
+  },
+  vsText: {
+      fontSize: 20,
+      color: COLORS.textMuted,
+      fontFamily: FONTS.bold,
+  },
+  footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderTopWidth: 1,
+      borderTopColor: COLORS.border,
+      paddingTop: SPACING.sm,
   },
   status: {
-    marginTop: 5,
     fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
 });

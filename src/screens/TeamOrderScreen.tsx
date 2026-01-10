@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Player, Team, TeamId, LineupSlot, Position } from '../types';
 import { dbManager } from '../services/databaseManager';
@@ -7,6 +7,7 @@ import { getGameDateString, formatDateJP } from '../utils/dateUtils';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
 
 interface TeamOrderScreenProps {
   route: {
@@ -556,7 +557,7 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
       >
         {!isBench ? (
             <TouchableOpacity onPress={() => toggleLock(slotNumber, player)} style={{ width: 30, justifyContent: 'center', alignItems: 'center' }}>
-                <Ionicons name={isLocked ? "checkbox" : "square-outline"} size={20} color={isLocked ? "#4CAF50" : "#757575"} />
+                <Ionicons name={isLocked ? "checkbox" : "square-outline"} size={20} color={isLocked ? COLORS.primary : COLORS.textMuted} />
             </TouchableOpacity>
         ) : (
             <View style={{ width: 30 }} />
@@ -566,22 +567,22 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
         {/* ポジション表示 (タップで変更可能) */}
         {!isBench ? (
             <TouchableOpacity 
-                style={[styles.cell, styles.posCell, { backgroundColor: isDuplicate ? '#FFEBEE' : 'transparent' }]}
+                style={[styles.cell, styles.posCell, { backgroundColor: isDuplicate ? 'rgba(207, 102, 121, 0.2)' : 'transparent', borderRadius: 4 }]}
                 onPress={() => {
                     setTargetPlayerIndex(index);
                     setPositionModalVisible(true);
                 }}
             >
-                <Text style={{ fontWeight: 'bold', color: isDuplicate ? 'red' : '#000' }}>{player.position}</Text>
+                <Text style={{ fontWeight: 'bold', color: isDuplicate ? '#CF6679' : COLORS.textMain }}>{player.position}</Text>
             </TouchableOpacity>
         ) : (
             <Text style={[styles.cell, styles.posCell]}>{player.position}</Text>
         )}
 
         <View style={[styles.cell, styles.nameCell]}>
-            <Text style={{ color: '#0000EE' }}>{player.name}</Text>
+            <Text style={{ color: COLORS.textMain, fontFamily: FONTS.regular }}>{player.name}</Text>
             {!isBench && isPositionChanged && player.position !== 'DH' && (
-                <Text style={{ fontSize: 10, color: '#757575' }}>(本:{mainPosition})</Text>
+                <Text style={{ fontSize: 10, color: COLORS.textMuted }}>(本:{mainPosition})</Text>
             )}
         </View>
         
@@ -635,11 +636,11 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
         onPress={() => handlePlayerPress(role, index)}
       >
         <TouchableOpacity onPress={() => toggleLock(slotNumber, player, role)} style={{ width: 30, justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name={isLocked ? "checkbox" : "square-outline"} size={20} color={isLocked ? "#4CAF50" : "#757575"} />
+            <Ionicons name={isLocked ? "checkbox" : "square-outline"} size={20} color={isLocked ? COLORS.primary : COLORS.textMuted} />
         </TouchableOpacity>
         <Text style={[styles.cell, styles.posCell]}>{role === 'starter' ? slotNumber : '-'}</Text>
         <Text style={[styles.cell, styles.posCell]}>{roleLabel}</Text>
-        <Text style={[styles.cell, styles.nameCell, { color: '#0000EE' }]}>{player.name}</Text>
+        <Text style={[styles.cell, styles.nameCell, { color: COLORS.textMain, fontFamily: FONTS.regular }]}>{player.name}</Text>
         <Text style={styles.cell}>{g}</Text>
         <Text style={styles.cell}>{ip}</Text>
         <Text style={styles.cell}>{era}</Text>
@@ -717,7 +718,7 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
   const currentDateStr = formatDateJP(getGameDateString(gameState.currentDate, gameState.season));
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Position Selection Modal */}
       <Modal
         animationType="fade"
@@ -761,10 +762,11 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
                 }} 
                 style={{ marginRight: 10 }}
             >
-                <Ionicons name="arrow-back" size={24} color="#fff" />
+                <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.teamName}>{team.name}</Text>
+            <Text style={styles.teamName}>{team?.name}</Text>
         </View>
+        <Text style={{color: COLORS.textMuted, fontSize: 12}}>{currentDateStr}</Text>
       </View>
 
       <View style={styles.tabContainer}>
@@ -788,20 +790,22 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
                 {/* Header Row */}
                 <View style={[styles.row, styles.headerRow]}>
                     <View style={{ width: 30, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 10, fontWeight: 'bold' }}>固定</Text>
+                        <Text style={[styles.headerText, { fontSize: 10 }]}>固定</Text>
                     </View>
-                    <Text style={[styles.cell, styles.posCell]}>順</Text>
-                    <Text style={[styles.cell, styles.posCell]}>守</Text>
-                    <Text style={[styles.cell, styles.nameCell]}>選手名</Text>
-                    <Text style={styles.cell}>AVG</Text>
-                    <Text style={styles.cell}>HR</Text>
-                    <Text style={styles.cell}>RBI</Text>
-                    <Text style={styles.cell}>SB</Text>
-                    <Text style={styles.cell}>OBP</Text>
+                    <Text style={[styles.cell, styles.posCell, styles.headerText]}>順</Text>
+                    <Text style={[styles.cell, styles.posCell, styles.headerText]}>守</Text>
+                    <Text style={[styles.cell, styles.nameCell, styles.headerText]}>選手名</Text>
+                    <Text style={[styles.cell, styles.headerText]}>AVG</Text>
+                    <Text style={[styles.cell, styles.headerText]}>HR</Text>
+                    <Text style={[styles.cell, styles.headerText]}>RBI</Text>
+                    <Text style={[styles.cell, styles.headerText]}>SB</Text>
+                    <Text style={[styles.cell, styles.headerText]}>OBP</Text>
                 </View>
-                <ScrollView>
+                <ScrollView contentContainerStyle={{paddingBottom: 20}}>
                     {lineupPlayers.map((p, i) => renderBatterRow(p, i))}
-                    <View style={styles.divider} />
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>ベンチ</Text>
+                    </View>
                     {benchPlayers.map((p, i) => renderBatterRow(p, i, true))}
                 </ScrollView>
             </View>
@@ -810,25 +814,31 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
                 {/* Header Row */}
                 <View style={[styles.row, styles.headerRow]}>
                     <View style={{ width: 30, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 10, fontWeight: 'bold' }}>固定</Text>
+                        <Text style={[styles.headerText, { fontSize: 10 }]}>固定</Text>
                     </View>
-                    <Text style={[styles.cell, styles.posCell]}>順</Text>
-                    <Text style={[styles.cell, styles.posCell]}>役</Text>
-                    <Text style={[styles.cell, styles.nameCell]}>選手名</Text>
-                    <Text style={styles.cell}>G</Text>
-                    <Text style={styles.cell}>IP</Text>
-                    <Text style={styles.cell}>ERA</Text>
-                    <Text style={styles.cell}>W-L</Text>
-                    <Text style={styles.cell}>SO</Text>
+                    <Text style={[styles.cell, styles.posCell, styles.headerText]}>順</Text>
+                    <Text style={[styles.cell, styles.posCell, styles.headerText]}>役</Text>
+                    <Text style={[styles.cell, styles.nameCell, styles.headerText]}>選手名</Text>
+                    <Text style={[styles.cell, styles.headerText]}>G</Text>
+                    <Text style={[styles.cell, styles.headerText]}>IP</Text>
+                    <Text style={[styles.cell, styles.headerText]}>ERA</Text>
+                    <Text style={[styles.cell, styles.headerText]}>W-L</Text>
+                    <Text style={[styles.cell, styles.headerText]}>SO</Text>
                 </View>
-                <ScrollView>
-                    <Text style={{fontWeight: 'bold', margin: 5, backgroundColor: '#eee', padding: 5}}>先発ローテーション</Text>
+                <ScrollView contentContainerStyle={{paddingBottom: 20}}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>先発ローテーション</Text>
+                    </View>
                     {pitchers.starters.map((p, i) => renderPitcherRow(p, i, 'starter'))}
-                    <View style={styles.divider} />
-                    <Text style={{fontWeight: 'bold', margin: 5, backgroundColor: '#eee', padding: 5}}>抑え</Text>
+                    
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>抑え</Text>
+                    </View>
                     {pitchers.closer.map((p, i) => renderPitcherRow(p, i, 'closer'))}
-                    <View style={styles.divider} />
-                    <Text style={{fontWeight: 'bold', margin: 5, backgroundColor: '#eee', padding: 5}}>ブルペン</Text>
+                    
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>ブルペン</Text>
+                    </View>
                     {pitchers.relievers.map((p, i) => renderPitcherRow(p, i, 'reliever'))}
                 </ScrollView>
             </View>
@@ -838,202 +848,202 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
       {/* Footer for Save/Cancel */}
       {hasUnsavedChanges && (
           <View style={styles.footer}>
-            <TouchableOpacity style={[styles.footerButton, { backgroundColor: '#757575', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 5 }]} onPress={cancelChanges}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>キャンセル</Text>
+            <TouchableOpacity style={[styles.footerButton, { backgroundColor: COLORS.header, borderWidth: 1, borderColor: COLORS.border }]} onPress={cancelChanges}>
+                <Text style={{ color: COLORS.textMuted, fontWeight: 'bold' }}>キャンセル</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.footerButton, { backgroundColor: '#2196F3', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 5 }]} onPress={saveChanges}>
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>確定する</Text>
+            <TouchableOpacity style={[styles.footerButton, { backgroundColor: COLORS.primary }]} onPress={saveChanges}>
+                <Text style={{ color: COLORS.background, fontWeight: 'bold' }}>確定する</Text>
             </TouchableOpacity>
           </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 10,
-    backgroundColor: '#4CAF50',
+    padding: SPACING.md,
+    backgroundColor: COLORS.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#388E3C',
-    paddingTop: 10, // Adjust based on status bar needs
+    borderBottomColor: COLORS.border,
   },
   teamInfo: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  logoText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
   teamName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
-  },
-  dateText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  headerRight: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 4,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    fontFamily: FONTS.bold,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    elevation: 2,
+    backgroundColor: COLORS.card,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   tabButton: {
     flex: 1,
     paddingVertical: 12,
     alignItems: 'center',
-    borderBottomWidth: 2,
+    borderBottomWidth: 3,
     borderBottomColor: 'transparent',
   },
   activeTabButton: {
-    borderBottomColor: '#4CAF50',
+    borderBottomColor: COLORS.primary,
   },
   tabText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   activeTabText: {
-    color: '#4CAF50',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
   },
   contentContainer: {
     flex: 1,
-    padding: 10,
+    padding: SPACING.sm,
   },
   column: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    padding: 5,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    backgroundColor: COLORS.card,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
-    paddingVertical: 4,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
     alignItems: 'center',
   },
   selectedRow: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: 'rgba(212, 175, 55, 0.2)', 
   },
   headerRow: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#ddd',
-    marginBottom: 5,
+    backgroundColor: COLORS.header,
+    borderBottomColor: COLORS.border,
+    paddingVertical: 10,
+  },
+  headerText: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   cell: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 13,
     textAlign: 'center',
-    color: '#333',
+    color: COLORS.textPrimary,
+    fontFamily: 'monospace',
+    fontVariant: ['tabular-nums'],
   },
   posCell: {
     flex: 0.5,
+    fontFamily: FONTS.regular,
     fontWeight: 'bold',
   },
   nameCell: {
     flex: 2,
     textAlign: 'left',
-    paddingLeft: 5,
+    paddingLeft: 8,
+    fontFamily: FONTS.regular,
   },
-  divider: {
-    height: 10,
+  sectionHeader: {
+    backgroundColor: COLORS.header,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    marginTop: 10,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: COLORS.textMuted,
   },
   footer: {
     flexDirection: 'row',
-    backgroundColor: '#333',
-    paddingVertical: 10,
-    justifyContent: 'space-around',
+    backgroundColor: COLORS.card,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
   },
   footerButton: {
+    flex: 0.48,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  footerButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    marginTop: 2,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 24,
+    width: '85%',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 20,
+    color: COLORS.textPrimary,
+    fontFamily: FONTS.bold,
   },
   positionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
+    marginBottom: 20,
   },
   positionButton: {
     width: 60,
-    height: 40,
-    backgroundColor: '#E3F2FD',
+    height: 45,
+    backgroundColor: COLORS.header,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 5,
-    borderRadius: 5,
+    margin: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   positionButtonText: {
     fontWeight: 'bold',
-    color: '#1976D2',
+    color: COLORS.textPrimary,
   },
   closeButton: {
-    marginTop: 15,
+    marginTop: 10,
     padding: 10,
   },
   closeButtonText: {
-    color: '#757575',
+    color: COLORS.textMuted,
   },
 });
