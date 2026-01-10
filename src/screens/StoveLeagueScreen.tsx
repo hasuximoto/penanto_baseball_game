@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, SafeAreaView } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
@@ -9,6 +9,8 @@ import { ContractManager } from '../services/contractManager';
 import { SpringCampManager } from '../services/springCampManager';
 import { SeasonManager } from '../services/seasonManager';
 import { dbManager } from '../services/databaseManager';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export const StoveLeagueScreen = () => {
   const navigation = useNavigation();
@@ -214,19 +216,32 @@ export const StoveLeagueScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>オフシーズンメニュー</Text>
+        <View style={styles.headerLeft}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color={COLORS.textMain} />
+            </TouchableOpacity>
+        </View>
+        <View style={styles.headerCenter}>
+            <Text style={styles.title}>オフシーズンメニュー</Text>
+        </View>
+        <View style={styles.headerRight} />
       </View>
 
-      <View style={styles.menuContainer}>
+      <ScrollView contentContainerStyle={styles.menuContainer}>
         <TouchableOpacity 
             style={[styles.menuButton, offSeasonStep !== 'draft' && styles.disabledButton]} 
             onPress={handleDraft}
             disabled={offSeasonStep !== 'draft'}
         >
-          <Text style={styles.menuButtonText}>ドラフト会議</Text>
-          <Text style={styles.menuDescription}>新人選手を獲得します</Text>
+          <View style={styles.iconContainer}>
+              <Ionicons name="people-outline" size={32} color={offSeasonStep === 'draft' ? COLORS.primary : COLORS.textMuted} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.menuButtonText, offSeasonStep !== 'draft' && { color: COLORS.textMuted }]}>ドラフト会議</Text>
+            <Text style={styles.menuDescription}>新人選手を獲得します</Text>
+          </View>
           {offSeasonStep !== 'draft' && <Text style={styles.completedText}>完了</Text>}
         </TouchableOpacity>
 
@@ -235,8 +250,13 @@ export const StoveLeagueScreen = () => {
             onPress={handleContract}
             disabled={offSeasonStep !== 'contract'}
         >
-          <Text style={styles.menuButtonText}>契約更改</Text>
-          <Text style={styles.menuDescription}>所属選手と契約を更新します</Text>
+          <View style={styles.iconContainer}>
+              <Ionicons name="document-text-outline" size={32} color={offSeasonStep === 'contract' ? COLORS.primary : COLORS.textMuted} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.menuButtonText, offSeasonStep !== 'contract' && { color: COLORS.textMuted }]}>契約更改</Text>
+            <Text style={styles.menuDescription}>所属選手と契約を更新します</Text>
+          </View>
           {offSeasonStep === 'reinforcement' || offSeasonStep === 'camp' || offSeasonStep === 'next_season' ? <Text style={styles.completedText}>完了</Text> : null}
         </TouchableOpacity>
 
@@ -245,8 +265,13 @@ export const StoveLeagueScreen = () => {
             onPress={handleReinforcement}
             disabled={offSeasonStep !== 'reinforcement'}
         >
-          <Text style={styles.menuButtonText}>戦力補強期間</Text>
-          <Text style={styles.menuDescription}>FA交渉・トレード・外国人獲得 (残り{OFF_SEASON_TURNS + 1 - (gameState.reinforcementTurn || 1)}ターン)</Text>
+          <View style={styles.iconContainer}>
+              <Ionicons name="briefcase-outline" size={32} color={offSeasonStep === 'reinforcement' ? COLORS.primary : COLORS.textMuted} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.menuButtonText, offSeasonStep !== 'reinforcement' && { color: COLORS.textMuted }]}>戦力補強期間</Text>
+            <Text style={styles.menuDescription}>FA交渉・トレード・外国人獲得 (残り{OFF_SEASON_TURNS + 1 - (gameState.reinforcementTurn || 1)}ターン)</Text>
+          </View>
           {offSeasonStep === 'camp' || offSeasonStep === 'next_season' ? <Text style={styles.completedText}>完了</Text> : null}
         </TouchableOpacity>
 
@@ -255,8 +280,13 @@ export const StoveLeagueScreen = () => {
             onPress={handleSpringCamp}
             disabled={offSeasonStep !== 'camp'}
         >
-          <Text style={styles.menuButtonText}>春季キャンプ</Text>
-          <Text style={styles.menuDescription}>選手の能力を強化します</Text>
+           <View style={styles.iconContainer}>
+              <Ionicons name="fitness-outline" size={32} color={offSeasonStep === 'camp' ? COLORS.primary : COLORS.textMuted} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.menuButtonText, offSeasonStep !== 'camp' && { color: COLORS.textMuted }]}>春季キャンプ</Text>
+            <Text style={styles.menuDescription}>選手の能力を強化します</Text>
+          </View>
           {offSeasonStep === 'next_season' && <Text style={styles.completedText}>完了</Text>}
         </TouchableOpacity>
 
@@ -267,9 +297,15 @@ export const StoveLeagueScreen = () => {
             onPress={handleNextSeason}
             disabled={offSeasonStep !== 'next_season'}
         >
-          <Text style={styles.menuButtonText}>翌シーズンへ</Text>
+          <View style={styles.iconContainer}>
+              <Ionicons name="calendar-outline" size={32} color={COLORS.background} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.menuButtonText, { color: COLORS.background }]}>翌シーズンへ</Text>
+            <Text style={[styles.menuDescription, { color: 'rgba(18, 18, 18, 0.7)' }]}>新しいシーズンを開始します</Text>
+          </View>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
 
       <Modal
         transparent={true}
@@ -290,122 +326,160 @@ export const StoveLeagueScreen = () => {
                     if (btn.onPress) btn.onPress();
                   }}
                 >
-                  <Text style={styles.modalButtonText}>{btn.text}</Text>
+                  <Text style={[styles.modalButtonText, btn.style === 'cancel' ? { color: COLORS.textMuted } : { color: COLORS.background }]}>{btn.text}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   header: {
-    padding: 20,
-    backgroundColor: '#4CAF50',
+    padding: SPACING.md,
+    backgroundColor: COLORS.card,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    flexDirection: 'row',
+  },
+  headerLeft: {
+    width: 40,
+    alignItems: 'flex-start',
+  },
+  headerCenter: {
+    flex: 1,
     alignItems: 'center',
   },
+  headerRight: {
+    width: 40,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   menuContainer: {
-    padding: 20,
+    padding: SPACING.md,
   },
   menuButton: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    padding: SPACING.md,
+    borderRadius: 12,
     marginBottom: 15,
-    elevation: 2,
-    shadowColor: '#000',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  iconContainer: {
+    width: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.sm,
+  },
+  textContainer: {
+    flex: 1,
   },
   disabledButton: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.border,
     opacity: 0.7,
   },
   completedText: {
-    color: '#4CAF50',
+    color: COLORS.primary,
     fontWeight: 'bold',
-    marginTop: 5,
+    fontSize: 12,
+    marginLeft: 10,
   },
   menuButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: COLORS.textMain,
+    marginBottom: 4,
+    fontFamily: FONTS.regular,
   },
   menuDescription: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   separator: {
     height: 20,
   },
   nextSeasonButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 24,
+    width: '85%',
     maxWidth: 400,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
   },
   modalMessage: {
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 24,
     textAlign: 'center',
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   modalButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
+    gap: 12,
   },
   modalButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 8,
     minWidth: 100,
     alignItems: 'center',
-    margin: 5,
+    marginBottom: 5,
   },
   okButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
   },
   cancelButton: {
-    backgroundColor: '#999',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.textMuted,
   },
   modalButtonText: {
-    color: 'white',
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
 });

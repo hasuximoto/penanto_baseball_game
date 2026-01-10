@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, SafeAreaView } from 'react-native';
 import { Player, TeamId, Team } from '../types';
 import { dbManager } from '../services/databaseManager';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
 
 interface RosterMoveScreenProps {
   route: {
@@ -104,7 +105,6 @@ export const RosterMoveScreen: React.FC<RosterMoveScreenProps> = ({ route, navig
 
   const renderPlayerItem = ({ item }: { item: Player }) => {
     const isSelected = selectedPlayer?.id === item.id;
-    const isPitcher = item.position === 'P';
     
     return (
       <TouchableOpacity 
@@ -112,7 +112,9 @@ export const RosterMoveScreen: React.FC<RosterMoveScreenProps> = ({ route, navig
         onPress={() => setSelectedPlayer(item)}
       >
         <View style={styles.playerInfo}>
-          <Text style={styles.positionText}>{item.position}</Text>
+          <View style={styles.positionBadge}>
+               <Text style={styles.positionText}>{item.position}</Text>
+          </View>
           <Text style={styles.nameText}>{item.name}</Text>
         </View>
         {isSelected && (
@@ -135,21 +137,24 @@ export const RosterMoveScreen: React.FC<RosterMoveScreenProps> = ({ route, navig
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>一軍登録・抹消</Text>
-        <Text style={styles.headerSubtitle}>一軍枠: {activePlayers.length} / 29</Text>
+        <View style={{ alignItems: 'center' }}>
+            <Text style={styles.headerTitle}>一軍登録・抹消</Text>
+            <Text style={styles.headerSubtitle}>一軍枠: {activePlayers.length} / 29</Text>
+        </View>
+        <View style={{ width: 24 }} />
       </View>
 
       <View style={styles.listsContainer}>
         <View style={styles.listColumn}>
-          <View style={[styles.columnHeader, { backgroundColor: '#E3F2FD' }]}>
+          <View style={[styles.columnHeader, { backgroundColor: COLORS.card }]}>
             <Text style={styles.columnTitle}>一軍 (Active)</Text>
           </View>
           <FlatList
@@ -167,7 +172,7 @@ export const RosterMoveScreen: React.FC<RosterMoveScreenProps> = ({ route, navig
         <View style={styles.divider} />
 
         <View style={styles.listColumn}>
-          <View style={[styles.columnHeader, { backgroundColor: '#FFEBEE' }]}>
+          <View style={[styles.columnHeader, { backgroundColor: COLORS.card }]}>
             <Text style={styles.columnTitle}>二軍 (Farm)</Text>
           </View>
           <FlatList
@@ -182,35 +187,43 @@ export const RosterMoveScreen: React.FC<RosterMoveScreenProps> = ({ route, navig
           />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
   header: {
-    padding: 15,
-    backgroundColor: '#4CAF50',
+    padding: SPACING.md,
+    backgroundColor: COLORS.background,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  backButton: {
+    padding: SPACING.xs,
+  },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: COLORS.text,
+    fontFamily: FONTS.bold,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: '#fff',
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
   listsContainer: {
     flex: 1,
@@ -221,59 +234,76 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: COLORS.border,
   },
   columnHeader: {
-    padding: 10,
+    padding: SPACING.sm,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: COLORS.border,
+    // Background color is set inline
   },
   columnTitle: {
     fontWeight: 'bold',
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
   },
   listContent: {
-    padding: 5,
+    padding: SPACING.xs,
   },
   playerItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 10,
+    padding: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    backgroundColor: '#fff',
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.card,
+    marginBottom: 4,
+    borderRadius: 8,
   },
   selectedItem: {
-    backgroundColor: '#E8F5E9',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+    borderWidth: 1,
   },
   playerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
+  positionBadge: {
+    backgroundColor: COLORS.background,
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    minWidth: 32,
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
   positionText: {
-    width: 30,
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#666',
+    color: COLORS.text,
   },
   nameText: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.text,
+    fontFamily: FONTS.regular,
   },
   actionButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 4,
-    marginLeft: 5,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginLeft: SPACING.sm,
   },
   promoteButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.primary,
   },
   demoteButton: {
-    backgroundColor: '#F44336',
+    backgroundColor: COLORS.negative,
   },
   actionButtonText: {
     color: '#fff',

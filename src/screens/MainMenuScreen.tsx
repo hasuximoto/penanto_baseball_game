@@ -8,6 +8,9 @@ import {
   ActivityIndicator,
   Modal,
   TextInput,
+  Dimensions,
+  SafeAreaView,
+  StatusBar
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,10 +21,15 @@ import { addDays, resetGame, incrementDate, setGameState, setPlayableFlags, setS
 import { Player } from '@/types';
 import { RosterModal } from '@/components/RosterModal';
 import { getGameDateString, formatDateJP } from '@/utils/dateUtils';
+import { COLORS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get('window');
+const COLUMN_WIDTH = (width - SPACING.md * 3) / 2;
 
 /**
  * MainMenuScreen - メインメニュー画面
- * VBA: main_menu.frm から変換
+ * Refactored for Modern Dark & Gold Design
  */
 export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -245,168 +253,202 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     }
   };
 
-  const handleStoveLeague = () => {
-    navigation.navigate('StoveLeague');
-  };
-
   const handleSettings = () => {
     navigation.navigate('Settings');
   };
 
+  const handleStoveLeague = () => {
+    navigation.navigate('StoveLeague');
+  };
+
+  // ----- Render Components -----
+
+  const renderDashboardHeader = () => (
+    <View style={styles.dashboardHeader}>
+      <View style={styles.dateCard}>
+        <Text style={styles.seasonText}>{gameState.season}</Text>
+        <Text style={styles.dateText}>{formatDateJP(getGameDateString(gameState.currentDate, gameState.season))}</Text>
+      </View>
+      <View style={styles.statusBadge}>
+         <Ionicons name="baseball-outline" size={16} color={COLORS.primary} />
+         <Text style={styles.statusText}> SEASON ACTIVE </Text>
+      </View>
+    </View>
+  );
+
+  const renderActionGrid = () => (
+    <View style={styles.gridContainer}>
+      {/* Primary Action: Play / Skip */}
+      <TouchableOpacity
+        style={[styles.actionCard, styles.primaryActionCard, (gameState.playableFlags.seasonEnded || loading) && styles.disabledCard]}
+        onPress={handleGameStart}
+        activeOpacity={0.8}
+        disabled={gameState.playableFlags.seasonEnded || loading}
+      >
+        <View style={styles.iconCircle}>
+           <Ionicons name="play" size={32} color={COLORS.background} />
+        </View>
+        <Text style={styles.primaryActionTitle}>MATCH START</Text>
+        <Text style={styles.primaryActionSubtitle}>本日の試合を開始</Text>
+      </TouchableOpacity>
+
+      <View style={styles.row}>
+          <TouchableOpacity
+            style={[styles.smallCard, (gameState.playableFlags.seasonEnded || loading) && styles.disabledCard]}
+            onPress={() => setSkipModalVisible(true)}
+            activeOpacity={0.7}
+            disabled={gameState.playableFlags.seasonEnded || loading}
+          >
+            <Ionicons name="play-forward-outline" size={28} color={COLORS.primary} />
+            <Text style={styles.cardTitle}>SKIP</Text>
+            <Text style={styles.cardSubtitle}>日程進行</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.smallCard, (!gameState.playableFlags.seasonEnded || loading) && styles.disabledCard]}
+            onPress={handleStoveLeague}
+            activeOpacity={0.7}
+            disabled={!gameState.playableFlags.seasonEnded || loading}
+          >
+            <Ionicons name="construct-outline" size={28} color={gameState.playableFlags.seasonEnded ? COLORS.primary : COLORS.textMuted} />
+            <Text style={[styles.cardTitle, !gameState.playableFlags.seasonEnded && {color: COLORS.textMuted}]}>OFF SEASON</Text>
+            <Text style={[styles.cardSubtitle, !gameState.playableFlags.seasonEnded && {color: COLORS.textMuted}]}>ストーブリーグ</Text>
+          </TouchableOpacity>
+      </View>
+
+      <View style={styles.row}>
+         <TouchableOpacity
+            style={[styles.smallCard, loading && styles.disabledCard]}
+            onPress={() => navigation.navigate('TitleHistory')}
+            activeOpacity={0.7}
+            disabled={loading}
+          >
+            <Ionicons name="trophy-outline" size={28} color={COLORS.secondary} />
+            <Text style={styles.cardTitle}>HISTORY</Text>
+            <Text style={styles.cardSubtitle}>タイトル履歴</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.smallCard, loading && styles.disabledCard]}
+            onPress={handleSettings}
+            activeOpacity={0.7}
+            disabled={loading}
+          >
+            <Ionicons name="settings-outline" size={28} color={COLORS.textSecondary} />
+            <Text style={styles.cardTitle}>SETTINGS</Text>
+            <Text style={styles.cardSubtitle}>設定</Text>
+          </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderStandingsTable = (title: string, teams: any[], leagueColor: string) => (
+    <View style={[styles.standingsCard, { borderColor: leagueColor }]}>
+        <View style={[styles.standingsHeader, { borderBottomColor: leagueColor }]}>
+            <Text style={[styles.standingsTitle, { color: leagueColor }]}>{title}</Text>
+            <Ionicons name="podium-outline" size={20} color={leagueColor} />
+        </View>
+        
+        {teams.length > 0 ? (
+          teams.map((team, index) => (
+            <TouchableOpacity 
+              key={team.id} 
+              style={styles.standingsRow}
+              onPress={() => handleTeamPress(team)}
+            >
+              <View style={[styles.rankBadge, index === 0 ? {backgroundColor: leagueColor} : {}]}>
+                  <Text style={[styles.rankText, index === 0 ? {color: COLORS.background} : {color: COLORS.textSecondary}]}>{index + 1}</Text>
+              </View>
+              <Text style={styles.teamName}>{team.name}</Text>
+              <View style={styles.recordContainer}>
+                <Text style={styles.recordText}>
+                    {team.record?.wins}<Text style={styles.recordLabel}>W </Text> 
+                    {team.record?.losses}<Text style={styles.recordLabel}>L </Text>
+                    {team.record?.draws}<Text style={styles.recordLabel}>D </Text>
+                </Text>
+                {team.record?.gamesBack !== undefined && team.record.gamesBack > 0 && 
+                    <Text style={styles.gbText}>{team.record.gamesBack} G</Text>
+                }
+                {team.record?.magicNumber !== undefined && team.record.magicNumber === 0 &&
+                    <Text style={styles.championText}>CHAMPION</Text>
+                }
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>No Data</Text>
+        )}
+    </View>
+  );
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {/* ヘッダー */}
-      <View style={styles.header}>
-        <Text style={styles.title}>SimBaseBall</Text>
-        <Text style={styles.subtitle}>
-          {gameState.season}年 {formatDateJP(getGameDateString(gameState.currentDate, gameState.season))}
-        </Text>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        
+        {renderDashboardHeader()}
+        
+        {renderActionGrid()}
 
-      {/* スタンディングス */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>パ・リーグ</Text>
-        {pacificStandings.length > 0 ? (
-          pacificStandings.map((team, index) => (
-            <TouchableOpacity 
-              key={team.id} 
-              style={styles.standingsRow}
-              onPress={() => handleTeamPress(team)}
-            >
-              <Text style={styles.rank}>{index + 1}</Text>
-              <Text style={styles.teamName}>{team.name}</Text>
-              <Text style={styles.record}>
-                {team.record?.wins || 0}勝 {team.record?.losses || 0}敗 {team.record?.draws || 0}分
-                {team.record?.gamesBack !== undefined && team.record.gamesBack > 0 ? ` ${team.record.gamesBack}差` : ''}
-                {team.record?.magicNumber !== undefined && (
-                  team.record.magicNumber === 0 ? ' 優勝' : ` M${team.record.magicNumber}`
-                )}
-              </Text>
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={styles.emptyText}>データなし</Text>
-        )}
-      </View>
+        <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>LEAGUE STANDINGS</Text>
+        </View>
+        
+        {renderStandingsTable('PACIFIC LEAGUE', pacificStandings, COLORS.primary)}
+        {renderStandingsTable('CENTRAL LEAGUE', centralStandings, '#4CAF50')}
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>セ・リーグ</Text>
-        {centralStandings.length > 0 ? (
-          centralStandings.map((team, index) => (
-            <TouchableOpacity 
-              key={team.id} 
-              style={styles.standingsRow}
-              onPress={() => handleTeamPress(team)}
-            >
-              <Text style={styles.rank}>{index + 1}</Text>
-              <Text style={styles.teamName}>{team.name}</Text>
-              <Text style={styles.record}>
-                {team.record?.wins || 0}勝 {team.record?.losses || 0}敗 {team.record?.draws || 0}分
-                {team.record?.gamesBack !== undefined && team.record.gamesBack > 0 ? ` ${team.record.gamesBack}差` : ''}
-                {team.record?.magicNumber !== undefined && (
-                  team.record.magicNumber === 0 ? ' 優勝' : ` M${team.record.magicNumber}`
-                )}
-              </Text>
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={styles.emptyText}>データなし</Text>
-        )}
-      </View>
-
-      {/* ボタングループ */}
-      <View style={styles.buttonGroup}>
-        <TouchableOpacity
-          style={[styles.button, styles.primaryButton, (gameState.playableFlags.seasonEnded || loading) && styles.disabledButton]}
-          onPress={handleGameStart}
-          activeOpacity={0.7}
-          disabled={gameState.playableFlags.seasonEnded || loading}
+        {/* Debug Button (Small) */}
+        <TouchableOpacity 
+          style={styles.debugLink} 
+          onPress={() => navigation.navigate('Debug')}
         >
-          <Text style={styles.buttonText}>試合を開始</Text>
+          <Text style={styles.debugLinkText}>Debug Menu</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#2196F3', marginTop: 10 }, (gameState.playableFlags.seasonEnded || loading) && styles.disabledButton]}
-          onPress={() => setSkipModalVisible(true)}
-          activeOpacity={0.7}
-          disabled={gameState.playableFlags.seasonEnded || loading}
-        >
-          <Text style={styles.buttonText}>日程スキップ</Text>
-        </TouchableOpacity>
+        <View style={styles.footerSpacing} />
 
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton, (!gameState.playableFlags.seasonEnded || loading) && styles.disabledButton]}
-          onPress={handleStoveLeague}
-          activeOpacity={0.7}
-          disabled={!gameState.playableFlags.seasonEnded || loading}
-        >
-          <Text style={styles.buttonText}>オフシーズン</Text>
-        </TouchableOpacity>
+      </ScrollView>
 
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton, loading && styles.disabledButton]}
-          onPress={() => navigation.navigate('TitleHistory')}
-          activeOpacity={0.7}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>タイトル履歴</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton, loading && styles.disabledButton]}
-          onPress={handleSettings}
-          activeOpacity={0.7}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>設定</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* フッター */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>SimBaseBall v1.0</Text>
-      </View>
-
+      {/* Modals */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={skipModalVisible}
         onRequestClose={() => setSkipModalVisible(false)}
       >
-        <View style={styles.modalCenteredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>スキップする日数を入力:</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={setSkipDays}
-              value={skipDays}
-              keyboardType="numeric"
-              placeholder="Days"
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, styles.secondaryButton, { marginRight: 10, flex: 1 }]}
-                onPress={() => setSkipModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>キャンセル</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.primaryButton, { marginLeft: 10, flex: 1 }]}
-                onPress={handleSkipDays}
-              >
-                <Text style={styles.buttonText}>実行</Text>
-              </TouchableOpacity>
+        <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                    <Ionicons name="time-outline" size={24} color={COLORS.primary} />
+                    <Text style={styles.modalTitle}>SKIP SCHEDULE</Text>
+                </View>
+                <Text style={styles.modalMessage}>何日分スキップしますか？</Text>
+                <TextInput
+                    style={styles.input}
+                    onChangeText={setSkipDays}
+                    value={skipDays}
+                    keyboardType="numeric"
+                    placeholder="Days"
+                    placeholderTextColor={COLORS.textMuted}
+                />
+                <View style={styles.modalActions}>
+                    <TouchableOpacity style={styles.cancelAction} onPress={() => setSkipModalVisible(false)}>
+                        <Text style={styles.cancelText}>CANCEL</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.confirmAction} onPress={handleSkipDays}>
+                        <Text style={styles.confirmText}>EXECUTE</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-          </View>
         </View>
       </Modal>
 
@@ -450,228 +492,345 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
         </View>
       </Modal>
 
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.debugButton} 
-          onPress={() => navigation.navigate('Debug')}
-        >
-          <Text style={styles.debugButtonText}>Debug Menu</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 16,
+  scrollContent: {
+      padding: SPACING.md,
+      paddingBottom: 40,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+  
+  // Header
+  dashboardHeader: {
+      marginBottom: SPACING.lg,
+      alignItems: 'flex-start',
   },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#666',
+  dateCard: {
+      marginBottom: SPACING.xs,
   },
-  header: {
-    alignItems: 'center',
-    marginVertical: 24,
+  seasonText: {
+      fontSize: 14,
+      color: COLORS.primary,
+      fontWeight: 'bold',
+      letterSpacing: 2,
   },
-  title: {
-    fontSize: 40,
+  dateText: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: COLORS.textPrimary,
+  },
+  statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(212, 175, 55, 0.15)',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: 'rgba(212, 175, 55, 0.3)',
+  },
+  statusText: {
+      color: COLORS.primary,
+      fontSize: 12,
+      fontWeight: 'bold',
+      marginLeft: 4,
+  },
+  // Grid
+  gridContainer: {
+      marginBottom: SPACING.lg,
+  },
+  row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: SPACING.md,
+  },
+  
+  // Action Cards
+  primaryActionCard: {
+      backgroundColor: COLORS.card,
+      borderRadius: 12,
+      padding: SPACING.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: 120,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      elevation: 6,
+      borderWidth: 1,
+      borderColor: COLORS.primary,
+  },
+  iconCircle: {
+      backgroundColor: COLORS.primary,
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: SPACING.sm,
+      position: 'absolute',
+      right: 20,
+      top: 20,
+  },
+  primaryActionTitle: {
+      color: COLORS.textPrimary,
+      fontSize: 24,
+      fontWeight: '900',
+      letterSpacing: 1,
+      alignSelf: 'flex-start',
+  },
+  primaryActionSubtitle: {
+      color: COLORS.textSecondary,
+      fontSize: 14,
+      fontWeight: 'bold',
+      alignSelf: 'flex-start',
+      marginTop: 4,
+  },
+  
+  smallCard: {
+      backgroundColor: COLORS.card,
+      width: COLUMN_WIDTH,
+      padding: SPACING.md,
+      borderRadius: 12,
+      height: 100,
+      justifyContent: 'space-between',
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 3,
+      elevation: 3,
+  },
+  cardTitle: {
+      color: COLORS.textPrimary,
+      fontSize: 14,
+      fontWeight: 'bold',
+      marginTop: 8,
+  },
+  cardSubtitle: {
+      color: COLORS.textSecondary,
+      fontSize: 10,
+  },
+  disabledCard: {
+      opacity: 0.5,
+      backgroundColor: '#252525',
+  },
+
+  // Sections
+  sectionHeader: {
+    paddingHorizontal: SPACING.md,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+  },
+  sectionHeaderText: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    paddingLeft: SPACING.sm,
   },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  modalCenteredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22,
-    backgroundColor: 'rgba(0,0,0,0.5)'
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: '80%'
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: 'bold'
-  },
-  input: {
-    height: 40,
-    margin: 12,
+
+  // Standings
+  standingsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    marginHorizontal: SPACING.sm,
+    marginBottom: SPACING.md,
+    overflow: 'hidden',
     borderWidth: 1,
-    padding: 10,
-    width: '100%',
-    borderColor: '#ccc',
-    borderRadius: 5
   },
-  modalButtons: {
+  standingsHeader: {
     flexDirection: 'row',
-    marginTop: 15,
-    width: '100%',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.md,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    borderBottomWidth: 1,
   },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 12,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#333',
+  standingsTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
   standingsRow: {
     flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
     alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  rank: {
-    width: 30,
+  rankBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    backgroundColor: '#333',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.sm,
+  },
+  rankText: {
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#666',
-    fontSize: 14,
   },
   teamName: {
     flex: 1,
-    color: '#333',
-    fontSize: 14,
-    marginLeft: 8,
-  },
-  record: {
-    color: '#666',
+    color: COLORS.textPrimary,
     fontSize: 12,
-    minWidth: 60,
-    textAlign: 'right',
-  },
-  emptyText: {
-    color: '#999',
-    textAlign: 'center',
-    paddingVertical: 12,
-  },
-  buttonGroup: {
-    marginVertical: 24,
-  },
-  button: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginVertical: 8,
-    alignItems: 'center',
-    elevation: 3,
-  },
-  primaryButton: {
-    backgroundColor: '#4CAF50',
-  },
-  secondaryButton: {
-    backgroundColor: '#2196F3',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-    elevation: 0,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
     fontWeight: '600',
   },
-  footer: {
+  recordContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
   },
-  footerText: {
-    color: '#999',
+  recordText: {
+    color: COLORS.textSecondary,
     fontSize: 12,
+    marginRight: 8,
   },
-  debugButton: {
-    marginTop: 10,
-    padding: 5,
+  recordLabel: {
+    fontSize: 9,
+    color: COLORS.textMuted,
   },
-  debugButtonText: {
-    color: '#ccc',
+  gbText: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    backgroundColor: '#333',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  championText: {
+    color: COLORS.primary,
     fontSize: 10,
+    fontWeight: 'bold',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 4,
   },
+  emptyText: {
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    padding: SPACING.lg,
+    fontStyle: 'italic',
+  },
+
+  // Footer / Misc
+  debugLink: {
+    alignSelf: 'center',
+    marginTop: SPACING.xl,
+    padding: 10,
+  },
+  debugLinkText: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  footerSpacing: {
+    height: 40,
+  },
+  loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: COLORS.background,
+  },
+  loadingText: {
+      color: COLORS.textMuted,
+      marginTop: 10,
+  },
+
+  // Modals
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
-    maxWidth: 400,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: SPACING.lg,
+    width: '85%',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
   },
   modalTitle: {
-    fontSize: 20,
+    color: COLORS.textPrimary,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
+    marginLeft: 8,
   },
   modalMessage: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#333',
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.lg,
+    lineHeight: 20,
+  },
+  input: {
+    backgroundColor: '#333',
+    color: COLORS.textPrimary,
+    padding: SPACING.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: SPACING.lg,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  cancelAction: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginRight: 10,
+  },
+  cancelText: {
+    color: COLORS.textMuted,
+    fontWeight: 'bold',
+  },
+  confirmAction: {
+      backgroundColor: COLORS.primary,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+  },
+  confirmText: {
+      color: COLORS.background,
+      fontWeight: 'bold',
   },
   modalButtons2: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'flex-end',
+    marginTop: 10,
   },
   modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    minWidth: 100,
-    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    marginLeft: 10,
   },
   okButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: COLORS.primary,
   },
   cancelButton: {
-    backgroundColor: '#999',
+    backgroundColor: COLORS.textMuted,
   },
   modalButtonText: {
-    color: 'white',
+    color: COLORS.background,
     fontWeight: 'bold',
   },
 });
+

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { GameResult, PlayerGameStats } from '../types';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { GameResult } from '../types';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
 
 export const BoxScoreScreen = ({ route }: any) => {
   const { gameResult } = route.params as { gameResult: GameResult };
@@ -119,164 +120,181 @@ export const BoxScoreScreen = ({ route }: any) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.scoreHeader}>
-          {gameResult.awayTeam.toUpperCase()} {gameResult.awayScore} - {gameResult.homeScore} {gameResult.homeTeam.toUpperCase()}
-        </Text>
-        <Text style={styles.dateText}>
-          Season {gameResult.season} - Day {gameResult.date}
-        </Text>
-      </View>
-
-      {renderLineScore()}
-      
-      <View style={styles.tabs}>
-        <TouchableOpacity 
-          onPress={() => setTab('home')} 
-          style={[styles.tab, tab === 'home' && styles.activeTab]}
-        >
-          <Text style={[styles.tabText, tab === 'home' && styles.activeTabText]}>
-            {gameResult.homeTeam.toUpperCase()}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={() => setTab('away')} 
-          style={[styles.tab, tab === 'away' && styles.activeTab]}
-        >
-          <Text style={[styles.tabText, tab === 'away' && styles.activeTabText]}>
-            {gameResult.awayTeam.toUpperCase()}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Batting</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-          <View>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.colOrder, styles.headerText]}>Ord</Text>
-              <Text style={[styles.colName, styles.headerText]}>Name</Text>
-              <Text style={[styles.colPos, styles.headerText]}>Pos</Text>
-              <Text style={[styles.colStat, styles.headerText]}>AB</Text>
-              <Text style={[styles.colStat, styles.headerText]}>R</Text>
-              <Text style={[styles.colStat, styles.headerText]}>H</Text>
-              <Text style={[styles.colStat, styles.headerText]}>HR</Text>
-              <Text style={[styles.colStat, styles.headerText]}>RBI</Text>
-              {Array.from({ length: gameResult.innings }, (_, i) => i + 1).map(inning => (
-                <Text key={inning} style={[styles.colInning, styles.headerText]}>{inning}</Text>
-              ))}
-            </View>
-            {sortedBatting.map((p, i) => {
-              const isSub = i > 0 && p.order === sortedBatting[i-1].order;
-              return (
-                <View key={i} style={styles.row}>
-                  <Text style={styles.colOrder}>{isSub ? '' : p.order}</Text>
-                  <Text style={[styles.colName, isSub && styles.subName]}>
-                    {isSub ? ' └ ' : ''}{p.playerName}
-                  </Text>
-                  <Text style={styles.colPos}>{p.position}</Text>
-                  <Text style={styles.colStat}>{p.atBats}</Text>
-                  <Text style={styles.colStat}>{p.runs}</Text>
-                  <Text style={styles.colStat}>{p.hits}</Text>
-                  <Text style={styles.colStat}>{p.homeRuns}</Text>
-                  <Text style={styles.colStat}>{p.rbi}</Text>
-                  {Array.from({ length: gameResult.innings }, (_, i) => i + 1).map(inning => {
-                    const details = p.atBatDetails?.filter(d => d.inning === inning).map(d => d.result).join('\n');
-                    return (
-                      <Text key={inning} style={styles.colInning}>{details || ''}</Text>
-                    );
-                  })}
-                </View>
-              );
-            })}
-            {/* Totals Row */}
-            <View style={[styles.row, styles.totalRow]}>
-              <Text style={[styles.colOrder, styles.bold]}></Text>
-              <Text style={[styles.colName, styles.bold]}>Totals</Text>
-              <Text style={styles.colPos}></Text>
-              <Text style={[styles.colStat, styles.bold]}>{batting.reduce((s, p) => s + p.atBats, 0)}</Text>
-              <Text style={[styles.colStat, styles.bold]}>{totalRuns}</Text>
-              <Text style={[styles.colStat, styles.bold]}>{totalHits}</Text>
-              <Text style={[styles.colStat, styles.bold]}>{totalHR}</Text>
-              <Text style={[styles.colStat, styles.bold]}>{totalRBI}</Text>
-              {Array.from({ length: gameResult.innings }, (_, i) => i + 1).map(inning => (
-                <Text key={inning} style={styles.colInning}></Text>
-              ))}
-            </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={{ paddingBottom: SPACING.lg }}>
+        <View style={styles.header}>
+          <View style={styles.scoreInfo}>
+            <Text style={styles.scoreHeader}>
+              {gameResult.awayTeam.toUpperCase()} {gameResult.awayScore} - {gameResult.homeScore} {gameResult.homeTeam.toUpperCase()}
+            </Text>
+            <Text style={styles.dateText}>
+              Season {gameResult.season} - Day {gameResult.date}
+            </Text>
           </View>
-        </ScrollView>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Pitching</Text>
-        <View style={styles.tableHeader}>
-          <Text style={[styles.colStat, styles.headerText]}></Text>
-          <Text style={[styles.colName, styles.headerText]}>Name</Text>
-          <Text style={[styles.colStat, styles.headerText]}>IP</Text>
-          <Text style={[styles.colStat, styles.headerText]}>H</Text>
-          <Text style={[styles.colStat, styles.headerText]}>ER</Text>
-          <Text style={[styles.colStat, styles.headerText]}>K</Text>
-          <Text style={[styles.colStat, styles.headerText]}>BB</Text>
         </View>
-        {sortedPitching.map((p, i) => {
-          let prefix = '';
-          if (p.wins) prefix = '(勝) ';
-          else if (p.losses) prefix = '(負) ';
-          else if (p.saves) prefix = '(S) ';
 
-          return (
-            <View key={i} style={styles.row}>
-              <Text style={styles.colStat}>{prefix}</Text>
-              <Text style={styles.colName}>{p.playerName}</Text>
-              <Text style={styles.colStat}>{formatInnings(p.inningsPitched || 0)}</Text>
-              <Text style={styles.colStat}>{p.pitchingHits || 0}</Text>
-              <Text style={styles.colStat}>{p.earnedRuns}</Text>
-              <Text style={styles.colStat}>{p.pitchingStrikeouts}</Text>
-              <Text style={styles.colStat}>{p.pitchingWalks}</Text>
+        {renderLineScore()}
+        
+        <View style={styles.tabs}>
+          <TouchableOpacity 
+            onPress={() => setTab('home')} 
+            style={[styles.tab, tab === 'home' && styles.activeTab]}
+          >
+            <Text style={[styles.tabText, tab === 'home' && styles.activeTabText]}>
+              {gameResult.homeTeam.toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => setTab('away')} 
+            style={[styles.tab, tab === 'away' && styles.activeTab]}
+          >
+            <Text style={[styles.tabText, tab === 'away' && styles.activeTabText]}>
+              {gameResult.awayTeam.toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Batting</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            <View>
+              <View style={styles.tableHeader}>
+                <Text style={[styles.colOrder, styles.headerText]}>Ord</Text>
+                <Text style={[styles.colName, styles.headerText]}>Name</Text>
+                <Text style={[styles.colPos, styles.headerText]}>Pos</Text>
+                <Text style={[styles.colStat, styles.headerText]}>AB</Text>
+                <Text style={[styles.colStat, styles.headerText]}>R</Text>
+                <Text style={[styles.colStat, styles.headerText]}>H</Text>
+                <Text style={[styles.colStat, styles.headerText]}>HR</Text>
+                <Text style={[styles.colStat, styles.headerText]}>RBI</Text>
+                {Array.from({ length: gameResult.innings }, (_, i) => i + 1).map(inning => (
+                  <Text key={inning} style={[styles.colInning, styles.headerText]}>{inning}</Text>
+                ))}
+              </View>
+              {sortedBatting.map((p, i) => {
+                const isSub = i > 0 && p.order === sortedBatting[i-1].order;
+                return (
+                  <View key={i} style={styles.row}>
+                    <Text style={styles.colOrder}>{isSub ? '' : p.order}</Text>
+                    <Text style={[styles.colName, isSub && styles.subName]}>
+                      {isSub ? ' └ ' : ''}{p.playerName}
+                    </Text>
+                    <Text style={styles.colPos}>{p.position}</Text>
+                    <Text style={styles.colStat}>{p.atBats}</Text>
+                    <Text style={styles.colStat}>{p.runs}</Text>
+                    <Text style={styles.colStat}>{p.hits}</Text>
+                    <Text style={styles.colStat}>{p.homeRuns}</Text>
+                    <Text style={styles.colStat}>{p.rbi}</Text>
+                    {Array.from({ length: gameResult.innings }, (_, i) => i + 1).map(inning => {
+                      const details = p.atBatDetails?.filter(d => d.inning === inning).map(d => d.result).join('\n');
+                      return (
+                        <Text key={inning} style={styles.colInning}>{details || ''}</Text>
+                      );
+                    })}
+                  </View>
+                );
+              })}
+              {/* Totals Row */}
+              <View style={[styles.row, styles.totalRow]}>
+                <Text style={[styles.colOrder, styles.bold]}></Text>
+                <Text style={[styles.colName, styles.bold]}>Totals</Text>
+                <Text style={styles.colPos}></Text>
+                <Text style={[styles.colStat, styles.bold]}>{batting.reduce((s, p) => s + p.atBats, 0)}</Text>
+                <Text style={[styles.colStat, styles.bold]}>{totalRuns}</Text>
+                <Text style={[styles.colStat, styles.bold]}>{totalHits}</Text>
+                <Text style={[styles.colStat, styles.bold]}>{totalHR}</Text>
+                <Text style={[styles.colStat, styles.bold]}>{totalRBI}</Text>
+                {Array.from({ length: gameResult.innings }, (_, i) => i + 1).map(inning => (
+                  <Text key={inning} style={styles.colInning}></Text>
+                ))}
+              </View>
             </View>
-          );
-        })}
-         {/* Pitching Totals Row */}
-         <View style={[styles.row, styles.totalRow]}>
-          <Text style={[styles.colStat, styles.bold]}></Text>
-          <Text style={[styles.colName, styles.bold]}>Totals</Text>
-          <Text style={[styles.colStat, styles.bold]}>{formatInnings(pitching.reduce((s, p) => s + (p.inningsPitched || 0), 0))}</Text>
-          <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.pitchingHits || 0), 0)}</Text>
-          <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.earnedRuns || 0), 0)}</Text>
-          <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.pitchingStrikeouts || 0), 0)}</Text>
-          <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.pitchingWalks || 0), 0)}</Text>
+          </ScrollView>
         </View>
-      </View>
-    </ScrollView>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pitching</Text>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.colStat, styles.headerText]}></Text>
+            <Text style={[styles.colName, styles.headerText]}>Name</Text>
+            <Text style={[styles.colStat, styles.headerText]}>IP</Text>
+            <Text style={[styles.colStat, styles.headerText]}>H</Text>
+            <Text style={[styles.colStat, styles.headerText]}>ER</Text>
+            <Text style={[styles.colStat, styles.headerText]}>K</Text>
+            <Text style={[styles.colStat, styles.headerText]}>BB</Text>
+          </View>
+          {sortedPitching.map((p, i) => {
+            let prefix = '';
+            if (p.wins) prefix = '(勝) ';
+            else if (p.losses) prefix = '(負) ';
+            else if (p.saves) prefix = '(S) ';
+
+            return (
+              <View key={i} style={styles.row}>
+                <Text style={styles.colStat}>{prefix}</Text>
+                <Text style={styles.colName}>{p.playerName}</Text>
+                <Text style={styles.colStat}>{formatInnings(p.inningsPitched || 0)}</Text>
+                <Text style={styles.colStat}>{p.pitchingHits || 0}</Text>
+                <Text style={styles.colStat}>{p.earnedRuns}</Text>
+                <Text style={styles.colStat}>{p.pitchingStrikeouts}</Text>
+                <Text style={styles.colStat}>{p.pitchingWalks}</Text>
+              </View>
+            );
+          })}
+           {/* Pitching Totals Row */}
+           <View style={[styles.row, styles.totalRow]}>
+            <Text style={[styles.colStat, styles.bold]}></Text>
+            <Text style={[styles.colName, styles.bold]}>Totals</Text>
+            <Text style={[styles.colStat, styles.bold]}>{formatInnings(pitching.reduce((s, p) => s + (p.inningsPitched || 0), 0))}</Text>
+            <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.pitchingHits || 0), 0)}</Text>
+            <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.earnedRuns || 0), 0)}</Text>
+            <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.pitchingStrikeouts || 0), 0)}</Text>
+            <Text style={[styles.colStat, styles.bold]}>{pitching.reduce((s, p) => s + (p.pitchingWalks || 0), 0)}</Text>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   header: {
-    padding: 20,
-    backgroundColor: '#f8f8f8',
+    padding: SPACING.md,
+    backgroundColor: COLORS.card,
+    flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
+  },
+  backButton: {
+    marginRight: SPACING.md,
+  },
+  scoreInfo: {
+      flex: 1,
+      alignItems: 'center',
   },
   scoreHeader: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: COLORS.textMain,
     marginBottom: 5,
+    fontFamily: FONTS.bold,
   },
   dateText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   lineScoreContainer: {
-    padding: 15,
+    padding: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.card,
+    marginBottom: SPACING.sm,
   },
   lineScoreRow: {
     flexDirection: 'row',
@@ -285,108 +303,130 @@ const styles = StyleSheet.create({
   lineScoreTeam: {
     width: 60,
     fontWeight: 'bold',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   lineScoreCell: {
     width: 25,
     textAlign: 'center',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   lineScoreTotal: {
     width: 30,
     textAlign: 'center',
     fontWeight: 'bold',
     marginLeft: 5,
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   lineScoreHeader: {
-    color: '#666',
+    color: COLORS.textMuted,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   tabs: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.card,
   },
   tab: {
     flex: 1,
-    padding: 15,
+    padding: SPACING.md,
     alignItems: 'center',
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#2196F3',
+    borderBottomColor: COLORS.primary,
   },
   tabText: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   activeTabText: {
-    color: '#2196F3',
+    color: COLORS.primary,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   section: {
-    padding: 15,
+    padding: SPACING.md,
+    backgroundColor: COLORS.background,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   tableHeader: {
     flexDirection: 'row',
     paddingBottom: 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
     marginBottom: 5,
   },
   headerText: {
     fontWeight: 'bold',
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bold,
   },
   row: {
     flexDirection: 'row',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.border,
   },
   totalRow: {
     borderTopWidth: 2,
-    borderTopColor: '#ccc',
+    borderTopColor: COLORS.border,
     marginTop: 5,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLORS.primary,
   },
   colName: {
     width: 100, // Fixed width for horizontal scroll
     fontSize: 14,
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   colOrder: {
     width: 30,
     fontSize: 14,
     textAlign: 'center',
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   subName: {
-    color: '#555',
+    color: COLORS.textMuted,
     fontStyle: 'italic',
   },
   colPos: {
     width: 40,
     fontSize: 14,
     textAlign: 'center',
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   colStat: {
     width: 35,
     fontSize: 14,
     textAlign: 'center',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   colInning: {
     width: 45,
     fontSize: 12,
     textAlign: 'center',
     borderLeftWidth: 1,
-    borderLeftColor: '#eee',
+    borderLeftColor: COLORS.border,
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   bold: {
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
 });

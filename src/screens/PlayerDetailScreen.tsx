@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Player, YearlyStats } from '../types';
 import { dbManager } from '../services/databaseManager';
+import { COLORS, SPACING } from '../utils/theme';
 
 type Tab = 'stats' | 'abilities' | 'yearlyStats';
 
@@ -36,7 +38,14 @@ export const PlayerDetailScreen = ({ route }: any) => {
 
   const renderStats = () => {
     const stats = player.stats;
-    if (!stats) return <Text>成績データなし</Text>;
+    if (!stats) return <Text style={{color: COLORS.textPrimary, padding: 20}}>成績データなし</Text>;
+
+    const StatBox = ({ label, value, highlight = false }: { label: string, value: string | number, highlight?: boolean }) => (
+        <View style={styles.statBox}>
+            <Text style={styles.statLabel}>{label}</Text>
+            <Text style={[styles.statValue, highlight && styles.highlightStat]}>{value}</Text>
+        </View>
+    );
 
     if (player.position === 'P') {
       const formatInnings = (innings: number) => {
@@ -49,32 +58,33 @@ export const PlayerDetailScreen = ({ route }: any) => {
       };
 
       return (
-        <View style={styles.statsContainer}>
-          <View style={styles.statRow}><Text style={styles.statLabel}>登板</Text><Text style={styles.statValue}>{stats.gamesPitched || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>投球回</Text><Text style={styles.statValue}>{formatInnings(stats.inningsPitched || 0)}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>自責点</Text><Text style={styles.statValue}>{stats.earnedRuns}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>被安打</Text><Text style={styles.statValue}>{stats.pitchingHits || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>被本塁打</Text><Text style={styles.statValue}>{stats.pitchingHomeRuns || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>奪三振</Text><Text style={styles.statValue}>{stats.strikeOuts}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>与四球</Text><Text style={styles.statValue}>{stats.pitchingWalks || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>与死球</Text><Text style={styles.statValue}>{stats.pitchingHitByPitch || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>完投</Text><Text style={styles.statValue}>{stats.completeGames || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>完封</Text><Text style={styles.statValue}>{stats.shutouts || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>勝</Text><Text style={styles.statValue}>{stats.wins}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>敗</Text><Text style={styles.statValue}>{stats.losses}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>セーブ</Text><Text style={styles.statValue}>{stats.saves}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>先発</Text><Text style={styles.statValue}>{stats.gamesStarted || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>救援</Text><Text style={styles.statValue}>{(stats.gamesPitched || 0) - (stats.gamesStarted || 0)}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>QS</Text><Text style={styles.statValue}>{stats.qualityStarts || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>防御率</Text><Text style={styles.statValue}>{stats.era?.toFixed(2)}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>奪三振率</Text><Text style={styles.statValue}>{stats.k9?.toFixed(2) || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>与四球率</Text><Text style={styles.statValue}>{stats.bb9?.toFixed(2) || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>WHIP</Text><Text style={styles.statValue}>{stats.whip?.toFixed(2) || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>WAR</Text><Text style={styles.statValue}>{stats.war?.toFixed(1) || '0.0'}</Text></View>
+        <View>
+            <Text style={styles.sectionTitle}>メイン成績</Text>
+            <View style={styles.gridContainer}>
+                <StatBox label="防御率" value={stats.era?.toFixed(2) || '-'} highlight />
+                <StatBox label="勝利" value={stats.wins || 0} highlight />
+                <StatBox label="セーブ" value={stats.saves || 0} />
+                <StatBox label="登板" value={stats.gamesPitched || 0} />
+                <StatBox label="奪三振" value={stats.strikeOuts || 0} />
+                <StatBox label="WHIP" value={stats.whip?.toFixed(2) || '-'} />
+            </View>
+
+            <Text style={styles.sectionTitle}>詳細成績</Text>
+            <View style={styles.gridContainer}>
+                <StatBox label="敗北" value={stats.losses || 0} />
+                <StatBox label="投球回" value={formatInnings(stats.inningsPitched || 0)} />
+                <StatBox label="先発" value={stats.gamesStarted || 0} />
+                <StatBox label="完投" value={stats.completeGames || 0} />
+                <StatBox label="完封" value={stats.shutouts || 0} />
+                <StatBox label="QS" value={stats.qualityStarts || 0} />
+                <StatBox label="奪三振率" value={stats.k9?.toFixed(2) || '-'} />
+                <StatBox label="与四球率" value={stats.bb9?.toFixed(2) || '-'} />
+                <StatBox label="WAR" value={stats.war?.toFixed(1) || '0.0'} />
+            </View>
         </View>
       );
     } else {
-      // Calculate derived stats if missing
+      // Calculate derived stats
       const hits = stats.hits || 0;
       const doubles = stats.doubles || 0;
       const triples = stats.triples || 0;
@@ -93,39 +103,39 @@ export const PlayerDetailScreen = ({ route }: any) => {
       const ops = obp + slugging;
 
       return (
-        <View style={styles.statsContainer}>
-          <View style={styles.statRow}><Text style={styles.statLabel}>試合</Text><Text style={styles.statValue}>{stats.gamesPlayed || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>打席</Text><Text style={styles.statValue}>{stats.plateAppearances || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>打数</Text><Text style={styles.statValue}>{atBats}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>安打</Text><Text style={styles.statValue}>{hits}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>二塁打</Text><Text style={styles.statValue}>{doubles}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>三塁打</Text><Text style={styles.statValue}>{triples}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>本塁打</Text><Text style={styles.statValue}>{homeRuns}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>打点</Text><Text style={styles.statValue}>{stats.rbi}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>三振</Text><Text style={styles.statValue}>{stats.batterStrikeouts || stats.strikeOuts || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>四球</Text><Text style={styles.statValue}>{walks}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>死球</Text><Text style={styles.statValue}>{hitByPitch}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>犠打</Text><Text style={styles.statValue}>{stats.sacrificeBunts || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>犠飛</Text><Text style={styles.statValue}>{sacrificeFlies}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>盗塁</Text><Text style={styles.statValue}>{stats.stolenBases}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>盗塁死</Text><Text style={styles.statValue}>{stats.caughtStealing || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>併殺打</Text><Text style={styles.statValue}>{stats.doublePlays || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>失策</Text><Text style={styles.statValue}>{stats.errors || 0}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>打率</Text><Text style={styles.statValue}>{stats.average?.toFixed(3)}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>出塁率</Text><Text style={styles.statValue}>{stats.obp?.toFixed(3) || obp.toFixed(3)}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>長打率</Text><Text style={styles.statValue}>{stats.slugging?.toFixed(3) || slugging.toFixed(3)}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>OPS</Text><Text style={styles.statValue}>{stats.ops?.toFixed(3) || ops.toFixed(3)}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>UZR</Text><Text style={styles.statValue}>{stats.uzr?.toFixed(1) || '0.0'}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>UBR</Text><Text style={styles.statValue}>{stats.ubr?.toFixed(1) || '0.0'}</Text></View>
-          <View style={styles.statRow}><Text style={styles.statLabel}>WAR</Text><Text style={styles.statValue}>{stats.war?.toFixed(1) || '0.0'}</Text></View>
+        <View>
+            <Text style={styles.sectionTitle}>メイン成績</Text>
+            <View style={styles.gridContainer}>
+                <StatBox label="打率" value={stats.average?.toFixed(3) || '.000'} highlight />
+                <StatBox label="本塁打" value={homeRuns} highlight />
+                <StatBox label="打点" value={stats.rbi || 0} highlight />
+                <StatBox label="OPS" value={stats.ops?.toFixed(3) || ops.toFixed(3)} />
+                <StatBox label="安打" value={hits} />
+                <StatBox label="盗塁" value={stats.stolenBases || 0} />
+            </View>
+
+            <Text style={styles.sectionTitle}>詳細成績</Text>
+            <View style={styles.gridContainer}>
+                <StatBox label="試合" value={stats.gamesPlayed || 0} />
+                <StatBox label="打席" value={stats.plateAppearances || 0} />
+                <StatBox label="打数" value={atBats} />
+                <StatBox label="二塁打" value={doubles} />
+                <StatBox label="三塁打" value={triples} />
+                <StatBox label="四球" value={walks} />
+                <StatBox label="三振" value={stats.batterStrikeouts || stats.strikeOuts || 0} />
+                <StatBox label="出塁率" value={stats.obp?.toFixed(3) || obp.toFixed(3)} />
+                <StatBox label="長打率" value={stats.slugging?.toFixed(3) || slugging.toFixed(3)} />
+                <StatBox label="WAR" value={stats.war?.toFixed(1) || '0.0'} />
+            </View>
         </View>
       );
     }
   };
 
+
   const renderAbilities = () => {
     const abilities = player.abilities;
-    if (!abilities) return <Text>能力データなし</Text>;
+    if (!abilities) return <Text style={{color: COLORS.textPrimary}}>能力データなし</Text>;
 
     const getRank = (value: number | undefined) => {
       if (value == null) return 'G';
@@ -141,14 +151,14 @@ export const PlayerDetailScreen = ({ route }: any) => {
 
     const getRankColor = (rank: string) => {
       switch (rank) {
-        case 'S': return '#FFD700'; // Gold
-        case 'A': return '#FF4500'; // OrangeRed
-        case 'B': return '#FFA500'; // Orange
-        case 'C': return '#32CD32'; // LimeGreen
-        case 'D': return '#1E90FF'; // DodgerBlue
-        case 'E': return '#9370DB'; // MediumPurple
-        case 'F': return '#808080'; // Gray
-        default: return '#000000';
+        case 'S': return COLORS.primary; // Gold
+        case 'A': return '#C0C0C0'; // Silver
+        case 'B': return '#CD7F32'; // Bronze
+        case 'C': return '#4682B4'; // Metallic Blue
+        case 'D': return '#2E8B57'; // Sea Green
+        case 'E': return '#778899'; // Light Slate Gray
+        case 'F': return '#696969'; // Dim Gray
+        default: return COLORS.textMuted;
       }
     };
 
@@ -165,7 +175,7 @@ export const PlayerDetailScreen = ({ route }: any) => {
 
     const renderPitchTypes = (pitchTypes: { name: string; value: number }[] | undefined) => {
       if (!pitchTypes || pitchTypes.length === 0) return (
-        <View style={styles.statRow}>
+        <View style={styles.statBox}>
           <Text style={styles.statLabel}>変化球</Text>
           <Text style={styles.statValue}>なし</Text>
         </View>
@@ -173,7 +183,8 @@ export const PlayerDetailScreen = ({ route }: any) => {
 
       return (
         <View style={{ marginTop: 15, marginBottom: 10 }}>
-          <Text style={[styles.statLabel, { marginBottom: 10, fontWeight: 'bold' }]}>変化球</Text>
+          <Text style={styles.sectionTitle}>変化球</Text>
+          <View style={styles.gridContainer}>
           {pitchTypes.map((pitch, index) => {
             const rank = getPitchRank(pitch.value);
             const color = getRankColor(rank);
@@ -181,20 +192,21 @@ export const PlayerDetailScreen = ({ route }: any) => {
             const widthPercent = Math.min(100, Math.max(5, (pitch.value / 160) * 100));
             
             return (
-              <View key={index} style={{ marginBottom: 12 }}>
+              <View key={index} style={[styles.statBox, { alignItems: 'stretch' }]}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <Text style={{ fontSize: 14, color: '#333' }}>{pitch.name}</Text>
+                  <Text style={{ fontSize: 14, color: COLORS.textPrimary }}>{pitch.name}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={{ fontWeight: 'bold', color: color, marginRight: 6, fontSize: 16 }}>{rank}</Text>
-                    <Text style={{ fontSize: 14, color: '#666', width: 30, textAlign: 'right' }}>{pitch.value}</Text>
+                    <Text style={{ fontSize: 14, color: COLORS.textSecondary, width: 30, textAlign: 'right' }}>{pitch.value}</Text>
                   </View>
                 </View>
-                <View style={{ height: 8, backgroundColor: '#eee', borderRadius: 4, overflow: 'hidden' }}>
+                <View style={{ height: 6, backgroundColor: COLORS.border, borderRadius: 4, overflow: 'hidden' }}>
                   <View style={{ height: '100%', width: `${widthPercent}%`, backgroundColor: color }} />
                 </View>
               </View>
             );
           })}
+          </View>
         </View>
       );
     };
@@ -203,26 +215,27 @@ export const PlayerDetailScreen = ({ route }: any) => {
       const rank = getRank(value);
       const color = getRankColor(rank);
       return (
-        <View style={styles.statRow}>
+        <View style={styles.statBox}>
           <Text style={styles.statLabel}>{label}</Text>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            {showRank && (
-              <Text style={[styles.statValue, { color: color, marginRight: 10, fontSize: 18 }]}>{rank}</Text>
-            )}
-            <Text style={styles.statValue}>{value !== undefined ? value : '-'}{unit}</Text>
-          </View>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                {showRank && (
+                <Text style={{ color: color, marginRight: 5, fontSize: 18, fontWeight: 'bold' }}>{rank}</Text>
+                )}
+                <Text style={styles.statValue}>{value !== undefined ? value : '-'}{unit}</Text>
+            </View>
         </View>
       );
     };
 
     return (
-      <View style={styles.statsContainer}>
+      <View>
+        <Text style={styles.sectionTitle}>基本能力</Text>
+        <View style={styles.gridContainer}>
         {player.position === 'P' ? (
            <>
              {renderAbilityRow('スタミナ', abilities.stamina)}
              {renderAbilityRow('球速', abilities.speed, ' km/h', false)}
              {renderAbilityRow('コントロール', abilities.control)}
-             {renderPitchTypes(abilities.pitchTypes)}
            </>
         ) : (
            <>
@@ -231,9 +244,12 @@ export const PlayerDetailScreen = ({ route }: any) => {
              {renderAbilityRow('走力', abilities.speed)}
              {renderAbilityRow('肩力', abilities.arm)}
              {renderAbilityRow('守備力', abilities.fielding)}
-             {renderAptitudes()}
            </>
         )}
+        </View>
+        
+        {player.position === 'P' && renderPitchTypes(abilities.pitchTypes)}
+        {player.position !== 'P' && renderAptitudes()}
       </View>
     );
   };
@@ -252,30 +268,33 @@ export const PlayerDetailScreen = ({ route }: any) => {
     ];
 
     return (
-      <View style={{ marginTop: 20, borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 10 }}>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 10 }}>ポジション適性</Text>
+      <View style={{ marginTop: 20 }}>
+        <Text style={styles.sectionTitle}>ポジション適性</Text>
+        <View style={styles.gridContainer}>
         {positions.map((pos) => {
           const value = (aptitudes as any)[pos.key] || 0;
-          const width = Math.min(100, (value / 13) * 100); // Max 13 (S)
-          // Color based on rank
+          if (value < 1) return null; // Don't show inactive positions
+
+          const width = Math.min(100, (value / 13) * 100); 
           let color = '#ddd';
           if (value >= 12) color = '#ff0000'; // S
           else if (value >= 10) color = '#ff8800'; // A
           else if (value >= 8) color = '#ffcc00'; // B
           else if (value >= 6) color = '#ffff00'; // C
-          else if (value >= 4) color = '#00cc00'; // D
-          else if (value >= 2) color = '#0000ff'; // E
           
           return (
-            <View key={pos.key} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <Text style={{ width: 40, fontSize: 14 }}>{pos.label}</Text>
-              <View style={{ flex: 1, height: 10, backgroundColor: '#eee', borderRadius: 5, marginHorizontal: 10 }}>
-                <View style={{ width: `${width}%`, height: '100%', backgroundColor: color, borderRadius: 5 }} />
+            <View key={pos.key} style={[styles.statBox, { alignItems: 'stretch' }]}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
+                  <Text style={{ fontSize: 14, color: COLORS.textPrimary }}>{pos.label}</Text>
+                  <Text style={{ fontSize: 14, color: COLORS.textSecondary }}>{value.toFixed(1)}</Text>
               </View>
-              <Text style={{ width: 30, textAlign: 'right', fontSize: 14 }}>{value.toFixed(1)}</Text>
+              <View style={{ height: 6, backgroundColor: COLORS.border, borderRadius: 3 }}>
+                <View style={{ width: `${width}%`, height: '100%', backgroundColor: color, borderRadius: 3 }} />
+              </View>
             </View>
           );
         })}
+        </View>
       </View>
     );
   };
@@ -284,7 +303,7 @@ export const PlayerDetailScreen = ({ route }: any) => {
     if (yearlyStats.length === 0) {
       return (
         <View style={styles.statsContainer}>
-          <Text style={{ textAlign: 'center', color: '#666', marginTop: 20 }}>過去の成績データはありません</Text>
+          <Text style={{ textAlign: 'center', color: COLORS.textMuted, marginTop: 20 }}>過去の成績データはありません</Text>
         </View>
       );
     }
@@ -382,7 +401,7 @@ export const PlayerDetailScreen = ({ route }: any) => {
     );
 
     return (
-      <View style={styles.statsContainer}>
+      <View style={styles.tableContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
           <View>
             {/* Header */}
@@ -564,11 +583,19 @@ export const PlayerDetailScreen = ({ route }: any) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.headerCard}>
+        <View style={styles.avatarCircle}>
+             <Text style={styles.avatarText}>{player.position}</Text>
+        </View>
+        <Text style={styles.uniformNumber}>#{player.id.slice(-2)}</Text>
         <Text style={styles.playerName}>{player.name}</Text>
-        <Text style={styles.playerInfo}>{player.team.toUpperCase()} | {player.position} | 年齢: {player.age}</Text>
-        <Text style={styles.playerInfo}>ドラフト順位: {player.draftRank} | 年数: {player.experienceYears} | 新人王資格: {player.isRookieEligible ? 'あり' : 'なし'}</Text>
+        <View style={styles.playerDetailRow}>
+             <View style={styles.tag}><Text style={styles.tagText}>{player.team.toUpperCase()}</Text></View>
+             <View style={styles.tag}><Text style={styles.tagText}>{player.age}歳</Text></View>
+             <View style={styles.tag}><Text style={styles.tagText}>{player.experienceYears}年目</Text></View>
+             <View style={styles.tag}><Text style={styles.tagText}>D{player.draftRank}位</Text></View>
+        </View>
       </View>
 
       <View style={styles.tabContainer}>
@@ -596,122 +623,214 @@ export const PlayerDetailScreen = ({ route }: any) => {
         {activeTab === 'stats' && renderStats()}
         {activeTab === 'yearlyStats' && renderYearlyStats()}
         {activeTab === 'abilities' && renderAbilities()}
+        <View style={{height: 40}} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
-  header: {
-    padding: 20,
-    backgroundColor: 'white',
+  
+  // Header Profile
+  headerCard: {
+    padding: SPACING.lg,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: COLORS.border,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.xl,
+    backgroundColor: COLORS.card,
+  },
+  profileMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  uniformNumber: {
+    fontSize: 42,
+    fontWeight: '900',
+    color: 'rgba(212, 175, 55, 0.2)', // Faded gold
+    position: 'absolute',
+    right: 20,
+    top: 0,
+  },
+  avatarCircle: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: COLORS.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: SPACING.md,
+      borderWidth: 2,
+      borderColor: COLORS.primary,
+  },
+  avatarText: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: COLORS.primary,
   },
   playerName: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
-  playerInfo: {
-    fontSize: 16,
-    color: '#666',
+  playerDetailRow: {
+    flexDirection: 'row',
+    marginTop: SPACING.xs,
   },
+  tag: {
+      backgroundColor: COLORS.background,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+      marginHorizontal: 4,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+  },
+  tagText: {
+      color: COLORS.textSecondary,
+      fontSize: 12,
+      fontWeight: '600',
+  },
+  
+  // Tabs
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: COLORS.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: COLORS.border,
+    paddingHorizontal: SPACING.md,
   },
   tab: {
-    flex: 1,
-    paddingVertical: 15,
-    alignItems: 'center',
+    paddingVertical: 16,
+    marginRight: SPACING.xl,
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
   },
   activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#2196F3',
+    borderBottomColor: COLORS.primary,
   },
   tabText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: COLORS.textMuted,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   activeTabText: {
-    color: '#2196F3',
-    fontWeight: 'bold',
+    color: COLORS.textPrimary,
   },
+  
+  // Content
   content: {
-    padding: 20,
+    padding: SPACING.md,
+    paddingTop: SPACING.lg,
   },
-  statsContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+  
+  // Stats Grid
+  gridContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      marginBottom: SPACING.lg,
   },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+  statBox: {
+      width: '31%',
+      backgroundColor: COLORS.card,
+      padding: SPACING.md,
+      borderRadius: 8,
+      marginBottom: SPACING.md,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: COLORS.border,
   },
   statLabel: {
-    fontSize: 16,
-    color: '#333',
+      fontSize: 12,
+      color: COLORS.textMuted,
+      marginBottom: 4,
+      textTransform: 'uppercase',
   },
   statValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: COLORS.textPrimary,
+  },
+  highlightStat: {
+      color: COLORS.primary,
+  },
+  
+  // Section Headers
+  sectionTitle: {
+      color: COLORS.primary,
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: SPACING.md,
+      marginTop: SPACING.sm,
+      paddingLeft: SPACING.xs,
+      borderLeftWidth: 3,
+      borderLeftColor: COLORS.primary,
+  },
+
+  // Yearly Stats Table
+  tableContainer: {
+    backgroundColor: COLORS.card,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 40,
   },
   headerRow: {
     flexDirection: 'row',
-    backgroundColor: '#e0e0e0',
-    paddingVertical: 10,
+    backgroundColor: COLORS.header,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: COLORS.border,
   },
   headerCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 2,
+    paddingHorizontal: 4,
   },
   headerText: {
-    fontWeight: 'bold',
-    fontSize: 12,
-    color: '#333',
+    fontWeight: '700',
+    fontSize: 10,
+    color: COLORS.textSecondary,
     textAlign: 'center',
   },
   row: {
     flexDirection: 'row',
-    backgroundColor: 'white',
-    paddingVertical: 10,
+    backgroundColor: COLORS.card,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
   },
   cell: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 2,
+    paddingHorizontal: 4,
   },
   cellText: {
-    fontSize: 13,
-    color: '#333',
+    fontSize: 12,
+    color: COLORS.textPrimary,
     textAlign: 'center',
+    fontVariant: ['tabular-nums'],
   },
   totalRow: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgba(212, 175, 55, 0.05)',
     borderTopWidth: 2,
-    borderTopColor: '#ccc',
+    borderTopColor: COLORS.primary,
   },
 });

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView, SafeAreaView } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { dbManager } from '../services/databaseManager';
 import { setSelectedTeam } from '../redux/slices/gameSlice';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
 
 export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -66,7 +67,7 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
         <Text style={styles.teamName}>{item.name}</Text>
         <Text style={styles.leagueName}>{item.league === 'pacific' ? 'パ・リーグ' : 'セ・リーグ'}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={24} color="#ccc" />
+      <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
     </TouchableOpacity>
   );
 
@@ -75,17 +76,17 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
   if (loading && !selectedTeamId) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>読み込み中...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBackButton}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={COLORS.textMain} />
         </TouchableOpacity>
         <Text style={styles.title}>チーム選択</Text>
         <View style={{width: 24}} /> 
@@ -113,7 +114,7 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>{selectedTeam.name}</Text>
                         <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                            <Ionicons name="close" size={24} color="#666" />
+                            <Ionicons name="close" size={24} color={COLORS.textMuted} />
                         </TouchableOpacity>
                     </View>
                     
@@ -163,32 +164,34 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
   loadingText: {
     marginTop: 10,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 15,
-    backgroundColor: '#fff',
+    padding: SPACING.md,
+    backgroundColor: COLORS.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
   },
   headerBackButton: {
     padding: 5,
@@ -196,80 +199,76 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textMuted,
     textAlign: 'center',
     marginVertical: 15,
+    fontFamily: FONTS.regular,
   },
   listContent: {
-    padding: 15,
+    padding: SPACING.md,
     paddingBottom: 40,
   },
   teamItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.card,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   teamIconPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#4CAF50',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
   },
   teamIconText: {
-    color: '#fff',
-    fontSize: 18,
+    color: COLORS.background,
+    fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   teamInfo: {
     flex: 1,
   },
   teamName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   leagueName: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.textMuted,
     marginTop: 2,
+    fontFamily: FONTS.regular,
   },
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 15,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
     width: '100%',
     maxWidth: 500,
     maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
     overflow: 'hidden',
   },
   modalHeader: {
@@ -278,12 +277,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
   },
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.bold,
   },
   closeButton: {
     padding: 5,
@@ -296,56 +296,61 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.border,
   },
   detailLabel: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   detailValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
   },
   infoBox: {
     marginTop: 25,
     padding: 15,
-    backgroundColor: '#e8f5e9',
+    backgroundColor: 'rgba(212, 175, 55, 0.1)', // Gold tint
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
   },
   infoText: {
-    color: '#2e7d32',
+    color: COLORS.primary,
     textAlign: 'center',
     fontSize: 15,
+    fontFamily: FONTS.bold,
   },
   modalFooter: {
     flexDirection: 'row',
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    gap: 10,
+    borderTopColor: COLORS.border,
+    gap: 12,
   },
   cancelButton: {
     flex: 1,
     padding: 15,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.card,
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#666',
+    color: COLORS.textMuted,
     fontWeight: 'bold',
     fontSize: 16,
   },
   startButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.primary,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
   startButtonText: {
-    color: '#fff',
+    color: COLORS.background,
     fontSize: 16,
     fontWeight: 'bold',
   },

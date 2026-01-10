@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { dbManager } from '../services/databaseManager';
 import { Player } from '../types';
 import { useNavigation } from '@react-navigation/native';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 type SortKey = 'position' | 'age' | 'salary';
 type SortOrder = 'asc' | 'desc';
@@ -144,15 +146,25 @@ export const ReleasePlayersScreen = () => {
       >
         <View style={styles.playerInfo}>
             <View style={styles.mainInfo}>
-                <Text style={styles.position}>{item.position}</Text>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.age}>{item.age}歳</Text>
-                <Text style={styles.salary}>{item.contract?.salary}万</Text>
-                {isProtected && (
-                    <Text style={styles.protectedText}>
-                        {isDraftedThisYear ? '新人' : '複数年'}
-                    </Text>
-                )}
+                <View style={styles.positionBadge}>
+                    <Text style={styles.positionText}>{item.position}</Text>
+                </View>
+                <View style={{ flex: 1, marginLeft: SPACING.sm }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={styles.name}>{item.name}</Text>
+                        {isProtected && (
+                            <View style={styles.protectedBadge}>
+                                <Text style={styles.protectedBadgeText}>
+                                    {isDraftedThisYear ? '新人' : '複数年'}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                    <Text style={styles.age}>{item.age}歳</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                     <Text style={styles.salary}>{item.contract?.salary}万</Text>
+                </View>
             </View>
             <View style={styles.statsInfo}>
                 {isPitcher ? (
@@ -166,24 +178,29 @@ export const ReleasePlayersScreen = () => {
                 )}
             </View>
         </View>
-        <View style={styles.checkbox}>
-            {isSelected && <View style={styles.checked} />}
+        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+            {isSelected && <Ionicons name="checkmark" size={16} color={COLORS.background} />}
         </View>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>戦力外通告選択</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            </TouchableOpacity>
+            <Text style={styles.title}>戦力外通告選択</Text>
+        </View>
         <View>
             <Text style={styles.count}>
-                支配下登録: {roster.length} / {ROSTER_LIMIT}
+                支配下登録: <Text style={{ color: COLORS.text, fontWeight: 'bold' }}>{roster.length}</Text> / {ROSTER_LIMIT}
             </Text>
             {roster.length > ROSTER_LIMIT && (
                 <Text style={styles.warning}>
-                    あと {roster.length - ROSTER_LIMIT} 人削減してください
+                    あと {roster.length - ROSTER_LIMIT} 人削減必須
                 </Text>
             )}
         </View>
@@ -229,7 +246,9 @@ export const ReleasePlayersScreen = () => {
             onPress={handleRelease}
             disabled={selectedPlayers.length === 0}
         >
-            <Text style={styles.buttonText}>選択した選手を戦力外にする ({selectedPlayers.length})</Text>
+            <Text style={[styles.buttonText, selectedPlayers.length === 0 && { color: COLORS.textSecondary }]}>
+                選択した選手を戦力外にする ({selectedPlayers.length})
+            </Text>
         </TouchableOpacity>
       </View>
 
@@ -237,9 +256,10 @@ export const ReleasePlayersScreen = () => {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
+        animationType="fade"
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>戦力外通告</Text>
             <Text style={styles.modalMessage}>
               {`選択した${selectedPlayers.length}人の選手を戦力外にしますか？\nこの操作は取り消せません。`}
@@ -267,9 +287,10 @@ export const ReleasePlayersScreen = () => {
         transparent={true}
         visible={exitConfirmVisible}
         onRequestClose={() => setExitConfirmVisible(false)}
+        animationType="fade"
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>終了確認</Text>
             <Text style={styles.modalMessage}>
               戦力外通告を終了しますか？
@@ -297,9 +318,10 @@ export const ReleasePlayersScreen = () => {
         transparent={true}
         visible={warningVisible}
         onRequestClose={() => setWarningVisible(false)}
+        animationType="fade"
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>警告</Text>
             <Text style={styles.modalMessage}>
               {`支配下登録選手が${ROSTER_LIMIT}名を超えています。\nあと${roster.length - ROSTER_LIMIT}名削減してください。`}
@@ -315,94 +337,106 @@ export const ReleasePlayersScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   header: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.background,
+  },
+  backButton: {
+    padding: SPACING.xs,
+    marginRight: SPACING.sm,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    color: COLORS.text,
+    fontFamily: FONTS.bold,
   },
   count: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
+    textAlign: 'right',
   },
   warning: {
     fontSize: 12,
-    color: '#FF3B30',
+    color: COLORS.negative,
     fontWeight: 'bold',
+    textAlign: 'right',
+    marginTop: 2,
   },
   list: {
-    padding: 8,
+    padding: SPACING.md,
   },
   sortContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 8,
-    paddingBottom: 8,
-    backgroundColor: '#fff',
+    justifyContent: 'space-around',
+    paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.background,
   },
   sortButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
     borderRadius: 15,
-    backgroundColor: '#f0f0f0',
-    marginRight: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   activeSortButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   sortButtonText: {
     fontSize: 12,
-    color: '#333',
+    color: COLORS.textSecondary,
   },
   activeSortButtonText: {
-    color: '#fff',
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 12,
-    marginBottom: 8,
+    backgroundColor: COLORS.card,
     borderRadius: 8,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: COLORS.border,
   },
   selectedItem: {
-    borderColor: '#007AFF',
-    backgroundColor: '#F0F8FF',
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
   },
   protectedItem: {
-    backgroundColor: '#f0f0f0',
-    opacity: 0.7,
+    backgroundColor: COLORS.border, // Darker gray for disabled
+    opacity: 0.6,
   },
-  protectedText: {
-    fontSize: 10,
-    color: '#FF9500',
-    fontWeight: 'bold',
-    marginLeft: 4,
-    borderWidth: 1,
-    borderColor: '#FF9500',
-    borderRadius: 4,
+  protectedBadge: {
+    backgroundColor: COLORS.secondary,
     paddingHorizontal: 4,
     paddingVertical: 1,
+    borderRadius: 2,
+    marginRight: SPACING.sm,
+    marginLeft: SPACING.sm,
+  },
+  protectedBadgeText: {
+    fontSize: 10,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   playerInfo: {
     flex: 1,
@@ -410,123 +444,129 @@ const styles = StyleSheet.create({
   mainInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
+  },
+  positionBadge: {
+    backgroundColor: COLORS.background,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    minWidth: 32,
+    alignItems: 'center',
+  },
+  positionText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  age: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginLeft: SPACING.sm,
+  },
+  salary: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.text,
   },
   statsInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginTop: SPACING.xs,
   },
   statsText: {
     fontSize: 12,
-    color: '#666',
-  },
-  position: {
-    width: 40,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  name: {
-    flex: 1,
-    fontSize: 16,
-  },
-  age: {
-    width: 50,
-    textAlign: 'right',
-    color: '#666',
-  },
-  salary: {
-    width: 80,
-    textAlign: 'right',
-    color: '#666',
+    color: COLORS.textSecondary,
   },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: COLORS.textSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
+    marginLeft: SPACING.md,
   },
-  checked: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#007AFF',
+  checkboxSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
   },
   footer: {
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: SPACING.lg,
+    backgroundColor: COLORS.background,
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    borderTopColor: COLORS.border,
   },
   button: {
-    backgroundColor: '#FF3B30',
-    padding: 16,
+    backgroundColor: COLORS.negative,
+    padding: SPACING.md,
     borderRadius: 8,
     alignItems: 'center',
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: COLORS.border,
+    opacity: 0.5,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
-    alignItems: 'center',
+    padding: SPACING.lg,
   },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
-    maxWidth: 400,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+  modalContainer: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    color: COLORS.text,
+    marginBottom: SPACING.md,
     textAlign: 'center',
   },
   modalMessage: {
     fontSize: 16,
-    marginBottom: 20,
+    color: COLORS.text,
+    marginBottom: SPACING.lg,
     textAlign: 'center',
-    color: '#333',
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
   },
   modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    minWidth: 100,
+    flex: 1,
+    paddingVertical: SPACING.sm,
+    borderRadius: 8,
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#999',
+    backgroundColor: COLORS.secondary,
   },
   destructiveButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: COLORS.negative,
   },
   okButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primary,
   },
   modalButtonText: {
-    color: 'white',
+    color: '#fff',
     fontWeight: 'bold',
   },
 });

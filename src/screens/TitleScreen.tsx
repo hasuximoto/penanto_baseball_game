@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal, SafeAreaView } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { dbManager } from '../services/databaseManager';
 import { resetGame, setGameState } from '../redux/slices/gameSlice';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
 
 export const TitleScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -79,24 +80,27 @@ export const TitleScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>処理中...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>SimBaseBall</Text>
-      
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleNewGame}>
-          <Text style={styles.buttonText}>はじめから</Text>
-        </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>SimBaseBall</Text>
+        <Text style={styles.subtitle}>Tactical Manager</Text>
         
-        <TouchableOpacity style={[styles.button, styles.loadButton]} onPress={handleLoadGame}>
-          <Text style={styles.buttonText}>つづきから</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleNewGame}>
+            <Text style={styles.buttonText}>はじめから</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={[styles.button, styles.loadButton]} onPress={handleLoadGame}>
+            <Text style={[styles.buttonText, styles.loadButtonText]}>つづきから</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -129,110 +133,134 @@ export const TitleScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
+  },
+  contentContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: SPACING.l,
   },
   title: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: COLORS.primary,
+    marginBottom: 5,
+    fontFamily: FONTS.bold,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: COLORS.textMuted,
     marginBottom: 60,
+    letterSpacing: 4,
+    fontFamily: FONTS.regular,
   },
   buttonContainer: {
-    width: '80%',
+    width: '100%',
     maxWidth: 300,
   },
   button: {
-    backgroundColor: '#4CAF50',
-    padding: 15,
+    backgroundColor: COLORS.primary,
+    padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 20,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   loadButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonText: {
-    color: '#fff',
+    color: COLORS.background,
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
+  },
+  loadButtonText: {
+    color: COLORS.primary,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.regular,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
     maxWidth: 400,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
   },
   modalMessage: {
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 24,
     textAlign: 'center',
-    color: '#666',
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
+    lineHeight: 24,
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
     width: '100%',
+    gap: 12,
   },
   modalButton: {
-    paddingVertical: 10,
+    flex: 1,
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 5,
-    marginHorizontal: 10,
-    minWidth: 100,
+    borderRadius: 8,
     alignItems: 'center',
   },
   modalButtonOk: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COLORS.primary,
   },
   modalButtonCancel: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: COLORS.textMuted,
   },
   modalButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   modalButtonTextOk: {
-    color: 'white',
+    color: COLORS.background,
   },
   modalButtonTextCancel: {
-    color: '#666',
+    color: COLORS.textMuted,
   },
 });

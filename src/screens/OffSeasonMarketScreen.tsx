@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, SafeAreaView } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { dbManager } from '../services/databaseManager';
 import { Player } from '../types';
 import { ContractManager } from '../services/contractManager';
+import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 type TabType = 'fa' | 'released' | 'foreign';
 type SortKey = 'position' | 'age' | 'salary';
@@ -142,13 +144,19 @@ export const OffSeasonMarketScreen = () => {
       <TouchableOpacity style={styles.playerRow} onPress={() => handlePlayerPress(item)}>
         <View style={styles.playerInfo}>
           <View style={styles.mainInfo}>
-            <Text style={styles.position}>{item.position}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                <Text style={styles.name}>{item.name}</Text>
-                {isFA && <Text style={styles.faBadge}>FA</Text>}
+            <View style={styles.positionBadge}>
+                <Text style={styles.positionText}>{item.position}</Text>
             </View>
-            <Text style={styles.age}>{item.age}歳</Text>
-            <Text style={styles.salary}>{item.contract?.salary || 0}万</Text>
+            <View style={{ flex: 1, marginLeft: SPACING.sm }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.name}>{item.name}</Text>
+                    {isFA && <View style={styles.faBadge}><Text style={styles.faBadgeText}>FA</Text></View>}
+                </View>
+                <Text style={styles.age}>{item.age}歳</Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.salary}>{item.contract?.salary || 0}万</Text>
+            </View>
           </View>
           <View style={styles.statsInfo}>
             {isPitcher ? (
@@ -163,15 +171,23 @@ export const OffSeasonMarketScreen = () => {
           </View>
         </View>
         <View style={styles.statusContainer}>
-            {isOffered && <Text style={styles.offeredBadge}>提示済</Text>}
-            <Text style={styles.arrow}>＞</Text>
+            {isOffered && <View style={styles.offeredBadge}><Text style={styles.offeredBadgeText}>提示済</Text></View>}
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
         </View>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </TouchableOpacity>
+        <Text style={styles.title}>戦力補強</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
       <View style={styles.tabContainer}>
         <TouchableOpacity 
             style={[styles.tab, activeTab === 'fa' && styles.activeTab]} 
@@ -235,114 +251,141 @@ export const OffSeasonMarketScreen = () => {
       <Modal
         visible={modalVisible}
         transparent={true}
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>{selectedPlayer?.name} へのオファー</Text>
             
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>年俸 (万円)</Text>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalLabel}>年俸 (万円)</Text>
               <TextInput
                 style={styles.input}
                 value={offerSalary}
                 onChangeText={setOfferSalary}
                 keyboardType="numeric"
+                placeholderTextColor={COLORS.textSecondary}
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>契約年数 (年)</Text>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalLabel}>契約年数 (年)</Text>
               <TextInput
                 style={styles.input}
                 value={offerYears}
                 onChangeText={setOfferYears}
                 keyboardType="numeric"
+                placeholderTextColor={COLORS.textSecondary}
               />
             </View>
 
-            <View style={styles.buttonGroup}>
-              <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => setModalVisible(false)}>
-                <Text style={styles.buttonText}>キャンセル</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                <Text style={styles.cancelButtonText}>キャンセル</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.submitButton]} onPress={handleOffer}>
-                <Text style={styles.buttonText}>提示する</Text>
+              <TouchableOpacity style={styles.offerButton} onPress={handleOffer}>
+                <Text style={styles.offerButtonText}>提示する</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.background,
+  },
+  backButton: {
+    padding: SPACING.xs,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    fontFamily: FONTS.bold,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    elevation: 2,
+    backgroundColor: COLORS.card,
+    margin: SPACING.sm,
+    borderRadius: 8,
+    padding: 2,
   },
   tab: {
     flex: 1,
-    paddingVertical: 15,
+    paddingVertical: SPACING.sm,
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderRadius: 6,
   },
   activeTab: {
-    borderBottomColor: '#2196F3',
+    backgroundColor: COLORS.primary,
   },
   tabText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  activeTabText: {
-    color: '#2196F3',
+    fontSize: 14,
+    color: COLORS.textSecondary,
     fontWeight: 'bold',
   },
-  listContent: {
-    padding: 10,
+  activeTabText: {
+    color: COLORS.black,
   },
   sortContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    backgroundColor: '#fff',
+    justifyContent: 'space-around',
+    paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.background,
   },
   sortButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
     borderRadius: 15,
-    backgroundColor: '#f0f0f0',
-    marginRight: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   activeSortButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COLORS.primaryLowOpacity,
+    borderColor: COLORS.primary,
   },
   sortButtonText: {
     fontSize: 12,
-    color: '#333',
+    color: COLORS.textSecondary,
   },
   activeSortButtonText: {
-    color: '#fff',
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
-  playerRow: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  center: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    elevation: 1,
+  },
+  listContent: {
+    padding: SPACING.md,
+  },
+  playerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: 8,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   playerInfo: {
     flex: 1,
@@ -350,127 +393,146 @@ const styles = StyleSheet.create({
   mainInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
+  },
+  positionBadge: {
+    backgroundColor: COLORS.background,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    minWidth: 32,
+    alignItems: 'center',
+  },
+  positionText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginRight: SPACING.xs,
+  },
+  age: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  faBadge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 2,
+    marginRight: SPACING.xs,
+  },
+  faBadgeText: {  
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: COLORS.black,
+  },
+  salary: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.money,
   },
   statsInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginTop: SPACING.xs,
   },
   statsText: {
     fontSize: 12,
-    color: '#666',
-  },
-  position: {
-    width: 40,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  name: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  age: {
-    width: 50,
-    textAlign: 'right',
-    color: '#666',
-  },
-  salary: {
-    width: 80,
-    textAlign: 'right',
-    color: '#666',
+    color: COLORS.textSecondary,
   },
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginLeft: SPACING.sm,
   },
   offeredBadge: {
-      backgroundColor: '#4CAF50',
-      color: 'white',
-      fontSize: 12,
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 4,
-      marginRight: 10,
-      overflow: 'hidden',
+    backgroundColor: COLORS.success,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginRight: SPACING.sm,
   },
-  faBadge: {
-      backgroundColor: '#FF9800',
-      color: 'white',
-      fontSize: 10,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-      marginLeft: 8,
-      overflow: 'hidden',
-      fontWeight: 'bold',
-  },
-  arrow: {
-    fontSize: 18,
-    color: '#ccc',
+  offeredBadgeText: {
+    fontSize: 10,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   emptyContainer: {
-      padding: 40,
-      alignItems: 'center',
+    padding: SPACING.xl,
+    alignItems: 'center',
   },
   emptyText: {
-      color: '#999',
-      fontSize: 16,
+    color: COLORS.textSecondary,
+    fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
-    alignItems: 'center',
+    padding: SPACING.lg,
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    width: '80%',
-    borderRadius: 10,
-    padding: 20,
-    elevation: 5,
+  modalContainer: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: COLORS.text,
+    marginBottom: SPACING.lg,
     textAlign: 'center',
   },
-  inputGroup: {
-    marginBottom: 15,
+  modalContent: {
+    marginBottom: SPACING.md,
   },
-  label: {
+  modalLabel: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
   },
   input: {
+    backgroundColor: COLORS.background,
+    color: COLORS.text,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    padding: 10,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    padding: SPACING.md,
     fontSize: 16,
   },
-  buttonGroup: {
+  modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginHorizontal: 5,
+    marginTop: SPACING.md,
   },
   cancelButton: {
-    backgroundColor: '#999',
+    flex: 1,
+    backgroundColor: COLORS.secondary,
+    padding: SPACING.md,
+    borderRadius: 8,
+    marginRight: SPACING.sm,
+    alignItems: 'center',
   },
-  submitButton: {
-    backgroundColor: '#2196F3',
-  },
-  buttonText: {
+  cancelButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
+  },
+  offerButton: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    padding: SPACING.md,
+    borderRadius: 8,
+    marginLeft: SPACING.sm,
+    alignItems: 'center',
+  },
+  offerButtonText: {
+    color: COLORS.black,
     fontWeight: 'bold',
   },
 });
