@@ -92,13 +92,15 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
         <View style={{width: 24}} /> 
       </View>
       
-      <Text style={styles.subtitle}>プレイするチームを選択してください</Text>
-
       <FlatList
+        style={{ flex: 1 }}
         data={teams}
         renderItem={renderTeamItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <Text style={styles.subtitle}>プレイするチームを選択してください</Text>
+        }
       />
 
       <Modal
