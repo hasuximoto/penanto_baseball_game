@@ -320,16 +320,17 @@ export const calculateAtBatProbabilities = (
   // 能力値ベースの確率計算 (安定性重視)
   
   // 1. 基本打率の計算
-  // 基準: Contact 10.0 = .200 (打高投低の是正のため .250 -> .200)
-  const baseAvg = 0.210;
+  // 基準: Contact 10.0 = .255 (打者有利にするため基準を引き上げ)
+  const baseAvg = 0.255;
   const batterContact = batter.abilities.contact || 10.0;
-  const pitcherControl = pitcher.abilities.control || 10.0;
+  // const pitcherControl = pitcher.abilities.control || 10.0; // 打率への直接影響は減らす
   
   // 打者補正: Contact 1につき +0.010
   const batterFactor = (batterContact - 10.0) * 0.010;
   
-  // 投手補正: Control 1につき -0.010
-  const pitcherFactor = (pitcherControl - 10.0) * -0.010;
+  // 投手補正: Control 1につき -0.005 (影響半減、四球重視)
+  const pitcherControl = pitcher.abilities.control || 10.0;
+  const pitcherFactor = (pitcherControl - 10.0) * -0.005;
 
   // 変化球補正 (Master Data Integration)
   let breakingBallHitFactor = 0;
@@ -379,8 +380,13 @@ export const calculateAtBatProbabilities = (
         breakingBallHRFactor = (avgGround - 4) * -0.01;
     }
   }
+
+  // 投手球速による被安打率・被長打率抑制 (球威)
+  const pitcherSpeed = pitcher.abilities.speed || 140.0;
+  // 145km/h基準、+10km/hでヒット率-1%
+  const speedHitFactor = (pitcherSpeed - 145.0) * -0.001;
   
-  let hitProb = baseAvg + batterFactor + pitcherFactor + breakingBallHitFactor;
+  let hitProb = baseAvg + batterFactor + pitcherFactor + breakingBallHitFactor + speedHitFactor;
   hitProb = Math.max(0.100, Math.min(0.450, hitProb)); // .100 - .450 の範囲に収める
 
   // HR率維持のための計算 (元の基準 .250 を使用)
@@ -391,15 +397,34 @@ export const calculateAtBatProbabilities = (
   // 2. 長打率の計算 (ヒット内の内訳)
   const batterPower = batter.abilities.power || 10.0;
   const batterSpeed = batter.abilities.speed || 10.0;
+  const batterTrajectory = batter.abilities.trajectory || 2; // 弾道 1-4 (デフォルト2)
+
+  // 弾道補正 & 球速による被弾抑制
+  // 弾道3以上で長打増、弾道1で長打減(単打増)
+  let trajectoryHRMod = 0;
+  let trajectoryDoubleMod = 0;
   
+  if (batterTrajectory >= 3) {
+      trajectoryHRMod = 0.05 + (batterTrajectory - 3) * 0.05; // +5% ~ +10%
+      trajectoryDoubleMod = 0.05;
+  } else if (batterTrajectory === 1) {
+      trajectoryHRMod = -0.05; // -5%
+      trajectoryDoubleMod = -0.05;
+  }
+
+  // 球速によるホームラン抑制 (140km基準、+10kmでHR率-2%)
+  const speedHREffect = Math.max(0, (pitcherSpeed - 140.0) * 0.002);
+
   // HR率 (対ヒット)
   // Power 10 = 10%, Power 20 = 30%
   let hrRatio = Math.max(0.01, 0.10 + (batterPower - 10.0) * 0.03);
-  hrRatio = Math.max(0.005, hrRatio + breakingBallHRFactor); // Apply ground ball factor
+  hrRatio = Math.max(0.005, hrRatio + breakingBallHRFactor + trajectoryHRMod - speedHREffect); 
 
   // 2塁打・3塁打率 (Speed依存)
   const tripleRatio = Math.max(0.005, 0.02 + (batterSpeed - 10.0) * 0.005);
-  const doubleRatio = Math.max(0.10, 0.20 + (batterSpeed - 10.0) * 0.01 + (batterPower - 10.0) * 0.005);
+  // 弾道が高いとフライが増えて2塁打も増える傾向
+  let doubleRatio = Math.max(0.10, 0.20 + (batterSpeed - 10.0) * 0.01 + (batterPower - 10.0) * 0.005);
+  doubleRatio += trajectoryDoubleMod;
   
   // HR確率は元の打率基準で計算（本塁打率維持）
   const homeRunProb = originalHitProb * hrRatio;
@@ -409,7 +434,12 @@ export const calculateAtBatProbabilities = (
   const doubleProb = hitProb * doubleRatio;
   
   // シングルヒットで調整
-  const singleProb = Math.max(0, hitProb - homeRunProb - tripleProb - doubleProb);
+  let singleProb = Math.max(0, hitProb - homeRunProb - tripleProb - doubleProb);
+  
+  // 弾道1の場合はゴロ安打が増えるので単打を少し増やす
+  if (batterTrajectory === 1) {
+      singleProb *= 1.1; // 10%増
+  }
 
   // 3. 四球・三振の計算
   const outProbTotal = 1.0 - hitProb;
@@ -419,6 +449,7 @@ export const calculateAtBatProbabilities = (
   const batterEye = batter.abilities.eye !== undefined ? batter.abilities.eye : (batter.abilities.contact || 2.5);
   const batterAgg = batter.abilities.aggressiveness !== undefined ? batter.abilities.aggressiveness : 2.5;
 
+  // 近年の傾向に合わせて少し下げる (.08 -> .08) 現状維持
   const baseWalkRate = 0.08;
   
   // Eye 1につき +0.5% (基準2.5, 数値が高いほど選球眼が良い)
@@ -436,8 +467,7 @@ export const calculateAtBatProbabilities = (
   
   // 三振率
   // Pitcher Speed (球速) と Batter Contact
-  const pitcherSpeed = pitcher.abilities.speed || 140.0; // km/h
-  const baseKRate = 0.18;
+  const baseKRate = 0.19; // .18 -> .19 アップ
   
   // 球速 146km/h 基準, +10km/h で +9%
   const speedFactor = (pitcherSpeed - 146.0) * 0.009;
@@ -457,19 +487,34 @@ export const calculateAtBatProbabilities = (
   
   let normalOutProb = Math.max(0, remainingOut - strikeoutProb);
 
-  // 三振以外のアウト確率を下げる (三振が取れない投手の価値を下げるため)
-  // 減少分は単打(single)に加算する
-  const outReductionFactor = 0.88; // 12%削減
+  // 三振以外のアウト確率を下げる (インプレー打球のヒット化リスク - 旧謎の12%ブースト)
+  // 投手の球速(球威)に基づいて係数を変動させる
+  // 158km/h以上ならリスク小(0.96)、130km/h以下ならリスク大(0.88)
+  // 球が遅いと、バットに当てられたときに凡打がヒットになりやすい
+  const minSpeedLimit = 130.0;
+  const maxSpeedLimit = 158.0; 
+  
+  let speedRatio = (pitcherSpeed - minSpeedLimit) / (maxSpeedLimit - minSpeedLimit);
+  speedRatio = Math.max(0, Math.min(1.0, speedRatio));
+
+  // 以前の0.88固定に戻しつつ(軟投派)、速球派でも0.96(4%)程度のリスクは残す
+  // これにより全体的に打率が上がり、防御率が悪化する
+  const minReduction = 0.88; // 遅い投手: 12%がヒットに
+  const maxReduction = 0.96; // 速い投手: 4%がヒットに
+  const outReductionFactor = minReduction + (maxReduction - minReduction) * speedRatio;
+  
   const reducedOutProb = normalOutProb * outReductionFactor;
   const diff = normalOutProb - reducedOutProb;
   
+  // 減少分(凡打がヒットになった分)はシングルヒットに加算
   normalOutProb = reducedOutProb;
+  const finalSingleProb = singleProb + diff;
 
   return {
     homeRun: homeRunProb,
     triple: tripleProb,
     double: doubleProb,
-    single: singleProb + diff,
+    single: finalSingleProb,
     walk: walkProb,
     strikeout: strikeoutProb,
     out: normalOutProb
