@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView, Platform, SafeAreaView } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { dbManager } from '../services/databaseManager';
 import { setSelectedTeam } from '../redux/slices/gameSlice';
@@ -57,17 +57,16 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
 
   const renderTeamItem = ({ item }: { item: any }) => (
     <TouchableOpacity
-      style={styles.teamItem}
+      style={styles.gridItem}
       onPress={() => handleTeamPress(item.id)}
     >
-      <View style={styles.teamIconPlaceholder}>
+      <View style={styles.gridIconPlaceholder}>
          <Text style={styles.teamIconText}>{item.name.charAt(0)}</Text>
       </View>
       <View style={styles.teamInfo}>
-        <Text style={styles.teamName}>{item.name}</Text>
-        <Text style={styles.leagueName}>{item.league === 'pacific' ? 'パ・リーグ' : 'セ・リーグ'}</Text>
+        <Text style={styles.gridTeamName} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.leagueName}>{item.league === 'pacific' ? 'Pacific' : 'Central'}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
     </TouchableOpacity>
   );
 
@@ -83,7 +82,7 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBackButton}>
             <Ionicons name="arrow-back" size={24} color={COLORS.textMain} />
@@ -92,16 +91,19 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
         <View style={{width: 24}} /> 
       </View>
       
-      <FlatList
-        style={{ flex: 1 }}
-        data={teams}
-        renderItem={renderTeamItem}
-        keyExtractor={item => item.id}
+      <ScrollView 
+        style={{ flex: 1 }} 
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          <Text style={styles.subtitle}>プレイするチームを選択してください</Text>
-        }
-      />
+      >
+        <Text style={styles.subtitle}>プレイするチームを選択してください</Text>
+        <View style={styles.gridContainer}>
+            {teams.map((item) => (
+                <View key={item.id} style={styles.gridItemWrapper}>
+                    {renderTeamItem({ item })}
+                </View>
+            ))}
+        </View>
+      </ScrollView>
 
       <Modal
         animationType="slide"
@@ -166,7 +168,7 @@ export const TeamSelectionScreen: React.FC<{ navigation: any }> = ({ navigation 
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -174,6 +176,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+    ...(Platform.OS === 'web' ? { height: '100vh', overflow: 'hidden' } as any : {}),
   },
   center: {
     flex: 1,
@@ -215,24 +218,33 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     paddingBottom: 40,
   },
-  teamItem: {
+  gridContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.card,
-    padding: 15,
-    borderRadius: 12,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  gridItemWrapper: {
+    width: '48%',
     marginBottom: 10,
+  },
+  gridItem: {
+    backgroundColor: COLORS.card,
+    padding: 12,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 120,
   },
-  teamIconPlaceholder: {
+  gridIconPlaceholder: {
     width: 44,
     height: 44,
     borderRadius: 22,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginBottom: 8,
   },
   teamIconText: {
     color: COLORS.background,
@@ -241,13 +253,14 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
   },
   teamInfo: {
-    flex: 1,
+    alignItems: 'center',
   },
-  teamName: {
-    fontSize: 18,
+  gridTeamName: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.textMain,
     fontFamily: FONTS.bold,
+    textAlign: 'center',
   },
   leagueName: {
     fontSize: 12,
