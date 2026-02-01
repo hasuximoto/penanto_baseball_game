@@ -1131,8 +1131,37 @@ export class GameEngine {
 
       const batterStat = battingStats.find(s => s.playerId === batter.id);
       
+      // ------------------------------------
+      // 投手スタミナによる能力低下シミュレーション
+      // ------------------------------------
+      let effectivePitcher = currentPitcher;
+      // 投手のスタミナ値は概ね 10.0 前後。
+      // スタミナ * 9 球を閾値とする (スタミナ10 -> 90球, 12 -> 108球)
+      const staminaVal = currentPitcher.abilities.stamina || 10.0;
+      const staminaThreshold = staminaVal * 9.0; 
+      
+      const currentPCount = pitcherStat ? (pitcherStat.pitchCount || 0) : 0;
+      
+      if (currentPCount > staminaThreshold) {
+          const excess = currentPCount - staminaThreshold;
+          // ペナルティ: 
+          // 5球超過ごとに Control -1
+          // 2球超過ごとに Speed -1 km/h (疲れによる球威低下)
+          const controlPenalty = excess * 0.2; 
+          const speedPenalty = excess * 0.5;
+
+          effectivePitcher = { 
+              ...currentPitcher, 
+              abilities: { 
+                  ...currentPitcher.abilities,
+                  control: Math.max(0, (currentPitcher.abilities.control || 0) - controlPenalty),
+                  speed: Math.max(100, (currentPitcher.abilities.speed || 140) - speedPenalty)
+              } 
+          };
+      }
+      
       // アットバット結果を取得 (確率ベース + 守備)
-      const result = await this.simulateAtBat(batter, currentPitcher, defenseLineup);
+      const result = await this.simulateAtBat(batter, effectivePitcher, defenseLineup);
 
       // 併殺打判定
       let isDoublePlay = false;
@@ -1258,6 +1287,56 @@ export class GameEngine {
             // 投球回加算 (追加の1アウト分)
             if (pitcherStat) {
                 pitcherStat.inningsPitched = (pitcherStat.inningsPitched || 0) + (1 / 3);
+            }
+        } else if (result.type === 'out' && outs < 3) { // 3アウトチェンジでない場合に進塁チェック
+            // 1. 犠牲フライ判定 (外野フライ & 3塁走者あり)
+            if (!result.isGroundBall && result.direction && result.direction >= 7 && baseRunners[2].occupied) {
+                // 走者速度と外野手(推定)の肩で判定
+                const runnerId = baseRunners[2].playerId;
+                const runner = lineup.find(p => p.id === runnerId);
+                const runnerSpeed = runner ? (runner.abilities.speed || 10) : 10;
+                
+                // 外野手の特定
+                const posName = ['LF', 'CF', 'RF'][result.direction - 7];
+                const fielder = defenseLineup.find(p => p.position === posName);
+                const fielderArm = fielder ? (fielder.abilities.arm || 10) : 10;
+                
+                // 生還確率: 基準70% + (走力-肩)*2%
+                // 3塁からのタッチアップは高確率で決まる
+                let scoreChance = 0.70 + (runnerSpeed - fielderArm) * 0.02;
+                scoreChance = Math.max(0.1, Math.min(0.99, scoreChance));
+
+                if (Math.random() < scoreChance) {
+                    // 生還成功
+                    const r = baseRunners[2];
+                    runs++;
+                    baseRunners[2] = { occupied: false, isEarned: true }; // ランナー消滅
+                    
+                    // 打点
+                    if (batterStat) {
+                        batterStat.rbi = (batterStat.rbi || 0) + 1;
+                        batterStat.sacrificeFlies = (batterStat.sacrificeFlies || 0) + 1;
+                        result.rbiEarned++;
+                    }
+                    
+                    // 投手の失点・自責点
+                    if (pitcherStat) {
+                        pitcherStat.runsAllowed = (pitcherStat.runsAllowed || 0) + 1;
+                        // 自責点判定: みなしアウトが3未満なら自責
+                        if (r.isEarned && potentialOuts < 3) {
+                            pitcherStat.earnedRuns = (pitcherStat.earnedRuns || 0) + 1;
+                        }
+                    }
+                }
+            }
+            // 2. 内野ゴロでの進塁 (右方向ゴロでの2塁->3塁など)
+            else if (result.isGroundBall && baseRunners[1].occupied && !baseRunners[2].occupied) {
+                // 1塁or2塁方向へのゴロなら進塁しやすい
+                if (result.direction === 3 || result.direction === 4) {
+                    // 2塁走者を3塁へ
+                    baseRunners[2] = baseRunners[1];
+                    baseRunners[1] = { occupied: false, isEarned: true }; // 2塁は空く
+                }
             }
         }
 
@@ -1671,6 +1750,9 @@ export class GameEngine {
     } else if (rand < (cumulative += probs.walk)) {
       type = 'walk';
       advanceBases = 1;
+    } else if (rand < (cumulative += probs.hitByPitch)) {
+      type = 'hitByPitch';
+      advanceBases = 1;
     } else if (rand < (cumulative += probs.strikeout)) {
       type = 'strikeout'; 
     } else {
@@ -1678,10 +1760,31 @@ export class GameEngine {
     }
 
     // 守備の影響を計算 (HR, 四死球, 三振以外)
-    if (type !== 'homeRun' && type !== 'walk' && type !== 'strikeout') {
+    if (type !== 'homeRun' && type !== 'walk' && type !== 'hitByPitch' && type !== 'strikeout') {
         // 打球方向を決定 (1-9)
         // 1: P, 2: C, 3: 1B, 4: 2B, 5: 3B, 6: SS, 7: LF, 8: CF, 9: RF
-        const location = Math.floor(Math.random() * 9) + 1;
+        let location = 1;
+
+        // 長打は外野に限定 (確率は均等に割り振り)
+        if (type === 'double' || type === 'triple') {
+            const roll = Math.random();
+            if (roll < 0.33) location = 7; // LF
+            else if (roll < 0.66) location = 8; // CF
+            else location = 9; // RF
+        } else {
+            // 通常の打球分布 (投・捕は少なく、二遊・中堅を多く)
+            // 推定分布: P:4%, C:1%, 1B:12%, 2B:16%, 3B:11%, SS:16%, LF:13%, CF:14%, RF:13%
+            const roll = Math.random();
+            if (roll < 0.04) location = 1;      // P  (4%)
+            else if (roll < 0.05) location = 2; // C  (1%)
+            else if (roll < 0.17) location = 3; // 1B (12%)
+            else if (roll < 0.33) location = 4; // 2B (16%)
+            else if (roll < 0.44) location = 5; // 3B (11%)
+            else if (roll < 0.60) location = 6; // SS (16%)
+            else if (roll < 0.73) location = 7; // LF (13%)
+            else if (roll < 0.87) location = 8; // CF (14%)
+            else location = 9;                  // RF (13%)
+        }
         direction = location;
         const posMap = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
         const posName = posMap[location - 1];
