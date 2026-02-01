@@ -427,20 +427,74 @@ export const DraftScreen = () => {
   const getPlayerScore = (p: Player) => {
       let score = 0;
       if (p.position === 'P') {
-          // 投手: 球速100km/hを基準0とし、そこからの上積みで評価
-          // 平均: (145-100)*4.5 + 7.5*15 + 7.5*12 = 202.5 + 112.5 + 90 = 405
-          const speedScore = Math.max(0, (p.scoutInfo?.speed || 0) - 100) * 4.5;
-          score = speedScore + (p.scoutInfo?.control || 0) * 14 + (p.scoutInfo?.stamina || 0) * 11;
+          // 投手評価修正: シミュレーションの実情に合わせる
+          
+          // 1. 球速 (Speed): 130km/h基準。
+          // 1km/hあたりの価値は高いが、コントロールほど絶大ではない
+          // (Max 165 - 130) * 3.5 = 122.5
+          const speedScore = Math.max(0, (p.scoutInfo?.speed || 0) - 130) * 3.5;
+          
+          // 2. コントロール (Control): 最重要。1ポイントの重みを上げる
+          // シミュレーションではControlが悪いと四球+被安打で自滅する
+          // (20 * 18) = 360
+          const controlScore = (p.scoutInfo?.control || 0) * 18;
+          
+          // 3. スタミナ (Stamina): イニング消化能力
+          // (20 * 8) = 160
+          const staminaScore = (p.scoutInfo?.stamina || 0) * 8;
+          
+          // 4. 変化球 (Pitch Types): これまで無視されていたが加える
+          // p.abilities も参照する (scoutInfoに詳細がない場合があるため)
+          let pitchScore = 0;
+          const pitchTypes = p.scoutInfo && (p.scoutInfo as any).pitchTypes 
+              ? (p.scoutInfo as any).pitchTypes 
+              : p.abilities.pitchTypes;
+              
+          if (pitchTypes && Array.isArray(pitchTypes)) {
+              pitchTypes.forEach((pt: any) => {
+                  // 球種の質(value)や変化量に基づく
+                  const value = pt.value || 10;
+                  // 球種ごとの基本点 + 質のボーナス
+                  pitchScore += 15 + (value * 0.4); 
+              });
+          }
+          
+          score = speedScore + controlScore + staminaScore + pitchScore;
+
       } else {
-          // 野手: 各能力(0-15) * 重み
-          // 平均 7.5 * 係数合計53 = 397.5
-          score = ((p.scoutInfo?.contact || 0) * 16 + (p.scoutInfo?.power || 0) * 16 + (p.scoutInfo?.fielding || 0) * 9 + (p.scoutInfo?.arm || 0) * 7 + (p.scoutInfo?.speedFielder || 0) * 8) * 1.05;
+          // 野手評価修正: 長打力と弾道を重視
+          
+          // 1. ミート (Contact): 出塁の要
+          // (15 * 17) = 255
+          const contactScore = (p.scoutInfo?.contact || 0) * 17;
+          
+          // 2. パワー (Power): HR係数は下げたが、長打には必須
+          // (15 * 16) = 240
+          const powerScore = (p.scoutInfo?.power || 0) * 16;
+          
+          // 3. 走力 (Speed): 二塁打・三塁打に影響大
+          // (15 * 11) = 165 (重み増: 8->11)
+          const speedScore = (p.scoutInfo?.speedFielder || 0) * 11;
+          
+          // 4. 弾道 (Trajectory): 新規追加
+          // 弾道3,4は二塁打・本塁打が出やすいため高評価
+          // 4 * 35 = 140
+          const traj = p.scoutInfo?.trajectory || 2;
+          const trajScore = (traj - 1) * 35; 
+          
+          // 5. 守備・肩: 相対的に少し下げる
+          const defenseScore = (p.scoutInfo?.fielding || 0) * 7 + (p.scoutInfo?.arm || 0) * 6;
+
+          score = (contactScore + powerScore + speedScore + trajScore + defenseScore) * 1.05;
       }
 
-      // 年齢補正: 18歳(高卒)=1.05, 22歳(大卒)=1.0, 24歳(社会人)=0.95
+      // 年齢補正: 18歳(高卒)=1.15, 22歳(大卒)=1.0, 24歳以上(社会人)=0.95-0.90
+      // 将来性をより重視する
       let ageMultiplier = 1.0;
-      if (p.age <= 18) ageMultiplier = 1.05;
+      if (p.age <= 18) ageMultiplier = 1.15;
+      else if (p.age <= 21) ageMultiplier = 1.05;
       else if (p.age >= 24) ageMultiplier = 0.95;
+      else if (p.age >= 26) ageMultiplier = 0.90;
 
       return score * ageMultiplier;
   };

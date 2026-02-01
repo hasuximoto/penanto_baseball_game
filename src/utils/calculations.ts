@@ -20,6 +20,7 @@ const WAR_CONSTANTS = {
   RUNS_PER_WIN: 10.0,
   REPLACEMENT_LEVEL_RUNS: 20.0, // 600打席あたり
   REPLACEMENT_ERA: 4.50, // 代替投手の防御率
+  FIP_CONSTANT: 3.10, // FIP定数（リーグ平均防御率と釣り合わせる値）
   POSITION_ADJUSTMENTS: {
     'C': 12.5,
     '1B': -12.5,
@@ -41,20 +42,37 @@ const WAR_CONSTANTS = {
  */
 export const calculateWAR = (player: Player, stats: PlayerStats): number => {
   if (player.position === 'P') {
-    // 投手WAR (簡易版: RA9-WARベース)
-    // WAR = (Replacement_ERA - ERA) * (IP / 9) / RunsPerWin
-    // ※本来はFIPを使うべきだが、データ不足のためERA(または失点率)で代用
+    // 投手WAR (FIPベース)
+    // FIP = (13*HR + 3*(BB+HBP) - 2*K) / IP + Constant
+    // WAR = (Replacement_level - FIP) * IP / RunsPerWin + (Leverage Index Adjustments etc... omitted)
+    
+    // Replacement level は一般的に平均より高い（悪い）。
+    // fWARでは Replacement Level = League Average Runs Allowed + (Runs per Win * Raplacement Level Scaling)
+    // ここでは簡易的に REPLACEMENT_ERA (4.50) を基準とする。
     
     const innings = stats.inningsPitched || 0;
     if (innings === 0) return 0;
 
-    // 失点率 (Runs Allowed per 9)
-    // stats.runsAllowed があれば使うが、なければ earnedRuns (ERA) で代用
-    const runsAllowed = stats.runsAllowed || stats.earnedRuns || 0;
-    const ra9 = (runsAllowed * 9) / innings;
+    const hr = stats.pitchingHomeRuns || 0;
+    const bb = stats.pitchingWalks || 0;
+    const hbp = stats.pitchingHitByPitch || 0;
+    const k = stats.strikeOuts || 0;
+
+    // FIP計算
+    const fipNumerator = (13 * hr) + (3 * (bb + hbp)) - (2 * k);
+    const fip = (fipNumerator / innings) + WAR_CONSTANTS.FIP_CONSTANT;
+
+    // FIPベースの貢献度
+    const fipRunsAboveRep = (WAR_CONSTANTS.REPLACEMENT_ERA - fip) * (innings / 9);
     
-    // 代替水準との差分
-    const runsAboveRep = (WAR_CONSTANTS.REPLACEMENT_ERA - ra9) * (innings / 9);
+    // RA9 (防御率) ベースの貢献度 (被安打抑制能力などを評価に加えるため)
+    // 失点率 (Runs Allowed per 9) を使用するのが本来だが、簡易的にERAを使用
+    const era = stats.era || calculateERA(stats.earnedRuns || 0, innings);
+    const eraRunsAboveRep = (WAR_CONSTANTS.REPLACEMENT_ERA - era) * (innings / 9);
+
+    // FIPとERAのハイブリッド評価 (50:50)
+    // 特異なプレースタイル（ゴロ誘導型など）の投手が極端に低評価・高評価になるのを防ぐ
+    const runsAboveRep = (fipRunsAboveRep + eraRunsAboveRep) / 2;
     
     // 勝利数に換算
     return Math.round((runsAboveRep / WAR_CONSTANTS.RUNS_PER_WIN) * 10) / 10;
@@ -72,7 +90,13 @@ export const calculateWAR = (player: Player, stats: PlayerStats): number => {
     
     const walks = stats.walks || 0;
     const hbp = stats.hitByPitch || 0;
-    const singles = stats.singles || 0;
+    
+    // 単打数: singlesがあれば使うが、なければ安打数から計算
+    let singles = stats.singles || 0;
+    if (!stats.singles && (stats.hits || 0) > 0) {
+        singles = (stats.hits || 0) - (stats.doubles || 0) - (stats.triples || 0) - (stats.homeRuns || 0);
+    }
+
     const doubles = stats.doubles || 0;
     const triples = stats.triples || 0;
     const homeRuns = stats.homeRuns || 0;
@@ -151,7 +175,7 @@ export const calculateOnBasePercentage = (
  */
 export const calculateERA = (earnedRuns: number, inningsPitched: number): number => {
   if (inningsPitched === 0) return 0;
-  return Math.round((earnedRuns / inningsPitched) * 100) / 100;
+  return Math.round(((earnedRuns * 9) / inningsPitched) * 100) / 100;
 };
 
 /**

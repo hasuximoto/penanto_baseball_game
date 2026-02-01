@@ -726,8 +726,8 @@ export class DatabaseManager {
               const defB = (b.abilities.fielding || 0) + (b.abilities.arm || 0) * 0.5;
               
               // 適性が低い(C以下)場合はペナルティ大
-              const penA = aptA < 3 ? (3 - aptA) * 10 : 0;
-              const penB = aptB < 3 ? (3 - aptB) * 10 : 0;
+              const penA = aptA < 3 ? (3 - aptA) * 5 : 0;
+              const penB = aptB < 3 ? (3 - aptB) * 5 : 0;
 
               // 打撃力も考慮 (少し)
               // calculatePlayerBattingScoreにはランダム要素(調子)も含まれるため、
@@ -735,8 +735,8 @@ export class DatabaseManager {
               const batA = this.calculatePlayerBattingScore(a);
               const batB = this.calculatePlayerBattingScore(b);
 
-              const scoreA = (aptA * 2) + defA - penA + (batA * 0.15);
-              const scoreB = (aptB * 2) + defB - penB + (batB * 0.15);
+              const scoreA = (aptA * 2) + defA - penA + (batA * 0.6);
+              const scoreB = (aptB * 2) + defB - penB + (batB * 0.6);
               
               return scoreB - scoreA;
           });

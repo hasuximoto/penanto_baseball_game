@@ -308,6 +308,7 @@ export interface PitchingStyleProbabilities {
   double: number;
   single: number;
   walk: number;
+  hitByPitch: number; // 追加
   strikeout: number;
   out: number;
 }
@@ -319,18 +320,31 @@ export const calculateAtBatProbabilities = (
 ): PitchingStyleProbabilities => {
   // 能力値ベースの確率計算 (安定性重視)
   
-  // 1. 基本打率の計算
-  // 基準: Contact 10.0 = .255 (打者有利にするため基準を引き上げ)
-  const baseAvg = 0.255;
+  // 再々々々々々々調整: バランス仕上げ
+  // 再々々々々々々々調整: 最終微調整
+  // 現状: AVG .267 / ERA 3.79 / HR 1.10 / BB 3.21
+  // 目標: AVG .262 / ERA 3.70-3.75 / HR 1.00 / BB 3.20
+  // 対策: 
+  // 1. 打率微減: .183 -> .181 (AVG .267 -> .262付近へ)
+  // 2. HR係数微減: 1.10 -> 1.00へ (0.028 -> 0.026)
+  // 3. これでERAが少し下がるが、3.70台ならOK
+  const baseAvg = 0.181; 
   const batterContact = batter.abilities.contact || 10.0;
-  // const pitcherControl = pitcher.abilities.control || 10.0; // 打率への直接影響は減らす
   
-  // 打者補正: Contact 1につき +0.010
-  const batterFactor = (batterContact - 10.0) * 0.010;
+  // 打者補正: Contact 1につき +0.010 (基準8.0)
+  const batterFactor = (batterContact - 8.0) * 0.010;
   
-  // 投手補正: Control 1につき -0.005 (影響半減、四球重視)
+  // 投手補正: Control 1につき -0.007 (少し影響を戻す、四球と被安打抑制)
   const pitcherControl = pitcher.abilities.control || 10.0;
-  const pitcherFactor = (pitcherControl - 10.0) * -0.005;
+  const pitcherFactor = (pitcherControl - 10.0) * -0.007;
+
+  // リリーフ適正補正 (中継ぎ・抑えは全力投球で能力以上の数字が出やすい)
+  let reliefFactor = 0;
+  // リリーフ補正を削除 (ERA改善のため、リリーフも平等に打たれるようにする)
+  // if (pitcher.pitcherRole === 'reliever' || pitcher.pitcherRole === 'closer') {
+  //     // 被打率を 1.5% 下げる
+  //     reliefFactor = -0.015;
+  // }
 
   // 変化球補正 (Master Data Integration)
   let breakingBallHitFactor = 0;
@@ -386,7 +400,7 @@ export const calculateAtBatProbabilities = (
   // 145km/h基準、+10km/hでヒット率-1%
   const speedHitFactor = (pitcherSpeed - 145.0) * -0.001;
   
-  let hitProb = baseAvg + batterFactor + pitcherFactor + breakingBallHitFactor + speedHitFactor;
+  let hitProb = baseAvg + batterFactor + pitcherFactor + breakingBallHitFactor + speedHitFactor + reliefFactor;
   hitProb = Math.max(0.100, Math.min(0.450, hitProb)); // .100 - .450 の範囲に収める
 
   // HR率維持のための計算 (元の基準 .250 を使用)
@@ -399,17 +413,21 @@ export const calculateAtBatProbabilities = (
   const batterSpeed = batter.abilities.speed || 10.0;
   const batterTrajectory = batter.abilities.trajectory || 2; // 弾道 1-4 (デフォルト2)
 
-  // 弾道補正 & 球速による被弾抑制
-  // 弾道3以上で長打増、弾道1で長打減(単打増)
+  // 長打率アップ: 得点力不足の解消
   let trajectoryHRMod = 0;
   let trajectoryDoubleMod = 0;
   
   if (batterTrajectory >= 3) {
-      trajectoryHRMod = 0.05 + (batterTrajectory - 3) * 0.05; // +5% ~ +10%
-      trajectoryDoubleMod = 0.05;
+      // 弾道3,4はHRが出やすいが、二塁打もものすごく出やすくする
+      trajectoryHRMod = 0.06 + (batterTrajectory - 3) * 0.04;
+      trajectoryDoubleMod = 0.31; // Double Mod adjusted again (.29 -> .31)
   } else if (batterTrajectory === 1) {
-      trajectoryHRMod = -0.05; // -5%
-      trajectoryDoubleMod = -0.05;
+      // グラウンダーはHRが出にくい
+      trajectoryHRMod = -0.05; 
+      trajectoryDoubleMod = 0.00;
+  } else {
+      // ライナーは二塁打が出やすい
+      trajectoryDoubleMod = 0.21; // Double Mod adjusted again (.20 -> .21)
   }
 
   // 球速によるホームラン抑制 (140km基準、+10kmでHR率-2%)
@@ -417,7 +435,7 @@ export const calculateAtBatProbabilities = (
 
   // HR率 (対ヒット)
   // Power 10 = 10%, Power 20 = 30%
-  let hrRatio = Math.max(0.01, 0.10 + (batterPower - 10.0) * 0.03);
+  let hrRatio = Math.max(0.01, 0.10 + (batterPower - 10.0) * 0.026); // 係数微減 .028 -> .026
   hrRatio = Math.max(0.005, hrRatio + breakingBallHRFactor + trajectoryHRMod - speedHREffect); 
 
   // 2塁打・3塁打率 (Speed依存)
@@ -449,8 +467,10 @@ export const calculateAtBatProbabilities = (
   const batterEye = batter.abilities.eye !== undefined ? batter.abilities.eye : (batter.abilities.contact || 2.5);
   const batterAgg = batter.abilities.aggressiveness !== undefined ? batter.abilities.aggressiveness : 2.5;
 
-  // 近年の傾向に合わせて少し下げる (.08 -> .08) 現状維持
-  const baseWalkRate = 0.08;
+  // 近年の傾向に合わせて少し上げる (.08 -> .085)
+  // ランナーを増やしてERAを少し悪化させる狙い
+  // BB/9 (3.31) を少しだけ落ち着かせる: .079 -> .077
+  const baseWalkRate = 0.077;
   
   // Eye 1につき +0.5% (基準2.5, 数値が高いほど選球眼が良い)
   const eyeFactor = (batterEye - 2.5) * 0.005;
@@ -463,7 +483,11 @@ export const calculateAtBatProbabilities = (
 
   const walkProb = Math.max(0.02, Math.min(0.25, baseWalkRate + eyeFactor + aggFactor + controlFactor));
   
-  const remainingOut = Math.max(0, outProbTotal - walkProb);
+  // 死球率 (四球率の約7%程度と仮定して独立計算)
+  // Controlが悪いと増え、Aggressivenessが高いと増える傾向
+  const hbpProb = Math.max(0.001, (walkProb * 0.05) + ((20 - pitcherControl) * 0.0005));
+
+  const remainingOut = Math.max(0, outProbTotal - walkProb - hbpProb);
   
   // 三振率
   // Pitcher Speed (球速) と Batter Contact
@@ -471,8 +495,8 @@ export const calculateAtBatProbabilities = (
   
   // 球速 146km/h 基準, +10km/h で +9%
   const speedFactor = (pitcherSpeed - 146.0) * 0.009;
-  // Contact 10 基準, +10 で -5%
-  const contactKFactor = (batterContact - 10.0) * -0.005;
+  // Contact 10 基準, +10 で -10% (コンタクトの影響を強める：三振調整)
+  const contactKFactor = (batterContact - 10.0) * -0.010;
   
   // Aggressiveness 1につき +0.5% (積極的なほど三振が減る)
   const aggKFactor = (batterAgg - 2.5) * -0.005;
@@ -483,24 +507,29 @@ export const calculateAtBatProbabilities = (
   let kRate = Math.max(0.05, Math.min(0.40, baseKRate + speedFactor + contactKFactor + breakingBallKFactor + aggKFactor + eyeKFactor));
   kRate = kRate * 0.9;
 
-  const strikeoutProb = Math.min(remainingOut * 0.9, remainingOut * (kRate / (1-hitProb-walkProb))); // アウトの中での割合
+  const strikeoutProb = Math.min(remainingOut * 0.9, remainingOut * (kRate / (1-hitProb-walkProb-hbpProb))); // アウトの中での割合
   
   let normalOutProb = Math.max(0, remainingOut - strikeoutProb);
 
-  // 三振以外のアウト確率を下げる (インプレー打球のヒット化リスク - 旧謎の12%ブースト)
+  // 三振以外のアウト確率を下げる (インプレー打球のヒット化リスク)
   // 投手の球速(球威)に基づいて係数を変動させる
   // 158km/h以上ならリスク小(0.96)、130km/h以下ならリスク大(0.88)
   // 球が遅いと、バットに当てられたときに凡打がヒットになりやすい
+  // 打高化対応: 少し係数を上げる（ヒットになりやすくする）
   const minSpeedLimit = 130.0;
   const maxSpeedLimit = 158.0; 
   
   let speedRatio = (pitcherSpeed - minSpeedLimit) / (maxSpeedLimit - minSpeedLimit);
   speedRatio = Math.max(0, Math.min(1.0, speedRatio));
 
-  // 以前の0.88固定に戻しつつ(軟投派)、速球派でも0.96(4%)程度のリスクは残す
-  // これにより全体的に打率が上がり、防御率が悪化する
-  const minReduction = 0.88; // 遅い投手: 12%がヒットに
-  const maxReduction = 0.96; // 速い投手: 4%がヒットに
+  // 再々々々々々々調整: BABIP適正化
+  // ヒット率: 16-8% -> 15-7% に戻さないとAVG.274は高すぎる
+  // しかしERA維持のためにはヒットが必要。
+  // -> 二塁打率を上げたので、単打(ここ)は少し絞る。
+  // ユーザー要望: BABIP .310以下だが、投手有利にはしない
+  // 対策: BABIPを下げる(単打削減)が、長打と四球を増やす
+  const minReduction = 0.86; // 0.83 -> 0.86 (Out化しやすくする)
+  const maxReduction = 0.935; // 0.915 -> 0.935
   const outReductionFactor = minReduction + (maxReduction - minReduction) * speedRatio;
   
   const reducedOutProb = normalOutProb * outReductionFactor;
@@ -516,6 +545,7 @@ export const calculateAtBatProbabilities = (
     double: doubleProb,
     single: finalSingleProb,
     walk: walkProb,
+    hitByPitch: hbpProb, // 追加
     strikeout: strikeoutProb,
     out: normalOutProb
   };
