@@ -3,6 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../redux/store';
+import { dbManager } from '../services/databaseManager';
+import { setUnreadNewsCount } from '../redux/slices/uiSlice';
 import { COLORS } from '../utils/theme';
 
 // スクリーンはここにインポートします
@@ -238,7 +242,24 @@ const PlaceholderScreen = () => {
 
 
 
-const MainTabNavigator = () => (
+const MainTabNavigator = () => {
+    const dispatch = useDispatch();
+    const season = useSelector((state: RootState) => state.game.season);
+    const day = useSelector((state: RootState) => state.game.day);
+    const selectedTeamId = useSelector((state: RootState) => state.game.selectedTeamId); // gameSliceにselectedTeamIdがある前提
+    const unreadNewsCount = useSelector((state: RootState) => state.ui.unreadNewsCount);
+
+    // ニュース通知のチェック
+    React.useEffect(() => {
+        const checkUnreadNews = async () => {
+             // selectedTeamIdは string | null なので型変換が必要かも
+             const count = await dbManager.getUnreadNewsCount(selectedTeamId as any);
+             dispatch(setUnreadNewsCount(count));
+        };
+        checkUnreadNews();
+    }, [season, day, selectedTeamId, dispatch]);
+
+    return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -314,10 +335,12 @@ const MainTabNavigator = () => (
         component={NewsStack}
         options={{
           tabBarLabel: 'ニュース',
+          tabBarBadge: unreadNewsCount && unreadNewsCount > 0 ? unreadNewsCount : undefined,
         }}
       />
     </Tab.Navigator>
-);
+    );
+};
 
 /**
  * ルートナビゲーション

@@ -1,6 +1,7 @@
 import { Player, TeamId, NewsItem, GameState } from '../types';
 import { dbManager } from './databaseManager';
 import { OFF_SEASON_TURNS } from '../utils/constants';
+import { ForeignPlayerGenerator } from './foreignPlayerGenerator';
 
 export class ContractManager {
 
@@ -140,6 +141,28 @@ export class ContractManager {
 
       // 残った選手(年俸更新済み)を保存
       await dbManager.updatePlayers(currentRoster);
+    }
+
+    // === 外国人選手生成 (ストーブリーグ用) ===
+    logs.push("=== 新外国人選手リストアップ ===");
+    try {
+      // 投手・野手合わせて22人程度生成
+      const newForeignPlayers = ForeignPlayerGenerator.generateCandidates(22);
+      await dbManager.addPlayers(newForeignPlayers);
+      logs.push(`${newForeignPlayers.length}名の新外国人選手がリストアップされました`);
+      
+      newsItems.push({
+        id: `foreign_market_${date}`,
+        date: date,
+        title: `新外国人選手市場`,
+        content: `海外から${newForeignPlayers.length}名の選手が移籍市場にリストアップされました。`,
+        type: 'contract', // 'general' might not be a valid NewsType, sticking to 'contract' or existing
+        affectedTeams: []
+      });
+
+    } catch (e) {
+      console.error("Foreign player generation failed:", e);
+      logs.push("外国人選手生成に失敗しました");
     }
 
     if (newsItems.length > 0) {

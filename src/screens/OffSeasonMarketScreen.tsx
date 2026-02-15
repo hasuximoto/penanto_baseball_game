@@ -51,11 +51,11 @@ export const OffSeasonMarketScreen = () => {
         // FA宣言していて、まだ所属が決まっていない選手 (team === 'free_agent' かつ faState.declared === true)
         filtered = allPlayers.filter(p => p.team === 'free_agent' && p.faState?.declared);
       } else if (activeTab === 'released') {
-        // 自由契約選手 (FA宣言以外で free_agent の選手)
-        filtered = allPlayers.filter(p => p.team === 'free_agent' && !p.faState?.declared);
+        // 自由契約選手 (FA宣言以外で free_agent の選手、かつ新外国人ではない)
+        filtered = allPlayers.filter(p => p.team === 'free_agent' && !p.faState?.declared && !p.isForeign);
       } else if (activeTab === 'foreign') {
-        // TODO: 外国人リストの実装
-        filtered = [];
+        // 外国人リストの実装 (isForeign付与者)
+        filtered = allPlayers.filter(p => p.team === 'free_agent' && p.isForeign);
       }
       
       setPlayers(filtered);

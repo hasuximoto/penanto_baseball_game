@@ -378,6 +378,7 @@ export interface UIState {
     type: "info" | "warning" | "error" | "success";
     visible: boolean;
   };
+  unreadNewsCount?: number;
   activeScreen: string;
   selectedPlayer: number | null;
   showModalDialog: boolean;

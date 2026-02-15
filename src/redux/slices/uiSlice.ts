@@ -8,6 +8,7 @@ const initialState: UIState = {
     type: 'info',
     visible: false,
   },
+  unreadNewsCount: 0,
   activeScreen: 'MainMenu',
   selectedPlayer: null,
   showModalDialog: false,
@@ -41,6 +42,9 @@ const uiSlice = createSlice({
     hideNotification: (state) => {
       state.notification.visible = false;
     },
+    setUnreadNewsCount: (state, action: PayloadAction<number>) => {
+      state.unreadNewsCount = action.payload;
+    },
     setActiveScreen: (state, action: PayloadAction<string>) => {
       state.activeScreen = action.payload;
     },
@@ -69,6 +73,7 @@ export const {
   setLoading,
   showNotification,
   hideNotification,
+  setUnreadNewsCount,
   setActiveScreen,
   setSelectedPlayer,
   showModalDialog,
