@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
+import { setUnreadNewsCount } from '../redux/slices/uiSlice';
 import { dbManager } from '../services/databaseManager';
 import { NewsItem } from '../types';
 import { getGameDateString } from '../utils/dateUtils';
@@ -13,15 +14,29 @@ export const NewsScreen = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const currentSeason = useSelector((state: RootState) => state.game.season);
 
   const fetchNews = async () => {
     setLoading(true);
     try {
       const data = await dbManager.getNews();
-      // Sort by date descending (newest first)
-      const sorted = data.sort((a, b) => b.date - a.date);
+      // dataをコピーしてからソートすることで、元のdataの順序（時系列順）に影響を与えないようにする、
+      // あるいはソート済みのリストの先頭（最新）を取得する。
+      
+      const sorted = [...data].sort((a, b) => b.date - a.date);
       setNews(sorted);
+
+      // 最新のニュースIDを既読として保存
+      if (sorted.length > 0) {
+         // sortedは日付降順（新しい順）なので、sorted[0]が最新のニュース
+         const latestNews = sorted[0];
+         await dbManager.setLastReadNewsId(latestNews.id);
+      }
+      
+      // 未読カウントをリセット
+      dispatch(setUnreadNewsCount(0));
+
     } catch (error) {
       console.error(error);
     } finally {

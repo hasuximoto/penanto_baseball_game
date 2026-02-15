@@ -18,6 +18,13 @@ export class RandomUtils {
   }
 
   /**
+   * Selects a random item from an array
+   */
+  static choice<T>(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  /**
    * Generates a number from a normal distribution using Box-Muller transform
    * @param mean Mean value
    * @param stdDev Standard deviation

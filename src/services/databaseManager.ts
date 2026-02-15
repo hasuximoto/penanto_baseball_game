@@ -520,6 +520,29 @@ export class DatabaseManager {
   }
 
   /**
+   * 新しい選手を追加する
+   */
+  async addPlayers(newPlayersList: Player[]): Promise<void> {
+    try {
+      const schemaData = await this.getItem('simbaseball_db_schema');
+      if (!schemaData) return;
+
+      const parsed = JSON.parse(schemaData);
+      const currentPlayers = parsed.initialData.players as Player[];
+      
+      // 重複チェックはIDで行うのが安全だが、ここでは単純に追加する
+      // 必要ならIDチェックを入れる
+      
+      const updatedList = [...currentPlayers, ...newPlayersList];
+
+      parsed.initialData.players = updatedList;
+      await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+    } catch (error) {
+      console.error('Failed to add players:', error);
+    }
+  }
+
+  /**
    * 複数の選手を削除する
    */
   async removePlayers(playerIds: (string | number)[]): Promise<void> {
@@ -1678,6 +1701,81 @@ export class DatabaseManager {
       } catch (error) {
           console.error('Failed to get news:', error);
           return [];
+      }
+  }
+
+  /**
+   * 最後に読んだニュースIDを取得
+   */
+  async getLastReadNewsId(): Promise<string | null> {
+      try {
+          const schemaData = await this.getItem('simbaseball_db_schema');
+          if (schemaData) {
+              const parsed = JSON.parse(schemaData);
+              return parsed.lastReadNewsId || null;
+          }
+          return null;
+      } catch (error) {
+          console.error('Failed to get last read news ID:', error);
+          return null;
+      }
+  }
+
+  /**
+   * 最後に読んだニュースIDを保存
+   */
+  async setLastReadNewsId(id: string): Promise<void> {
+      try {
+          const schemaData = await this.getItem('simbaseball_db_schema');
+          if (schemaData) {
+              const parsed = JSON.parse(schemaData);
+              parsed.lastReadNewsId = id;
+              await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
+          }
+      } catch (error) {
+          console.error('Failed to set last read news ID:', error);
+      }
+  }
+
+  /**
+   * 未読ニュース数を取得
+   */
+  async getUnreadNewsCount(teamId: TeamId | null): Promise<number> {
+      try {
+          if (!teamId) return 0;
+          
+          const news = await this.getNews(); // すでに重複排除されている
+          const lastReadId = await this.getLastReadNewsId();
+          
+          let count = 0;
+          let foundLastRead = false;
+          
+          // ニュースは通常、古い順に追加される（配列末尾が最新）。
+          // なので、配列を逆走して、lastReadIdが見つかるまでカウントする。
+          for (let i = news.length - 1; i >= 0; i--) {
+              const item = news[i];
+              
+              if (lastReadId && item.id === lastReadId) {
+                  foundLastRead = true;
+                  break;
+              }
+              
+              // 自軍に関連するか、あるいは特定チームに限定されないニュースか
+              if (!item.affectedTeams || item.affectedTeams.length === 0 || item.affectedTeams.includes(teamId)) {
+                  count++;
+              }
+          }
+          
+          // もしlastReadIdが見つからなかった場合（かつlastReadIdが設定されていた場合）、
+          // 全てのニュースが新しいか、あるいはlastReadIdのニュースが消えた可能性がある。
+          // ここではシンプルに、見つからなければ全件未読（ただしフィルタリング済み）とする。
+          // 初回起動時(lastReadIdがnull)も同様。
+          
+          return count;
+          
+      } catch (error) {
+          console.error('Failed to get unread news count:', error);
+          return 0;
       }
   }
 
