@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: SPACING.l,
+    padding: SPACING.lg,
   },
   title: {
     fontSize: 48,

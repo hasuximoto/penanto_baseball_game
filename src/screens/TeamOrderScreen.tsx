@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Player, Team, TeamId, LineupSlot, Position } from '../types';
+import { Player, Team, TeamId, LineupSlot, Position, PitcherSetting } from '../types';
 import { dbManager } from '../services/databaseManager';
 import { getGameDateString, formatDateJP } from '../utils/dateUtils';
 import { useSelector } from 'react-redux';
@@ -116,7 +116,7 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
         
         // 1. Fill Rotation from Settings
         for (let i = 0; i < 6; i++) {
-             const setting = pitcherSettings.find(s => s.role === 'starter' && s.slotNumber === i + 1);
+             const setting = pitcherSettings.find((s: PitcherSetting) => s.role === 'starter' && s.slotNumber === i + 1);
              if (setting) {
                  const p = activePitchers.find(ap => ap.id === setting.playerId);
                  if (p) rotation.push(p);
@@ -157,8 +157,8 @@ export const TeamOrderScreen: React.FC<TeamOrderScreenProps> = ({ route, navigat
 
         // Identify Closer
         // Check settings first
-        const closerSettings = pitcherSettings.filter(s => s.role === 'closer');
-        closerSettings.forEach(s => {
+        const closerSettings = pitcherSettings.filter((s: PitcherSetting) => s.role === 'closer');
+        closerSettings.forEach((s: PitcherSetting) => {
             const p = activePitchers.find(ap => ap.id === s.playerId);
             if (p && !finalRotation.some(r => r.id === p.id)) {
                 closerList.push(p);

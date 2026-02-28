@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   activeTabText: {
-    color: COLORS.black,
+    color: COLORS.textInverse,
   },
   sortContainer: {
     flexDirection: 'row',
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   activeSortButton: {
-    backgroundColor: COLORS.primaryLowOpacity,
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
     borderColor: COLORS.primary,
   },
   sortButtonText: {
@@ -430,12 +430,12 @@ const styles = StyleSheet.create({
   faBadgeText: {  
     fontSize: 10,
     fontWeight: 'bold',
-    color: COLORS.black,
+    color: COLORS.textInverse,
   },
   salary: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: COLORS.money,
+    color: COLORS.primary,
   },
   statsInfo: {
     marginTop: SPACING.xs,
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.sm,
   },
   offeredBadge: {
-    backgroundColor: COLORS.success,
+    backgroundColor: COLORS.positive,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
     borderRadius: 4,
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   offerButtonText: {
-    color: COLORS.black,
+    color: COLORS.textInverse,
     fontWeight: 'bold',
   },
 });

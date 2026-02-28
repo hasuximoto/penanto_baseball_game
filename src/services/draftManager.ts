@@ -1,6 +1,8 @@
 import { Player, Position, TeamId } from '../types';
 import { dbManager } from './databaseManager';
 import { RandomUtils } from '../utils/randomUtils';
+import { DraftCommentGenerator } from './draftCommentGenerator';
+import { DraftStatusAssigner } from './draftStatusAssigner';
 
 export class DraftManager {
   
@@ -16,11 +18,30 @@ export class DraftManager {
     const fielderCount = count - pitcherCount;
 
     for (let i = 0; i < pitcherCount; i++) {
-      candidates.push(this.generatePitcher(i));
+        const pitcher = this.generatePitcher(i);
+        // Add draft comment after generation to have access to full stats
+        if (pitcher.scoutInfo) {
+            pitcher.scoutInfo.draftComment = DraftCommentGenerator.generateComment(pitcher);
+        }
+        candidates.push(pitcher);
     }
 
     for (let i = 0; i < fielderCount; i++) {
-      candidates.push(this.generateFielder(pitcherCount + i));
+        const fielder = this.generateFielder(pitcherCount + i);
+        if (fielder.scoutInfo) {
+            fielder.scoutInfo.draftComment = DraftCommentGenerator.generateComment(fielder);
+        }
+        candidates.push(fielder);
+    }
+
+    // Assign special statuses (e.g. Draft #1 Candidate, No.1 Slugger) based on entire pool
+    DraftStatusAssigner.assignStatuses(candidates);
+
+    // Regenerate comments to include the assigned statuses
+    for (const candidate of candidates) {
+        if (candidate.scoutInfo) {
+            candidate.scoutInfo.draftComment = DraftCommentGenerator.generateComment(candidate);
+        }
     }
 
     return candidates;
@@ -40,7 +61,8 @@ export class DraftManager {
     else if (age === 22) origin = "University";
     else if (age >= 24) origin = "Industrial";
 
-    const handedness = RandomUtils.chance(0.7) ? 'R' : 'L';
+    const throwHand = RandomUtils.weightedChoice([1, 2], [0.72, 0.28]) as 1 | 2;
+    const batHand = RandomUtils.weightedChoice([1, 2, 3], [0.7, 0.25, 0.05]) as 1 | 2 | 3;
     
     // Speed: Normal distribution around 146km/h
     const speed = Math.round(RandomUtils.normal(146, 5));
@@ -64,25 +86,35 @@ export class DraftManager {
     
     // Shuffle and pick
     const shuffled = [...pitchTypesList].sort(() => 0.5 - Math.random());
+    let totalPitchValue = 0;
     for (let i = 0; i < numPitches; i++) {
       // Value: Normal around 100? (JSON had 126)
       // Let's say 50-150 range.
       const val = Math.round(RandomUtils.clampedNormal(100, 20, 40, 200));
       selectedPitches.push({ name: shuffled[i], value: val });
+      totalPitchValue += val;
     }
+    
+    // Calculate breaking ball rank (roughly sum / 30) specific tuning for 0-15 scale
+    // If avg pitch is 100, and 3 pitches -> 300. 300 / 25 = 12 (S). A bit high.
+    // 3 pitches * 100 = 300. We want average good pitcher to have maybe 7-9 (B/A).
+    // 300 / 35 = 8.5.
+    const breakingBall = this.generateScoutValue(totalPitchValue / 35);
 
     return {
       id: `draft_p_${Date.now()}_${index}`,
       name,
       position: 'P',
-      handedness,
+      throwHand,
+      batHand,
       age,
       origin,
       team: 'unknown' as any, // Not assigned yet
       scoutInfo: {
         speed: speed,
         control: this.generateScoutValue(control),
-        stamina: this.generateScoutValue(stamina)
+        stamina: this.generateScoutValue(stamina),
+        breakingBall
       },
       stats: {
         average: 0, homeRuns: 0, rbi: 0, stolenBases: 0, obp: 0,
@@ -120,7 +152,8 @@ export class DraftManager {
     else if (age === 22) origin = "University";
     else if (age >= 24) origin = "Industrial";
 
-    const handedness = RandomUtils.weightedChoice(['R', 'L', 'B'], [0.6, 0.3, 0.1]) as "R" | "L" | "B";
+    const throwHand = RandomUtils.weightedChoice([1, 2], [0.72, 0.28]) as 1 | 2;
+    const batHand = RandomUtils.weightedChoice([1, 2, 3], [0.7, 0.25, 0.05]) as 1 | 2 | 3;
     
     // Position
     const positions: Position[] = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
@@ -166,7 +199,8 @@ export class DraftManager {
       id: `draft_f_${Date.now()}_${index}`,
       name,
       position: mainPos,
-      handedness,
+      throwHand,
+      batHand,
       age,
       origin,
       team: 'unknown' as any,

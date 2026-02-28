@@ -14,6 +14,7 @@ import { GameResult, PlayerGameStats, Player, NewsItem, TeamId, YearlyStats, Pla
 import { getGameDateString } from '../utils/dateUtils';
 import { AwardManager } from './awardManager';
 import { calculateWAR } from '../utils/calculations';
+import { DraftManager } from './draftManager';
 
 const POS_JP_TO_EN: Record<string, string> = {
   '右': 'RF', '中': 'CF', '左': 'LF',
@@ -33,7 +34,6 @@ export const DATABASE_SCHEMA = {
       team TEXT NOT NULL,
       position TEXT NOT NULL,
       age INTEGER,
-      handedness TEXT,
       salary INTEGER DEFAULT 0,
       level INTEGER DEFAULT 1,
       experience_years INTEGER DEFAULT 0,
@@ -215,7 +215,7 @@ export const INITIAL_TEAMS = INITIAL_TEAMS_DATA as any[];
 export class DatabaseManager {
   private dbKey = 'simbaseball_db_initialized';
   private dbVersionKey = 'simbaseball_db_version';
-  private currentVersion = 13;
+  private currentVersion = 14;
 
   constructor() {
     if (Platform.OS === 'web') {
@@ -269,7 +269,8 @@ export class DatabaseManager {
     if (Platform.OS === 'web') {
       return await localforage.keys();
     } else {
-      return await AsyncStorage.getAllKeys();
+      const keys = await AsyncStorage.getAllKeys();
+      return [...keys];
     }
   }
 
@@ -445,6 +446,45 @@ export class DatabaseManager {
       // 初期化フラグを設定
       await this.setItem(this.dbKey, 'true');
       await this.setItem(this.dbVersionKey, this.currentVersion.toString());
+
+      // 初期ドラフト候補の生成とニュース発行 (初期年度)
+      const initialYear = 2026;
+      console.log('Generating initial draft candidates...');
+      const draftCandidates = DraftManager.generateDraftCandidates(150);
+      await this.saveDraftCandidates(draftCandidates);
+
+      // 候補者の傾向分析（ニュース用）
+      const pitchers = draftCandidates.filter(p => p.position === 'P');
+      const fielders = draftCandidates.filter(p => p.position !== 'P');
+      
+      const hsPitchers = pitchers.filter(p => p.age === 18).length;
+      const uniPitchers = pitchers.filter(p => p.age === 22).length;
+      
+      const hsFielders = fielders.filter(p => p.age === 18).length;
+      const uniFielders = fielders.filter(p => p.age === 22).length;
+
+      // 注目選手（ドラフト1位候補など）
+      const topProspects = draftCandidates.filter(p => p.scoutInfo?.specialStatus?.includes('ドラフト1位候補'));
+      const topNames = topProspects.slice(0, 3).map(p => `${p.name} (${p.position})`).join('、');
+
+      let trendText = "";
+      if (pitchers.length > fielders.length + 10) trendText += "今年は投手が豊作の年となりそうだ。";
+      else if (fielders.length > pitchers.length + 10) trendText += "今年は野手の有力候補が多い。";
+      else trendText += "投打ともにバランスの取れた人材が揃っている。";
+
+      if (hsPitchers + hsFielders > 60) trendText += "特に高校生に逸材が多く、将来性が楽しみな年だ。";
+      else if (uniPitchers + uniFielders > 60) trendText += "即戦力となる大学生候補が充実している。";
+
+      const newsTitle = `${initialYear}年 ドラフト戦線異常あり？ 今年の展望`;
+      const newsContent = `${trendText}\n\n注目選手としては、${topNames}らの名前が挙がっている。\n各球団のスカウトも視察に熱が入る時期となってきた。\n\n[内訳]\n投手: ${pitchers.length}名 (高卒:${hsPitchers}, 大卒:${uniPitchers})\n野手: ${fielders.length}名 (高卒:${hsFielders}, 大卒:${uniFielders})`;
+
+      await this.addNews([{
+          id: `draft_prospects_start_${initialYear}`,
+          date: 0, // 開幕前
+          title: newsTitle,
+          content: newsContent,
+          type: 'news'
+      }]);
 
       console.log('Database initialized successfully');
     } catch (error) {

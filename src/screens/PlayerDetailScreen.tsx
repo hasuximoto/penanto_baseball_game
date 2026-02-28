@@ -588,7 +588,7 @@ export const PlayerDetailScreen = ({ route }: any) => {
         <View style={styles.avatarCircle}>
              <Text style={styles.avatarText}>{player.position}</Text>
         </View>
-        <Text style={styles.uniformNumber}>#{player.id.slice(-2)}</Text>
+        <Text style={styles.uniformNumber}>#{String(player.id).slice(-2)}</Text>
         <Text style={styles.playerName}>{player.name}</Text>
         <View style={styles.playerDetailRow}>
              <View style={styles.tag}><Text style={styles.tagText}>{player.team.toUpperCase()}</Text></View>
@@ -737,6 +737,9 @@ const styles = StyleSheet.create({
   content: {
     padding: SPACING.md,
     paddingTop: SPACING.lg,
+  },
+  statsContainer: {
+    paddingVertical: SPACING.md,
   },
   
   // Stats Grid

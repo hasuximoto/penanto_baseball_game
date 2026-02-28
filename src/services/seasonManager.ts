@@ -1,6 +1,6 @@
 import { dbManager } from './databaseManager';
 import INITIAL_SCHEDULE from '../data/initialSchedule.json';
-import { Player } from '../types';
+import { DraftManager } from './draftManager';
 
 export class SeasonManager {
   /**
@@ -153,7 +153,45 @@ export class SeasonManager {
     // 5. 古い試合履歴の削除 (容量確保のため)
     await dbManager.cleanupOldGameHistory(newSeasonYear);
 
-    // 6. 疲労度のリセット (開幕時は全員元気)
+    // 6. ドラフト候補の生成とニュース発行
+    console.log('Generating draft candidates...');
+    const draftCandidates = DraftManager.generateDraftCandidates(150);
+    await dbManager.saveDraftCandidates(draftCandidates);
+
+    // 候補者の傾向分析（ニュース用）
+    const pitchers = draftCandidates.filter(p => p.position === 'P');
+    const fielders = draftCandidates.filter(p => p.position !== 'P');
+    
+    const hsPitchers = pitchers.filter(p => p.age === 18).length;
+    const uniPitchers = pitchers.filter(p => p.age === 22).length;
+    
+    const hsFielders = fielders.filter(p => p.age === 18).length;
+    const uniFielders = fielders.filter(p => p.age === 22).length;
+
+    // 注目選手（ドラフト1位候補など）
+    const topProspects = draftCandidates.filter(p => p.scoutInfo?.specialStatus?.includes('ドラフト1位候補'));
+    const topNames = topProspects.slice(0, 3).map(p => `${p.name} (${p.position})`).join('、');
+
+    let trendText = "";
+    if (pitchers.length > fielders.length + 10) trendText += "今年は投手が豊作の年となりそうだ。";
+    else if (fielders.length > pitchers.length + 10) trendText += "今年は野手の有力候補が多い。";
+    else trendText += "投打ともにバランスの取れた人材が揃っている。";
+
+    if (hsPitchers + hsFielders > 60) trendText += "特に高校生に逸材が多く、将来性が楽しみな年だ。";
+    else if (uniPitchers + uniFielders > 60) trendText += "即戦力となる大学生候補が充実している。";
+
+    const newsTitle = `${newSeasonYear}年 ドラフト戦線異常あり？ 今年の展望`;
+    const newsContent = `${trendText}\n\n注目選手としては、${topNames}らの名前が挙がっている。\n各球団のスカウトも視察に熱が入る時期となってきた。\n\n[内訳]\n投手: ${pitchers.length}名 (高卒:${hsPitchers}, 大卒:${uniPitchers})\n野手: ${fielders.length}名 (高卒:${hsFielders}, 大卒:${uniFielders})`;
+
+    await dbManager.addNews([{
+        id: `draft_prospects_start_${newSeasonYear}`,
+        date: 0, // 開幕前
+        title: newsTitle,
+        content: newsContent,
+        type: 'news'
+    }]);
+
+    // 7. 疲労度のリセット (開幕時は全員元気)
     // updatePlayersでstatsと一緒にfatigueもリセットすべきだが、
     // Player型にfatigueが含まれていない場合があるため、別途確認が必要。
     // types/index.tsを見る限りPlayer型にはfatigueがないが、runtimeで追加されている可能性がある。

@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: SPACING.m,
+    padding: SPACING.md,
     backgroundColor: COLORS.card,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
@@ -111,14 +111,14 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
   },
   arrowButton: {
-    padding: SPACING.s,
+    padding: SPACING.sm,
   },
   weekHeader: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
     paddingVertical: 10,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
   },
   weekDayText: {
     flex: 1,
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 16,
     color: COLORS.textMain,
-    fontFamily: FONTS.medium,
+    fontFamily: FONTS.regular,
   },
   dot: {
     width: 4,
