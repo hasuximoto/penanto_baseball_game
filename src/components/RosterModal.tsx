@@ -52,7 +52,7 @@ export const RosterModal: React.FC<RosterModalProps> = ({
               )}
               {onViewDetails && (
                   <TouchableOpacity
-                      style={[styles.button, { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.primary, flex: 1, marginLeft: 5 }]}
+                    style={[styles.button, { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.primary, flex: 1, marginLeft: 5 }]}
                       onPress={onViewDetails}
                   >
                       <Text style={[styles.buttonText, { color: COLORS.primary }]}>オーダー確認</Text>
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   disabledButton: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderColor: COLORS.textMuted,
     borderWidth: 1,
   },
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     padding: 6,
     marginBottom: 5,
     color: COLORS.primary,
-    fontFamily: FONTS.medium,
+    fontFamily: FONTS.regular,
   },
   rosterRow: {
     flexDirection: 'row',
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   rosterName: {
     flex: 1,
     color: COLORS.textMain,
-    fontFamily: FONTS.medium,
+    fontFamily: FONTS.regular,
   },
   rosterStats: {
     width: 100,

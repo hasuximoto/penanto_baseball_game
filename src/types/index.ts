@@ -19,6 +19,11 @@ export type SeasonPhase = "regular" | "off_season" | "draft" | "signing";
 
 export type OffSeasonStep = "draft" | "contract" | "reinforcement" | "camp" | "next_season";
 
+export type HandCode = 1 | 2 | 3;
+export type ThrowHandCode = 1 | 2;
+export type BatHandCode = HandCode;
+export type HandLabel = "右" | "左" | "両";
+
 // ========== 選手データ ==========
 
 export interface PlayerStats {
@@ -97,7 +102,8 @@ export interface Player {
   id: number | string;
   name: string;
   position: Position;
-  handedness: "R" | "L" | "B";      // 右・左・両打ち
+  throwHand: ThrowHandCode;          // 投げ手 (1:右, 2:左)
+  batHand: BatHandCode;              // 打ち手 (1:右, 2:左, 3:両)
   age: number;
   draftYear?: number;               // ドラフト指名年度
   experienceYears?: number;         // プロ年数
@@ -126,6 +132,7 @@ export interface Player {
     speed?: number; // 確定情報
     control?: number; // ランク用数値 (実データ + 誤差)
     stamina?: number; // ランク用数値 (実データ + 誤差)
+    breakingBall?: number; // 変化球 (ランク用数値)
     
     // 野手
     contact?: number;
@@ -134,6 +141,8 @@ export interface Player {
     arm?: number;
     speedFielder?: number; // 野手の走力
     trajectory?: number;
+    draftComment?: string;
+    specialStatus?: string[]; // "ドラフト1位候補", "甲子園優勝投手" など
   };
   stats: PlayerStats;
   abilities: {
@@ -463,8 +472,8 @@ export interface NewsItem {
   date: number;
   title: string;
   content: string;
-  type: "trade" | "injury" | "signing" | "record" | "event" | "roster_move" | "game" | "award" | "draft" | "contract" | "roster";
-  affectedTeams: TeamId[];
+  type: "trade" | "injury" | "signing" | "record" | "event" | "roster_move" | "game" | "award" | "draft" | "contract" | "roster" | "news";
+  affectedTeams?: TeamId[];
 }
 
 // ========== ゲーム計算用 ==========

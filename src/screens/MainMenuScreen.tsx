@@ -21,6 +21,7 @@ import { addDays, resetGame, incrementDate, setGameState, setPlayableFlags, setS
 import { Player } from '@/types';
 import { RosterModal } from '@/components/RosterModal';
 import { getGameDateString, formatDateJP } from '@/utils/dateUtils';
+import { formatThrowBat } from '@/utils/handedness';
 import { COLORS, SPACING } from '@/utils/theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -257,8 +258,43 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     navigation.navigate('Settings');
   };
 
-  const handleStoveLeague = () => {
-    navigation.navigate('StoveLeague');
+  const handleStoveLeague = async () => {
+      // ニュース発行 (まだ発行されていない場合)
+      const newsId = `draft_feature_offseason_${gameState.season}`;
+      const existingNews = await dbManager.getNews();
+      
+      // 既に同じシーズンのドラフト特集が出ていないか確認
+      if (!existingNews.some(n => n.id === newsId)) {
+          setLoading(true);
+          try {
+              const candidates = await dbManager.getDraftCandidates();
+              if (candidates && candidates.length > 0) {
+                   const bestCandidates = candidates
+                      .filter(c => c.scoutInfo?.specialStatus?.includes('ドラフト1位候補') || c.scoutInfo?.specialStatus?.includes('競合必至'))
+                      .slice(0, 5);
+                   
+                   const featureContent = bestCandidates.map(c => 
+                       `【${c.scoutInfo?.specialStatus?.[0]}】${c.name} (${c.position} / ${c.age}歳 / ${formatThrowBat(c.throwHand, c.batHand)})\n` +
+                       `評価: ${(c.scoutInfo?.draftComment || '').substring(0, 40)}...`
+                   ).join('\n\n');
+  
+                   await dbManager.addNews([{
+                       id: newsId,
+                       date: gameState.currentDate,
+                       title: '［特集］今年のドラフト候補たち 運命の選択へ',
+                       // contentは型定義でstringであることを確認済み
+                       content: `レギュラーシーズンが終了し、いよいよストーブリーグへ突入。\n今年の注目ドラフト候補選手たちをピックアップ！\n\n${featureContent}\n\n各球団の動向からも目が離せない。`,
+                       type: 'news'
+                   }]);
+              }
+          } catch (e) {
+              console.error("News generation failed", e);
+          } finally {
+              setLoading(false);
+          }
+      }
+  
+      navigation.navigate('StoveLeague');
   };
 
   // ----- Render Components -----
@@ -280,7 +316,7 @@ export const MainMenuScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     <View style={styles.gridContainer}>
       {/* Primary Action: Play / Skip */}
       <TouchableOpacity
-        style={[styles.actionCard, styles.primaryActionCard, (gameState.playableFlags.seasonEnded || loading) && styles.disabledCard]}
+        style={[styles.primaryActionCard, (gameState.playableFlags.seasonEnded || loading) && styles.disabledCard]}
         onPress={handleGameStart}
         activeOpacity={0.8}
         disabled={gameState.playableFlags.seasonEnded || loading}

@@ -1,5 +1,6 @@
 import { SaveData, GameState, Player, Team } from '../types';
 import { dbManager } from './databaseManager';
+import { parseBatHandCode, parseThrowHandCode } from '../utils/handedness';
 
 /**
  * DataManager - ゲームデータの永続化管理
@@ -90,7 +91,8 @@ export class DataManager {
         id: index + 1,
         name: p.name,
         position: p.position as any,
-        handedness: p.handedness as any,
+        throwHand: parseThrowHandCode(p.throwHand),
+        batHand: parseBatHandCode(p.batHand),
         age: p.age,
         team: p.team as any,
         abilities: p.abilities || {

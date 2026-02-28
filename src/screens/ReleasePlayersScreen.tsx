@@ -21,7 +21,7 @@ export const ReleasePlayersScreen = () => {
   const selectedTeamId = useSelector((state: RootState) => state.game.selectedTeamId);
   const currentSeason = useSelector((state: RootState) => state.game.season);
   const [roster, setRoster] = useState<Player[]>([]);
-  const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]); // Player IDs
+  const [selectedPlayers, setSelectedPlayers] = useState<Array<string | number>>([]); // Player IDs
   const [modalVisible, setModalVisible] = useState(false);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
   const [warningVisible, setWarningVisible] = useState(false);
@@ -72,7 +72,7 @@ export const ReleasePlayersScreen = () => {
     setRoster(players);
   };
 
-  const toggleSelection = (playerId: number) => {
+  const toggleSelection = (playerId: string | number) => {
     if (selectedPlayers.includes(playerId)) {
       setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
     } else {

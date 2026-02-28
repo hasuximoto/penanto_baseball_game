@@ -37,7 +37,8 @@ export class ForeignPlayerGenerator {
   private static generatePitcher(index: number): Player {
     const name = this.generateRandomForeignNameKatakana();
     const age = RandomUtils.int(24, 34);
-    const handedness = RandomUtils.chance(0.7) ? 'R' : 'L';
+    const throwHand = RandomUtils.chance(0.7) ? 1 : 2;
+    const batHand = RandomUtils.weightedChoice([1, 2, 3], [0.7, 0.25, 0.05]) as 1 | 2 | 3;
     
     // High velocity - simplify to integer range to avoid normal distribution issues
     const speed = RandomUtils.int(148, 162);
@@ -103,7 +104,8 @@ export class ForeignPlayerGenerator {
         id,
         name,
         position: 'P',
-        handedness,
+        throwHand,
+        batHand,
         age,
         team: 'free_agent',
         origin: 'Foreign',
@@ -132,7 +134,8 @@ export class ForeignPlayerGenerator {
   private static generateFielder(index: number): Player {
     const name = this.generateRandomForeignNameKatakana();
     const age = RandomUtils.int(24, 34);
-    const handedness = RandomUtils.weightedChoice(['R', 'L', 'B'], [0.6, 0.3, 0.1]);
+    const throwHand = RandomUtils.weightedChoice([1, 2], [0.7, 0.3]) as 1 | 2;
+    const batHand = RandomUtils.weightedChoice([1, 2, 3], [0.6, 0.3, 0.1]) as 1 | 2 | 3;
     
     const position = RandomUtils.weightedChoice(
         ['1B', '3B', 'LF', 'RF', 'DH', '2B', 'OF'], 
@@ -167,7 +170,8 @@ export class ForeignPlayerGenerator {
         id,
         name,
         position,
-        handedness: handedness as any,
+        throwHand,
+        batHand,
         age,
         team: 'free_agent',
         origin: 'Foreign',

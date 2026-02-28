@@ -9,6 +9,7 @@ import { dbManager } from '@/services/databaseManager';
 import { TeamStrategyManager } from '@/services/teamStrategyManager';
 import { Player, TeamId, NewsItem } from '@/types';
 import { COLORS, FONTS, SPACING } from '@/utils/theme';
+import { formatThrowBat } from '@/utils/handedness';
 import { Ionicons } from '@expo/vector-icons';
 
 const getRank = (value: number | undefined): string => {
@@ -19,6 +20,15 @@ const getRank = (value: number | undefined): string => {
   if (value >= 5) return 'C';
   if (value >= 3) return 'D';
   return 'E';
+};
+
+const getRankColor = (rank: string) => {
+    switch (rank) {
+        case 'S': return '#FFD700'; // Gold
+        case 'A': return COLORS.accent; 
+        case 'B': return '#ff8080'; 
+        default: return '#fff'; // Default text color for dark background
+    }
 };
 
 export const DraftScreen = () => {
@@ -45,6 +55,7 @@ export const DraftScreen = () => {
   
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
+  const [logModalVisible, setLogModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState({
     title: '',
     message: '',
@@ -73,8 +84,21 @@ export const DraftScreen = () => {
       try {
         setLoading(true);
         
-        // 1. 候補選手生成
-        const newCandidates = DraftManager.generateDraftCandidates(150); 
+        // 1. 候補選手生成 (保存された候補をロード)
+        let newCandidates: Player[] = [];
+        try {
+            newCandidates = await dbManager.getDraftCandidates();
+        } catch (e) {
+            console.warn("Failed to load draft candidates from DB", e);
+        }
+
+        // ロードできなかった場合、または空の場合は新規生成 (互換性維持)
+        if (!newCandidates || newCandidates.length === 0) {
+            console.log("No saved draft candidates found. Generating new candidates...");
+            newCandidates = DraftManager.generateDraftCandidates(150);
+            await dbManager.saveDraftCandidates(newCandidates);
+        }
+        
         setCandidates(newCandidates);
 
         // 2. チーム分析 (戦力外候補と補強ポイントの算出)
@@ -802,20 +826,15 @@ export const DraftScreen = () => {
         onPress={() => !isTaken && setSelectedCandidate(item)}
         disabled={isTaken}
       >
+        <View style={styles.rankContainer}>
+            <Text style={styles.rankLabel}>ランク</Text>
+            <Text style={[styles.rankValue, { color: rank === 'S' ? '#FFD700' : rank === 'A' ? COLORS.accent : COLORS.textMain }]}>{rank}</Text>
+        </View>
         <View style={styles.candidateInfo}>
             <Text style={styles.candidateName}>{item.name}</Text>
-            <Text style={styles.candidateDetail}>{item.position} | {item.age}歳</Text>
-        </View>
-        <View style={styles.rankContainer}>
-            <Text style={styles.rankLabel}>総合</Text>
-            <Text style={[styles.rankValue, { color: rank === 'S' ? COLORS.primary : rank === 'A' ? COLORS.accent : COLORS.textMain }]}>{rank}</Text>
+            <Text style={styles.candidateDetail}>{item.position} | {item.age}歳 | {formatThrowBat(item.throwHand, item.batHand)}</Text>
         </View>
         <View style={styles.candidateStats}>
-            {item.position === 'P' ? (
-                <Text style={styles.statText}>MAX: {item.scoutInfo?.speed}km | 制球: {getRank(item.scoutInfo?.control)} | スタミナ: {getRank(item.scoutInfo?.stamina)}</Text>
-            ) : (
-                <Text style={styles.statText}>弾道: {item.scoutInfo?.trajectory ? Math.round(item.scoutInfo.trajectory) : '-'} | ミート: {getRank(item.scoutInfo?.contact)} | パワー: {getRank(item.scoutInfo?.power)} | 走力: {getRank(item.scoutInfo?.speedFielder)} | 肩: {getRank(item.scoutInfo?.arm)} | 守備: {getRank(item.scoutInfo?.fielding)}</Text>
-            )}
             {isTaken && (
                 <Text style={styles.takenText}>
                     {teams.find(t => t.id === item.team)?.name || item.team} {item.draftRank}位
@@ -881,35 +900,40 @@ export const DraftScreen = () => {
                 <Text style={styles.roundText}>終了</Text>
             )}
         </View>
-        <View style={styles.headerRight} />
+        <View style={styles.headerRight}>
+             <TouchableOpacity onPress={() => setLogModalVisible(true)}>
+                <Ionicons name="list" size={24} color={COLORS.primary} />
+            </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.content}>
-        {/* 左パネル: 候補選手 */}
-        <View style={styles.leftPanel}>
-            <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false} 
-                style={styles.filterContainer}
-                contentContainerStyle={styles.filterContentContainer}
-            >
-                <TouchableOpacity style={[styles.filterButton, filterPosition === 'All' && styles.activeFilter]} onPress={() => setFilterPosition('All')}>
-                    <Text style={[styles.filterText, filterPosition === 'All' && { color: COLORS.background }]}>全て</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.filterButton, filterPosition === 'P' && styles.activeFilter]} onPress={() => setFilterPosition('P')}>
-                    <Text style={[styles.filterText, filterPosition === 'P' && { color: COLORS.background }]}>投手</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.filterButton, filterPosition === 'Fielder' && styles.activeFilter]} onPress={() => setFilterPosition('Fielder')}>
-                    <Text style={[styles.filterText, filterPosition === 'Fielder' && { color: COLORS.background }]}>野手</Text>
-                </TouchableOpacity>
-                <View style={styles.separator} />
-                <TouchableOpacity style={[styles.filterButton, sortType === 'Evaluation' && styles.activeFilter]} onPress={() => setSortType('Evaluation')}>
-                    <Text style={[styles.filterText, sortType === 'Evaluation' && { color: COLORS.background }]}>評価順</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.filterButton, sortType === 'Position' && styles.activeFilter]} onPress={() => setSortType('Position')}>
-                    <Text style={[styles.filterText, sortType === 'Position' && { color: COLORS.background }]}>ポジション順</Text>
-                </TouchableOpacity>
-            </ScrollView>
+      <View style={styles.mainContent}>
+        {/* 上部: 候補選手リスト */}
+        <View style={styles.listContainer}>
+            <View style={styles.filterContainer}>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false} 
+                    contentContainerStyle={styles.filterContentContainer}
+                >
+                    <TouchableOpacity style={[styles.filterButton, filterPosition === 'All' && styles.activeFilter]} onPress={() => setFilterPosition('All')}>
+                        <Text style={[styles.filterText, filterPosition === 'All' && { color: COLORS.background }]}>全て</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.filterButton, filterPosition === 'P' && styles.activeFilter]} onPress={() => setFilterPosition('P')}>
+                        <Text style={[styles.filterText, filterPosition === 'P' && { color: COLORS.background }]}>投手</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.filterButton, filterPosition === 'Fielder' && styles.activeFilter]} onPress={() => setFilterPosition('Fielder')}>
+                        <Text style={[styles.filterText, filterPosition === 'Fielder' && { color: COLORS.background }]}>野手</Text>
+                    </TouchableOpacity>
+                    <View style={styles.separator} />
+                    <TouchableOpacity style={[styles.filterButton, sortType === 'Evaluation' && styles.activeFilter]} onPress={() => setSortType('Evaluation')}>
+                        <Text style={[styles.filterText, sortType === 'Evaluation' && { color: COLORS.background }]}>評価順</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.filterButton, sortType === 'Position' && styles.activeFilter]} onPress={() => setSortType('Position')}>
+                        <Text style={[styles.filterText, sortType === 'Position' && { color: COLORS.background }]}>ポジション順</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </View>
             <FlatList
                 data={filteredCandidates}
                 renderItem={renderCandidateItem}
@@ -918,62 +942,166 @@ export const DraftScreen = () => {
             />
         </View>
 
-        {/* 右パネル: 情報とログ */}
-        <View style={styles.rightPanel}>
-            <View style={styles.selectedInfo}>
-                <Text style={styles.panelTitle}>選択中の選手</Text>
-                {selectedCandidate ? (
-                    <View>
-                        <Text style={styles.selectedName}>{selectedCandidate.name}</Text>
-                        <Text style={styles.selectedDetail}>{selectedCandidate.position} / {selectedCandidate.age}歳</Text>
-                        {/* ここに詳細を追加 */}
+        {/* 下部パネル: 詳細情報と操作ボタン */}
+        <View style={styles.bottomPanel}>
+            {selectedCandidate ? (
+                <View style={styles.detailCard}>
+                     {/* ヘッダー部分: 名前、ポジション等 */}
+                    <View style={styles.detailHeader}>
+                        <Text style={styles.detailName}>{selectedCandidate.name}</Text>
+                        <View style={styles.detailSubInfo}>
+                             <Text style={styles.detailSubText}>{selectedCandidate.position}</Text>
+                             <Text style={styles.detailSubText}>{formatThrowBat(selectedCandidate.throwHand, selectedCandidate.batHand)}</Text>
+                             <Text style={styles.detailSubText}>{selectedCandidate.age}歳</Text>
+                        </View>
                     </View>
-                ) : (
-                    <Text style={styles.placeholderText}>選手を選択してください</Text>
-                )}
-                
-                <TouchableOpacity 
-                    style={[styles.draftButton, (!isUserTurn || !selectedCandidate) && styles.disabledButton]}
-                    onPress={handleUserPick}
-                    disabled={!isUserTurn || !selectedCandidate}
-                >
-                    <Text style={[styles.draftButtonText, (!isUserTurn || !selectedCandidate) && {color: COLORS.textMuted}]}>指名する</Text>
-                </TouchableOpacity>
+                    
+                    <View style={styles.detailBody}>
+                        {/* 左側: 短評エリア（黒背景） */}
+                        <View style={styles.commentArea}>
+                            {/* <Text style={styles.commentTitle}>スカウト短評</Text> */}
+                            <Text style={styles.commentText}>
+                                {selectedCandidate.scoutInfo?.draftComment || 
+                                (selectedCandidate.position === 'P' 
+                                    ? "将来性豊かな投手。球速と変化球のキレに注目。" 
+                                    : "走攻守揃った好選手。将来のレギュラー候補。")}
+                            </Text>
+                        </View>
 
+                        {/* 右側: 能力値エリア（黒背景） */}
+                        <View style={styles.attributesArea}>
+                            {selectedCandidate.position === 'P' ? (
+                                <>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>球速</Text>
+                                        <Text style={styles.attrValue}>{selectedCandidate.scoutInfo?.speed} km/h</Text>
+                                    </View>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>制球</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.control)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.control)}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>スタミナ</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.stamina)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.stamina)}
+                                        </Text>
+                                    </View>
+                                     <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>変化球</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.breakingBall)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.breakingBall)}
+                                        </Text>
+                                    </View>
+                                </>
+                            ) : (
+                                <>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>弾道</Text>
+                                        <Text style={[styles.attrValue, { color: COLORS.warning }]}>
+                                            {selectedCandidate.scoutInfo?.trajectory ? Math.round(selectedCandidate.scoutInfo.trajectory) : '-'}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>ミート</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.contact)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.contact)}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>パワー</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.power)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.power)}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>走力</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.speedFielder)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.speedFielder)}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>肩力</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.arm)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.arm)}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.attrRow}>
+                                        <Text style={styles.attrLabel}>捕球</Text>
+                                        <Text style={[styles.attrRank, { color: getRankColor(getRank(selectedCandidate.scoutInfo?.fielding)) }]}>
+                                            {getRank(selectedCandidate.scoutInfo?.fielding)}
+                                        </Text>
+                                    </View>
+                                </>
+                            )}
+                        </View>
+                    </View>
+                </View>
+            ) : (
+                <View style={[styles.detailCard, styles.emptyDetail]}>
+                    <Text style={styles.placeholderText}>リストから選手を選択してください</Text>
+                </View>
+            )}
+
+            {/* アクションボタン */}
+            <View style={styles.actionButtonContainer}>
                 <TouchableOpacity 
-                    style={[styles.draftButton, styles.autoButton, !isUserTurn && styles.disabledButton]}
+                    style={[styles.actionButton, styles.autoButton, !isUserTurn && styles.disabledButton]}
                     onPress={handleAutoPick}
                     disabled={!isUserTurn}
                 >
-                    <Text style={[styles.draftButtonText, !isUserTurn && {color: COLORS.textMuted}]}>お任せ (CPU指名)</Text>
+                    <Text style={[styles.actionButtonText, !isUserTurn && {color: COLORS.textMuted}]}>お任せ</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                    style={[styles.actionButton, styles.draftButton, (!isUserTurn || !selectedCandidate) && styles.disabledButton]}
+                    onPress={handleUserPick}
+                    disabled={!isUserTurn || !selectedCandidate}
+                >
+                    <Text style={[styles.actionButtonText, (!isUserTurn || !selectedCandidate) && {color: COLORS.textMuted}]}>指名する</Text>
                 </TouchableOpacity>
 
                 {isUserTurn && (
                     <TouchableOpacity 
-                        style={[styles.draftButton, styles.finishTurnButton]}
+                        style={[styles.actionButton, styles.finishTurnButton]}
                         onPress={handleUserFinish}
                     >
-                        <Text style={styles.draftButtonText}>選択終了</Text>
+                        <Text style={styles.actionButtonText}>終了</Text>
+                    </TouchableOpacity>
+                )}
+                 {isDraftOver && (
+                    <TouchableOpacity style={[styles.actionButton, styles.finishButton]} onPress={saveAndExit}>
+                        <Text style={styles.finishButtonText}>ドラフト終了</Text>
                     </TouchableOpacity>
                 )}
             </View>
+        </View>
+      </View>
 
-            <View style={styles.logsContainer}>
-                <Text style={styles.panelTitle}>指名ログ</Text>
-                <ScrollView ref={scrollViewRef} style={styles.logsList}>
+      {/* Log Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={logModalVisible}
+        onRequestClose={() => setLogModalVisible(false)}
+      >
+          <View style={styles.modalOverlay}>
+              <View style={styles.logModalContent}>
+                  <View style={styles.logModalHeader}>
+                      <Text style={styles.logModalTitle}>指名ログ</Text>
+                      <TouchableOpacity onPress={() => setLogModalVisible(false)}>
+                          <Ionicons name="close" size={24} color={COLORS.textMain} />
+                      </TouchableOpacity>
+                  </View>
+                  <ScrollView ref={scrollViewRef} style={styles.logsListModal}>
                     {logs.map((log, index) => (
                         <Text key={index} style={styles.logText}>{log}</Text>
                     ))}
                 </ScrollView>
-            </View>
-            
-            {isDraftOver && (
-                <TouchableOpacity style={styles.finishButton} onPress={saveAndExit}>
-                    <Text style={styles.finishButtonText}>終了する</Text>
-                </TouchableOpacity>
-            )}
-        </View>
-      </View>
+              </View>
+          </View>
+      </Modal>
 
       <Modal
         transparent={true}
@@ -1029,6 +1157,7 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     width: 40,
+    alignItems: 'flex-end',
   },
   title: {
     fontSize: 20,
@@ -1041,20 +1170,20 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginTop: 2,
   },
-  content: {
+  mainContent: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
   },
-  leftPanel: {
-    flex: 2,
-    borderRightWidth: 1,
-    borderColor: COLORS.border,
+  listContainer: {
+    flex: 6, // Ratio 6
     backgroundColor: COLORS.background,
   },
-  rightPanel: {
-    flex: 1,
-    padding: SPACING.sm,
-    backgroundColor: COLORS.primary,
+  bottomPanel: {
+    flex: 4, // Ratio 4
+    backgroundColor: '#1a1a1a', // Dark theme background
+    borderTopWidth: 2,
+    borderTopColor: COLORS.primary,
+    padding: 8,
   },
   filterContainer: {
     padding: SPACING.sm,
@@ -1071,7 +1200,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 15,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.card,
     marginRight: 8,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -1096,33 +1225,37 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   candidateRow: {
-    padding: 10,
+    padding: 12,
     borderBottomWidth: 1,
     borderColor: COLORS.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLORS.card,
+    height: 60,
   },
   selectedRow: {
-    backgroundColor: 'rgba(212, 175, 55, 0.2)', // COLORS.primary with opacity
+    backgroundColor: 'rgba(212, 175, 55, 0.3)', 
   },
   takenRow: {
-    backgroundColor: COLORS.primary,
-    opacity: 0.6,
+    backgroundColor: '#cccccc',
+    opacity: 0.8,
   },
   candidateInfo: {
     flex: 1,
+    marginLeft: 10,
   },
   rankContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 10,
     width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#333',
   },
   rankLabel: {
-    fontSize: 10,
-    color: COLORS.textMuted,
+    fontSize: 8,
+    color: '#aaa',
     fontFamily: FONTS.regular,
   },
   rankValue: {
@@ -1141,106 +1274,224 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontFamily: FONTS.regular,
   },
-  finishTurnButton: {
-    backgroundColor: COLORS.textMuted,
-    marginTop: 10,
-  },
   candidateStats: {
-    flex: 2,
     alignItems: 'flex-end',
-  },
-  statText: {
-    fontSize: 11,
-    color: COLORS.textMain,
-    fontFamily: FONTS.regular,
+    width: 100,
   },
   takenText: {
-    fontSize: 12,
-    color: COLORS.accent,
+    fontSize: 11,
+    color: '#555',
     fontWeight: 'bold',
-    marginTop: 2,
     fontFamily: FONTS.bold,
   },
-  selectedInfo: {
-    padding: SPACING.md,
-    backgroundColor: COLORS.card,
-    borderRadius: 8,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  
+  // Detail Panel Styles
+  detailCard: {
+    flex: 1,
+    padding: 2,
   },
-  panelTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: COLORS.textMuted,
-    fontFamily: FONTS.bold,
-  },
-  selectedName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-    color: COLORS.primary,
-    fontFamily: FONTS.bold,
-  },
-  selectedDetail: {
-    fontSize: 14,
-    color: COLORS.textMain,
-    marginBottom: 8,
+  emptyDetail: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   placeholderText: {
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
+    color: '#666',
+    fontSize: 14,
+  },
+  detailHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    borderBottomWidth: 1,
+    borderBottomColor: '#444',
+    paddingBottom: 4,
+    marginBottom: 4,
+  },
+  detailName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    fontFamily: FONTS.bold,
+  },
+  detailSubInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  detailSubText: {
+    color: '#ccc',
+    fontSize: 12,
+    marginLeft: 8,
+    fontFamily: FONTS.regular,
+  },
+  detailBody: {
+    flexDirection: 'row',
+    flex: 1,
+    gap: 8,
+  },
+  commentArea: {
+    flex: 1,
+    backgroundColor: '#000',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  attributesArea: {
+    flex: 1, // Right side
+    backgroundColor: '#000',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#333',
+    justifyContent: 'space-around',
+  },
+  commentTitle: {
+    color: '#888',
+    fontSize: 10,
+    marginBottom: 4,
+  },
+  commentText: {
+    color: '#fff',
+    fontSize: 12,
+    lineHeight: 18,
+    fontFamily: FONTS.regular,
+  },
+  attrRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#222',
+  },
+  attrLabel: {
+    color: '#aaa',
+    fontSize: 12,
+  },
+  attrValue: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  attrRank: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
+  },
+  fieldImagePlaceholder: {
+      position: 'absolute',
+      right: 20,
+      bottom: 60,
+      width: 100,
+      height: 100,
+      opacity: 0.3, // Faint
+      // In a real app, use ImageBackground
+  },
+  positionMarker: {
+      position: 'absolute',
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: 'rgba(255, 215, 0, 0.8)',
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
+  positionMarkerText: {
+    fontWeight: 'bold',
+    fontSize: 10, 
+    color: '#000',
+  },
+
+  // Action Buttons
+  actionButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    height: 40,
+  },
+  actionButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#444',
+    marginHorizontal: 4,
+    borderRadius: 4,
   },
   draftButton: {
-    marginTop: 15,
     backgroundColor: COLORS.primary,
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
+    flex: 2,
   },
   autoButton: {
     backgroundColor: COLORS.secondary,
-    marginTop: 10,
   },
-  disabledButton: {
-    backgroundColor: COLORS.primary,
-    opacity: 0.5,
-  },
-  draftButtonText: {
-    color: COLORS.background,
-    fontWeight: 'bold',
-    fontFamily: FONTS.bold,
-  },
-  logsContainer: {
-    flex: 1,
-    backgroundColor: COLORS.card,
-    borderRadius: 8,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  logsList: {
-    flex: 1,
-  },
-  logText: {
-    fontSize: 12,
-    marginBottom: 4,
-    color: COLORS.textMain,
-    fontFamily: FONTS.regular,
+  finishTurnButton: {
+    backgroundColor: '#666',
   },
   finishButton: {
-    marginTop: 10,
-    backgroundColor: COLORS.primary,
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
+      backgroundColor: COLORS.accent,
+      flex: 2,
   },
-  finishButtonText: {
-    color: COLORS.background,
+  disabledButton: {
+    opacity: 0.4,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 14,
     fontWeight: 'bold',
     fontFamily: FONTS.bold,
   },
+  finishButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
+  },
+
+  // Log Modal
+  logModalContent: {
+      flex: 1,
+      backgroundColor: COLORS.card,
+      marginTop: 100,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      padding: 20,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: -2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+  },
+  logModalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: COLORS.border,
+      paddingBottom: 10,
+  },
+  logModalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: COLORS.textMain,
+  },
+  logsListModal: {
+      flex: 1,
+  },
+  logText: {
+    fontSize: 14,
+    marginBottom: 6,
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
+    borderBottomWidth: 0.5,
+    borderBottomColor: COLORS.border,
+    paddingBottom: 2,
+  },
+
+  // Alert Modal (Existing)
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',

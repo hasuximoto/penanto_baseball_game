@@ -342,6 +342,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  activeTeamFilterText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   teamFilterScroll: {
     flexDirection: 'row',
   },

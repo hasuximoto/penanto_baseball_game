@@ -33,7 +33,8 @@ export const generateRandomPlayer = (name: string, position: Position): Player =
     id: Math.floor(Math.random() * 1000000),
     name,
     position: randomPosition,
-    handedness: 'R',
+    throwHand: randomInt(1, 2) as 1 | 2,
+    batHand: randomInt(1, 3) as 1 | 2 | 3,
     age: randomInt(18, 40),
     team: 'eagles' as TeamId,
     abilities: {
