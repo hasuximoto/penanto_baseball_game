@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, SafeAreaView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, SafeAreaView, TextInput, ScrollView, useWindowDimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { dbManager } from '../services/databaseManager';
@@ -45,6 +45,10 @@ export const ReleasePlayersScreen = () => {
   
   const [sortKey, setSortKey] = useState<SortKey>('position');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const { width } = useWindowDimensions();
+  const isNarrowScreen = width <= 430;
+  const tableMinWidth = viewMode === 'simple' ? 640 : 980;
+  const rowWidthStyle = viewMode === 'simple' ? styles.tableRowSimple : styles.tableRowDetail;
 
   const ROSTER_LIMIT = 70;
   const pendingReleaseCount = pendingReleaseIds.length;
@@ -248,19 +252,22 @@ export const ReleasePlayersScreen = () => {
     const selectedSet = new Set(selectedPlayers.map(id => id.toString()));
     const selectedRoster = roster.filter(player => selectedSet.has(player.id.toString()));
 
-    const invalidPlayer = selectedRoster.find(player => {
+    let validationMessage: string | null = null;
+    for (const player of selectedRoster) {
       const edit = contractEdits[player.id.toString()];
-      if (!edit) return false;
+      if (!edit) continue;
+
       const salary = Number(edit.salary);
       const years = Number(edit.years);
-      return !Number.isInteger(salary) || !Number.isInteger(years) || salary <= 0 || years <= 0;
-    });
+      validationMessage = getContractValidationMessage(player, salary, years);
+      if (validationMessage) break;
+    }
 
-    if (invalidPlayer) {
+    if (validationMessage) {
       setInfoModal({
         visible: true,
         title: '入力エラー',
-        message: `${invalidPlayer.name} の契約入力が不正です。年俸・年数は1以上の整数を入力してください。`,
+        message: validationMessage,
       });
       return;
     }
@@ -331,6 +338,20 @@ export const ReleasePlayersScreen = () => {
     return Math.max(0, 7 - (player.faQualifiedYears || 0));
   };
 
+  const getContractValidationMessage = (player: Player, salary: number, years: number): string | null => {
+    if (!Number.isInteger(salary) || !Number.isInteger(years) || salary <= 0 || years <= 0) {
+      return `${player.name} の契約入力が不正です。年俸・年数は1以上の整数を入力してください。`;
+    }
+
+    const currentSalary = player.contract?.salary || 1000;
+    const { min, max } = ContractManager.getRenewalSalaryBounds(currentSalary, player);
+    if (salary < min || salary > max) {
+      return `${player.name} の年俸は ${min.toLocaleString('ja-JP')}〜${max.toLocaleString('ja-JP')} 万円の範囲で入力してください。`;
+    }
+
+    return null;
+  };
+
   const hasContractChanges = useMemo(() => {
     return roster.some(player => {
       const edit = contractEdits[player.id.toString()];
@@ -342,19 +363,22 @@ export const ReleasePlayersScreen = () => {
   }, [roster, contractEdits]);
 
   const saveContractChanges = async () => {
-    const invalidPlayer = roster.find(player => {
+    let validationMessage: string | null = null;
+    for (const player of roster) {
       const edit = contractEdits[player.id.toString()];
-      if (!edit) return false;
+      if (!edit) continue;
+
       const salary = Number(edit.salary);
       const years = Number(edit.years);
-      return !Number.isInteger(salary) || !Number.isInteger(years) || salary <= 0 || years <= 0;
-    });
+      validationMessage = getContractValidationMessage(player, salary, years);
+      if (validationMessage) break;
+    }
 
-    if (invalidPlayer) {
+    if (validationMessage) {
       setInfoModal({
         visible: true,
         title: '入力エラー',
-        message: `${invalidPlayer.name} の契約入力が不正です。年俸・年数は1以上の整数を入力してください。`,
+        message: validationMessage,
       });
       return;
     }
@@ -456,7 +480,7 @@ export const ReleasePlayersScreen = () => {
 
     if (viewMode === 'simple') {
       return (
-        <View style={[styles.tableRow, isPendingRelease && styles.pendingReleaseRow]}>
+        <View style={[styles.tableRow, rowWidthStyle, isPendingRelease && styles.pendingReleaseRow]}>
           <TouchableOpacity
             style={[styles.tableCell, styles.selectCell, isSelected && styles.selectedCell]}
             onPress={() => !isProtected && toggleSelection(item.id)}
@@ -480,7 +504,7 @@ export const ReleasePlayersScreen = () => {
     }
 
     return (
-      <View style={[styles.tableRow, isEdited && styles.editedRow, isPendingRelease && styles.pendingReleaseRow]}>
+      <View style={[styles.tableRow, rowWidthStyle, isEdited && styles.editedRow, isPendingRelease && styles.pendingReleaseRow]}>
         <TouchableOpacity
           style={[styles.tableCell, styles.selectCell, isSelected && styles.selectedCell]}
           onPress={() => !isProtected && toggleSelection(item.id)}
@@ -528,7 +552,7 @@ export const ReleasePlayersScreen = () => {
   const renderTableHeader = () => {
     if (viewMode === 'simple') {
       return (
-        <View style={[styles.tableRow, styles.tableHeaderRow]}>
+        <View style={[styles.tableRow, rowWidthStyle, styles.tableHeaderRow]}>
           <View style={[styles.tableCell, styles.selectCell]}><Text style={styles.headerCellText}>選</Text></View>
           <View style={[styles.tableCell, styles.posCell]}><Text style={styles.headerCellText}>位</Text></View>
           <View style={[styles.tableCell, styles.nameCell]}><Text style={styles.headerCellText}>選手名</Text></View>
@@ -542,7 +566,7 @@ export const ReleasePlayersScreen = () => {
     }
 
     return (
-      <View style={[styles.tableRow, styles.tableHeaderRow]}>
+      <View style={[styles.tableRow, rowWidthStyle, styles.tableHeaderRow]}>
         <View style={[styles.tableCell, styles.selectCell]}><Text style={styles.headerCellText}>選</Text></View>
         <View style={[styles.tableCell, styles.posCell]}><Text style={styles.headerCellText}>位</Text></View>
         <View style={[styles.tableCell, styles.detailNameCell]}><Text style={styles.headerCellText}>選手名</Text></View>
@@ -561,9 +585,6 @@ export const ReleasePlayersScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-            </TouchableOpacity>
             <Text style={styles.title}>契約・戦力外管理</Text>
         </View>
         <View>
@@ -626,56 +647,72 @@ export const ReleasePlayersScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={sortedRoster}
-        ListHeaderComponent={renderTableHeader}
-        stickyHeaderIndices={[0]}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={styles.list}
-      />
+      <View style={styles.tableArea}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={true}
+          contentContainerStyle={styles.tableScrollContent}
+        >
+          <View style={[styles.tableInner, { minWidth: tableMinWidth }]}>
+            <FlatList
+              data={sortedRoster}
+              ListHeaderComponent={renderTableHeader}
+              stickyHeaderIndices={[0]}
+              renderItem={renderItem}
+              keyExtractor={item => item.id.toString()}
+              contentContainerStyle={styles.list}
+            />
+          </View>
+        </ScrollView>
+      </View>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, isNarrowScreen && styles.footerCompact]}>
         <View style={styles.bulkActionRow}>
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            style={[styles.button, styles.secondaryButton, isNarrowScreen && styles.buttonCompact]}
             onPress={handleSelectAllToggle}
           >
-            <Text style={styles.buttonText}>全選択/解除</Text>
+            <Text style={[styles.buttonText, isNarrowScreen && styles.buttonTextCompact]}>
+              {isNarrowScreen ? '全選択' : '全選択/解除'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton, selectedPlayers.length === 0 && styles.disabledButton]}
+            style={[styles.button, styles.secondaryButton, isNarrowScreen && styles.buttonCompact, selectedPlayers.length === 0 && styles.disabledButton]}
             onPress={saveSelectedContractChanges}
             disabled={selectedPlayers.length === 0}
           >
-            <Text style={[styles.buttonText, selectedPlayers.length === 0 && { color: COLORS.textSecondary }]}>選択選手の契約を保存</Text>
+            <Text style={[styles.buttonText, isNarrowScreen && styles.buttonTextCompact, selectedPlayers.length === 0 && { color: COLORS.textSecondary }]}>
+              {isNarrowScreen ? '選択契約保存' : '選択選手の契約を保存'}
+            </Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          style={[styles.button, styles.contractButton, (!hasContractChanges || savingContracts) && styles.disabledButton]}
+          style={[styles.button, styles.contractButton, isNarrowScreen && styles.buttonCompact, (!hasContractChanges || savingContracts) && styles.disabledButton]}
           onPress={saveContractChanges}
           disabled={!hasContractChanges || savingContracts}
         >
-          <Text style={[styles.buttonText, (!hasContractChanges || savingContracts) && { color: COLORS.textSecondary }]}> 
-            契約条件を保存
+          <Text style={[styles.buttonText, isNarrowScreen && styles.buttonTextCompact, (!hasContractChanges || savingContracts) && { color: COLORS.textSecondary }]}> 
+            {isNarrowScreen ? '契約保存' : '契約条件を保存'}
           </Text>
         </TouchableOpacity>
         <View style={styles.bulkActionRow}>
           <TouchableOpacity 
-            style={[styles.button, styles.releaseButton, selectedPlayers.length === 0 && styles.disabledButton]} 
+            style={[styles.button, styles.releaseButton, isNarrowScreen && styles.buttonCompact, selectedPlayers.length === 0 && styles.disabledButton]} 
             onPress={handleReleaseNotify}
             disabled={selectedPlayers.length === 0}
           >
-              <Text style={[styles.buttonText, selectedPlayers.length === 0 && { color: COLORS.textSecondary }]}>
-                  戦力外通知する ({selectedPlayers.length})
+              <Text style={[styles.buttonText, isNarrowScreen && styles.buttonTextCompact, selectedPlayers.length === 0 && { color: COLORS.textSecondary }]}>
+                  {isNarrowScreen ? `戦力外通知 (${selectedPlayers.length})` : `戦力外通知する (${selectedPlayers.length})`}
               </Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.button, styles.secondaryButton, selectedPlayers.length === 0 && styles.disabledButton]} 
+            style={[styles.button, styles.secondaryButton, isNarrowScreen && styles.buttonCompact, selectedPlayers.length === 0 && styles.disabledButton]} 
             onPress={cancelPendingReleaseForSelected}
             disabled={selectedPlayers.length === 0}
           >
-              <Text style={[styles.buttonText, selectedPlayers.length === 0 && { color: COLORS.textSecondary }]}>通知を取り消す</Text>
+              <Text style={[styles.buttonText, isNarrowScreen && styles.buttonTextCompact, selectedPlayers.length === 0 && { color: COLORS.textSecondary }]}>
+                {isNarrowScreen ? '通知取消' : '通知を取り消す'}
+              </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -780,7 +817,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.text,
     fontFamily: FONTS.bold,
@@ -812,6 +849,15 @@ const styles = StyleSheet.create({
   list: {
     padding: SPACING.md,
     paddingBottom: SPACING.xl,
+  },
+  tableArea: {
+    flex: 1,
+  },
+  tableScrollContent: {
+    flexGrow: 1,
+  },
+  tableInner: {
+    flex: 1,
   },
   modeContainer: {
     flexDirection: 'row',
@@ -879,6 +925,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     overflow: 'hidden',
+  },
+  tableRowSimple: {
+    width: 640,
+  },
+  tableRowDetail: {
+    width: 980,
   },
   tableCell: {
     paddingVertical: SPACING.sm,
@@ -1034,21 +1086,32 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   footer: {
-    padding: SPACING.lg,
+    padding: SPACING.md,
     backgroundColor: COLORS.background,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     gap: SPACING.sm,
+  },
+  footerCompact: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    gap: SPACING.xs,
   },
   bulkActionRow: {
     flexDirection: 'row',
     gap: SPACING.sm,
   },
   button: {
-    padding: SPACING.md,
-    borderRadius: 8,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: 6,
     alignItems: 'center',
     flex: 1,
+  },
+  buttonCompact: {
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.xs,
+    borderRadius: 5,
   },
   secondaryButton: {
     backgroundColor: COLORS.secondary,
@@ -1058,7 +1121,6 @@ const styles = StyleSheet.create({
   },
   releaseButton: {
     backgroundColor: COLORS.negative,
-    padding: SPACING.md,
   },
   disabledButton: {
     backgroundColor: COLORS.border,
@@ -1066,9 +1128,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: 'bold',
     fontFamily: FONTS.bold,
+    textAlign: 'center',
+  },
+  buttonTextCompact: {
+    fontSize: 11,
   },
   modalOverlay: {
     flex: 1,

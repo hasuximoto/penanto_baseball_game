@@ -15,6 +15,18 @@ export class ContractManager {
     private static readonly HIGH_SALARY_THRESHOLD = CONTRACT_BALANCE_CONSTANTS.HIGH_SALARY_THRESHOLD;
     private static readonly NORMAL_SALARY_ROUNDING_UNIT = CONTRACT_BALANCE_CONSTANTS.NORMAL_SALARY_ROUNDING_UNIT;
     private static readonly HIGH_SALARY_ROUNDING_UNIT = CONTRACT_BALANCE_CONSTANTS.HIGH_SALARY_ROUNDING_UNIT;
+    private static readonly TIER_SALARY_PARAMS = {
+        pitcher: {
+            high: { minRate: 1.10, perfCoef: 0.82, maxRate: 1.70 },
+            mid: { minRate: 1.00, perfCoef: 0.72, maxRate: 1.45 },
+            low: { minRate: 0.90, perfCoef: 0.62, maxRate: 1.25 },
+        },
+        batter: {
+            high: { minRate: 1.08, perfCoef: 0.82, maxRate: 1.70 },
+            mid: { minRate: 1.00, perfCoef: 0.72, maxRate: 1.45 },
+            low: { minRate: 0.88, perfCoef: 0.62, maxRate: 1.25 },
+        },
+    } as const;
 
   /**
    * 全チームの契約更改処理を実行する
@@ -194,6 +206,22 @@ export class ContractManager {
         return this.calculateNewSalary(player);
     }
 
+    static getRenewalSalaryBounds(currentSalary: number, player?: Player): { min: number; max: number } {
+        const safeCurrentSalary = Math.max(1, currentSalary || 0);
+        const tierParams = player ? this.getTierSalaryParams(player) : null;
+        const minRate = tierParams?.minRate ?? this.RENEWAL_MAX_DECREASE_RATE;
+        const maxRate = tierParams
+            ? Math.min(tierParams.maxRate, this.RENEWAL_MAX_INCREASE_RATE)
+            : this.RENEWAL_MAX_INCREASE_RATE;
+
+        const minSalary = this.clampSalary(this.roundAutoSalary(safeCurrentSalary * minRate, safeCurrentSalary));
+        const maxSalary = this.clampSalary(this.roundAutoSalary(safeCurrentSalary * maxRate, safeCurrentSalary));
+        return {
+            min: Math.min(minSalary, maxSalary),
+            max: Math.max(minSalary, maxSalary),
+        };
+    }
+
     /**
    * 年俸計算ロジック
    */
@@ -204,48 +232,85 @@ export class ContractManager {
 
     // 成績による変動
     if (player.position === 'P') {
-        const era = player.stats.era || 4.50;
-        const wins = player.stats.wins || 0;
-        const holds = player.stats.holds || 0;
-        const saves = player.stats.saves || 0;
+        const era = player.stats.era ?? 4.5;
+        const whip = player.stats.whip ?? 1.35;
+        const k9 = player.stats.k9 ?? 6.8;
+        const bb9 = player.stats.bb9 ?? 3.6;
+        const wins = player.stats.wins ?? 0;
+        const saves = player.stats.saves ?? 0;
+        const qualityStarts = player.stats.qualityStarts ?? 0;
+        const gamesStarted = player.stats.gamesStarted ?? 0;
+        const gamesPitched = Math.max(1, player.stats.gamesPitched ?? 0);
 
-        const eraScore = this.clamp((3.7 - era) / 1.6, -1, 1);
-        const winsScore = this.clamp((wins - 8) / 8, -1, 1);
-        const holdsScore = this.clamp((holds - 12) / 18, 0, 1);
-        const savesScore = this.clamp((saves - 18) / 20, 0, 1);
+        const starterRatio = this.clamp01(gamesStarted / gamesPitched);
+        const eraScore = this.clamp((3.3 - era) / 1.1, -1, 1);
+        const whipScore = this.clamp((1.18 - whip) / 0.24, -1, 1);
+        const k9Score = this.clamp((k9 - 7.0) / 3.2, -1, 1);
+        const bb9Score = this.clamp((3.0 - bb9) / 1.5, -1, 1);
+        const winsScore = this.clamp((wins - 8) / 7, -1, 1);
+        const qualityStartsScore = this.clamp((qualityStarts - 10) / 10, -1, 1);
+        const savesScore = this.clamp((saves - 20) / 15, -1, 1);
 
-        performanceScore = (eraScore * 0.5) + (winsScore * 0.2) + (holdsScore * 0.15) + (savesScore * 0.15);
+        const starterPerformance =
+            (eraScore * 0.34)
+            + (whipScore * 0.22)
+            + (k9Score * 0.14)
+            + (bb9Score * 0.10)
+            + (winsScore * 0.10)
+            + (qualityStartsScore * 0.10);
+        const relieverPerformance =
+            (eraScore * 0.34)
+            + (whipScore * 0.26)
+            + (k9Score * 0.16)
+            + (bb9Score * 0.12)
+            + (savesScore * 0.12);
+
+        performanceScore = (starterPerformance * starterRatio) + (relieverPerformance * (1 - starterRatio));
         sampleWeight = this.getPitcherSampleWeight(player);
         
     } else {
-        const avg = player.stats.average || 0.250;
-        const hr = player.stats.homeRuns || 0;
-        const rbi = player.stats.rbi || 0;
-        const ops = player.stats.ops || 0.700;
+        const avg = player.stats.average ?? 0.25;
+        const ops = player.stats.ops ?? 0.7;
+        const obp = player.stats.obp ?? 0.32;
+        const hr = player.stats.homeRuns ?? 0;
+        const rbi = player.stats.rbi ?? 0;
+        const stolenBases = player.stats.stolenBases ?? 0;
 
-        const avgScore = this.clamp((avg - 0.26) / 0.05, -1, 1);
-        const opsScore = this.clamp((ops - 0.72) / 0.12, -1, 1);
-        const hrScore = this.clamp((hr - 12) / 20, -1, 1);
-        const rbiScore = this.clamp((rbi - 55) / 35, -1, 1);
+        const avgScore = this.clamp((avg - 0.26) / 0.045, -1, 1);
+        const opsScore = this.clamp((ops - 0.73) / 0.13, -1, 1);
+        const obpScore = this.clamp((obp - 0.33) / 0.08, -1, 1);
+        const hrScore = this.clamp((hr - 14) / 18, -1, 1);
+        const rbiScore = this.clamp((rbi - 58) / 32, -1, 1);
+        const sbScore = this.clamp((stolenBases - 12) / 18, -1, 1);
 
-        performanceScore = (avgScore * 0.35) + (opsScore * 0.35) + (hrScore * 0.15) + (rbiScore * 0.15);
+        performanceScore =
+            (opsScore * 0.30)
+            + (obpScore * 0.18)
+            + (avgScore * 0.17)
+            + (hrScore * 0.15)
+            + (rbiScore * 0.12)
+            + (sbScore * 0.08);
         sampleWeight = this.getBatterSampleWeight(player);
     }
 
-    const weightedPerformance = performanceScore * sampleWeight;
+    const reliabilityWeight = 0.25 + (sampleWeight * 0.75);
+    const weightedPerformance = performanceScore * reliabilityWeight;
     const agePenalty = Math.max(0, player.age - 33) * 0.015;
 
     // 忠誠度補正 (低いほど高年俸志向・高いほどチーム寄り)
     const loyalty = this.getTeamLoyalty(player);
-    const loyaltyAdjustment = ((this.DEFAULT_TEAM_LOYALTY - loyalty) / 100) * 0.05;
+    const loyaltyAdjustment = ((this.DEFAULT_TEAM_LOYALTY - loyalty) / 100) * 0.06;
 
-    const rawPerformanceFactor = 1 + (weightedPerformance * 0.18) - agePenalty + loyaltyAdjustment;
+        const tierParams = this.getTierSalaryParams(player);
+        const rawPerformanceFactor = 1 + (weightedPerformance * tierParams.perfCoef) - agePenalty + loyaltyAdjustment;
+        const tierMinRate = tierParams.minRate;
+        const tierMaxRate = Math.min(tierParams.maxRate, this.RENEWAL_MAX_INCREASE_RATE);
 
-    // 変動幅の制限 (最大+20%、最小-15%)
+        // 変動幅の制限 (稼働tierの最小保証～tier上限)
     const performanceFactor = this.clamp(
       rawPerformanceFactor,
-      this.RENEWAL_MAX_DECREASE_RATE,
-      this.RENEWAL_MAX_INCREASE_RATE
+            tierMinRate,
+            tierMaxRate
     );
 
     let newSalary = currentSalary * performanceFactor;
@@ -254,6 +319,34 @@ export class ContractManager {
     // 年俸上下限
     return this.clampSalary(newSalary);
   }
+
+    // 稼働量tier判定
+    private static getWorkloadTier(player: Player): 'high' | 'mid' | 'low' {
+        if (player.position === 'P') {
+            const gamesPitched = player.stats.gamesPitched || 0;
+            const wins = player.stats.wins || 0;
+            const hasEra = player.stats.era !== undefined;
+
+            if (gamesPitched >= 45 || (wins >= 8 && hasEra)) return 'high';
+            if (gamesPitched >= 20 && gamesPitched <= 44) return 'mid';
+            return 'low';
+        }
+
+        const gamesPlayed = player.stats.gamesPlayed || 0;
+        const hits = player.stats.hits || 0;
+
+        if (gamesPlayed >= 120 || hits >= 120) return 'high';
+        if (gamesPlayed >= 60 && gamesPlayed <= 119) return 'mid';
+        return 'low';
+    }
+
+    private static getTierSalaryParams(player: Player): { minRate: number; perfCoef: number; maxRate: number } {
+        const tier = this.getWorkloadTier(player);
+        if (player.position === 'P') {
+            return this.TIER_SALARY_PARAMS.pitcher[tier];
+        }
+        return this.TIER_SALARY_PARAMS.batter[tier];
+    }
 
     private static getBatterSampleWeight(player: Player): number {
         const plateAppearances = player.stats.plateAppearances || 0;
