@@ -2,8 +2,19 @@ import { Player, TeamId, NewsItem, GameState } from '../types';
 import { dbManager } from './databaseManager';
 import { OFF_SEASON_TURNS } from '../utils/constants';
 import { ForeignPlayerGenerator } from './foreignPlayerGenerator';
+import { CONTRACT_BALANCE_CONSTANTS } from '../utils/constants';
 
 export class ContractManager {
+    private static readonly DEFAULT_TEAM_LOYALTY = CONTRACT_BALANCE_CONSTANTS.DEFAULT_TEAM_LOYALTY;
+    private static readonly MIN_TEAM_LOYALTY = CONTRACT_BALANCE_CONSTANTS.MIN_TEAM_LOYALTY;
+    private static readonly MAX_TEAM_LOYALTY = CONTRACT_BALANCE_CONSTANTS.MAX_TEAM_LOYALTY;
+    private static readonly MIN_SALARY = CONTRACT_BALANCE_CONSTANTS.MIN_SALARY;
+    private static readonly MAX_SALARY = CONTRACT_BALANCE_CONSTANTS.MAX_SALARY;
+    private static readonly RENEWAL_MAX_INCREASE_RATE = CONTRACT_BALANCE_CONSTANTS.RENEWAL_MAX_INCREASE_RATE;
+    private static readonly RENEWAL_MAX_DECREASE_RATE = CONTRACT_BALANCE_CONSTANTS.RENEWAL_MAX_DECREASE_RATE;
+    private static readonly HIGH_SALARY_THRESHOLD = CONTRACT_BALANCE_CONSTANTS.HIGH_SALARY_THRESHOLD;
+    private static readonly NORMAL_SALARY_ROUNDING_UNIT = CONTRACT_BALANCE_CONSTANTS.NORMAL_SALARY_ROUNDING_UNIT;
+    private static readonly HIGH_SALARY_ROUNDING_UNIT = CONTRACT_BALANCE_CONSTANTS.HIGH_SALARY_ROUNDING_UNIT;
 
   /**
    * 全チームの契約更改処理を実行する
@@ -53,9 +64,13 @@ export class ContractManager {
 
       const updatedRoster: Player[] = [];
       
-      for (const player of remainingPlayers) {
-        const newSalary = this.calculateNewSalary(player);
-        const salaryDiff = newSalary - (player.contract?.salary || 0);
+            for (const player of remainingPlayers) {
+                const currentSalary = player.contract?.salary || 1000;
+                const currentYearsRemaining = player.contract?.yearsRemaining || 1;
+                const nextYearsRemaining = Math.max(0, currentYearsRemaining - 1);
+                const shouldRenewNow = nextYearsRemaining <= 0;
+                const newSalary = shouldRenewNow ? this.getRecommendedRenewalSalary(player) : currentSalary;
+                const salaryDiff = newSalary - currentSalary;
         
         // 契約情報を更新
         const updatedPlayer = {
@@ -63,7 +78,7 @@ export class ContractManager {
           contract: {
             ...player.contract,
             salary: newSalary,
-            yearsRemaining: Math.max(0, (player.contract?.yearsRemaining || 1) - 1)
+                        yearsRemaining: nextYearsRemaining
           }
         };
         updatedRoster.push(updatedPlayer);
@@ -173,56 +188,114 @@ export class ContractManager {
   }
 
   /**
+     * 更改推奨年俸を取得
+     */
+    static getRecommendedRenewalSalary(player: Player): number {
+        return this.calculateNewSalary(player);
+    }
+
+    /**
    * 年俸計算ロジック
    */
   private static calculateNewSalary(player: Player): number {
     const currentSalary = player.contract?.salary || 1000; // デフォルト1000万
-    let performanceFactor = 1.0;
+        let performanceScore = 0;
+        let sampleWeight = 0;
 
     // 成績による変動
     if (player.position === 'P') {
-        // 投手
         const era = player.stats.era || 4.50;
         const wins = player.stats.wins || 0;
+        const holds = player.stats.holds || 0;
         const saves = player.stats.saves || 0;
-        
-        if (era < 2.50) performanceFactor += 0.2;
-        else if (era < 3.50) performanceFactor += 0.1;
-        else if (era > 5.00) performanceFactor -= 0.1;
-        
-        if (wins > 10) performanceFactor += 0.15;
-        if (saves > 20) performanceFactor += 0.15;
+
+        const eraScore = this.clamp((3.7 - era) / 1.6, -1, 1);
+        const winsScore = this.clamp((wins - 8) / 8, -1, 1);
+        const holdsScore = this.clamp((holds - 12) / 18, 0, 1);
+        const savesScore = this.clamp((saves - 18) / 20, 0, 1);
+
+        performanceScore = (eraScore * 0.5) + (winsScore * 0.2) + (holdsScore * 0.15) + (savesScore * 0.15);
+        sampleWeight = this.getPitcherSampleWeight(player);
         
     } else {
-        // 野手
         const avg = player.stats.average || 0.250;
         const hr = player.stats.homeRuns || 0;
         const rbi = player.stats.rbi || 0;
         const ops = player.stats.ops || 0.700;
 
-        if (avg > 0.300) performanceFactor += 0.15;
-        else if (avg < 0.220) performanceFactor -= 0.1;
+        const avgScore = this.clamp((avg - 0.26) / 0.05, -1, 1);
+        const opsScore = this.clamp((ops - 0.72) / 0.12, -1, 1);
+        const hrScore = this.clamp((hr - 12) / 20, -1, 1);
+        const rbiScore = this.clamp((rbi - 55) / 35, -1, 1);
 
-        if (hr > 20) performanceFactor += 0.15;
-        if (rbi > 80) performanceFactor += 0.1;
-        if (ops > 0.850) performanceFactor += 0.1;
+        performanceScore = (avgScore * 0.35) + (opsScore * 0.35) + (hrScore * 0.15) + (rbiScore * 0.15);
+        sampleWeight = this.getBatterSampleWeight(player);
     }
 
-    // 年齢による減衰 (35歳以上)
-    if (player.age > 35) {
-        performanceFactor -= 0.1;
-    }
+    const weightedPerformance = performanceScore * sampleWeight;
+    const agePenalty = Math.max(0, player.age - 33) * 0.015;
 
-    // 変動幅の制限 (最大2倍、最小40%減)
-    performanceFactor = Math.max(0.6, Math.min(2.0, performanceFactor));
+    // 忠誠度補正 (低いほど高年俸志向・高いほどチーム寄り)
+    const loyalty = this.getTeamLoyalty(player);
+    const loyaltyAdjustment = ((this.DEFAULT_TEAM_LOYALTY - loyalty) / 100) * 0.05;
 
-    // 新年俸 (10万単位で丸める)
+    const rawPerformanceFactor = 1 + (weightedPerformance * 0.18) - agePenalty + loyaltyAdjustment;
+
+    // 変動幅の制限 (最大+20%、最小-15%)
+    const performanceFactor = this.clamp(
+      rawPerformanceFactor,
+      this.RENEWAL_MAX_DECREASE_RATE,
+      this.RENEWAL_MAX_INCREASE_RATE
+    );
+
     let newSalary = currentSalary * performanceFactor;
-    newSalary = Math.round(newSalary / 10) * 10;
-    
-    // 最低年俸保証 (400万)
-    return Math.max(400, newSalary);
+    newSalary = this.roundAutoSalary(newSalary, currentSalary);
+
+    // 年俸上下限
+    return this.clampSalary(newSalary);
   }
+
+    private static getBatterSampleWeight(player: Player): number {
+        const plateAppearances = player.stats.plateAppearances || 0;
+        const atBats = player.stats.atBats || 0;
+        const gamesPlayed = player.stats.gamesPlayed || 0;
+
+        const paBase = plateAppearances > 0 ? plateAppearances : atBats;
+        const paWeight = this.clamp01(paBase / 200);
+        const gamesWeight = this.clamp01(gamesPlayed / 120);
+
+        return this.clamp01(paWeight * 0.8 + gamesWeight * 0.2);
+    }
+
+    private static getPitcherSampleWeight(player: Player): number {
+        const inningsPitched = player.stats.inningsPitched || player.stats.pitchingInnings || 0;
+        const gamesPitched = player.stats.gamesPitched || 0;
+
+        const inningsWeight = this.clamp01(inningsPitched / 90);
+        const gamesWeight = this.clamp01(gamesPitched / 50);
+
+        return this.clamp01(inningsWeight * 0.8 + gamesWeight * 0.2);
+    }
+
+    private static clamp01(value: number): number {
+        return Math.max(0, Math.min(1, value));
+    }
+
+    private static clamp(value: number, min: number, max: number): number {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private static roundAutoSalary(salary: number, baseSalary?: number): number {
+        const thresholdBase = baseSalary ?? salary;
+        const roundingUnit = thresholdBase >= this.HIGH_SALARY_THRESHOLD
+            ? this.HIGH_SALARY_ROUNDING_UNIT
+            : this.NORMAL_SALARY_ROUNDING_UNIT;
+        return Math.round(salary / roundingUnit) * roundingUnit;
+    }
+
+    private static clampSalary(salary: number): number {
+        return this.clamp(salary, this.MIN_SALARY, this.MAX_SALARY);
+    }
 
   /**
    * 引退処理
@@ -396,7 +469,9 @@ export class ContractManager {
 
       // 2. FA宣言判定
       // 国内FA権取得は一般的に9年(大卒・社会人7年)だが、ここでは簡易的に一律7年とする
-      if (qualifiedYears >= 7 && Math.random() < 0.1) {
+    const loyalty = this.getTeamLoyalty(player);
+    const faDeclareProbability = this.getFADeclareProbability(loyalty);
+    if (qualifiedYears >= 7 && Math.random() < faDeclareProbability) {
         // FA宣言状態をセット
         player.faState = {
             declared: true,
@@ -529,10 +604,11 @@ export class ContractManager {
               // 判定実行
               if (Math.random() < offerChance) {
                   // オファー作成
-                  const baseSalary = player.contract?.salary || 1000;
-                  // 評価が高いほど高額オファー
-                  const salaryMultiplier = 0.8 + (playerAbility / 50) + Math.random() * 0.5; 
-                  const offerSalary = Math.floor(baseSalary * salaryMultiplier);
+                  const contractSalary = player.contract?.salary || 1000;
+                  const marketBaseline = Math.max(contractSalary, this.getRecommendedRenewalSalary(player));
+                  const abilityBonus = this.clamp((playerAbility - 20) / 80, -0.1, 0.2);
+                  const salaryMultiplier = 0.9 + abilityBonus + Math.random() * 0.18;
+                  const offerSalary = this.clampSalary(this.roundAutoSalary(marketBaseline * salaryMultiplier, marketBaseline));
                   const offerYears = playerAbility > 25 ? (Math.floor(Math.random() * 3) + 2) : (Math.floor(Math.random() * 2) + 1);
 
                   const newOffer = { teamId: team.id, salary: offerSalary, years: offerYears, date: turn };
@@ -546,16 +622,18 @@ export class ContractManager {
           // 即決ロジック: 非常に良い条件があれば即決断
           if (player.faState.offers.length > 0) {
               const bestOffer = player.faState.offers.reduce((prev: { teamId: TeamId; salary: number; years: number; date: number }, current: { teamId: TeamId; salary: number; years: number; date: number }) => {
-                  const prevScore = prev.salary * (1 + prev.years * 0.1);
-                  const currentScore = current.salary * (1 + current.years * 0.1);
+                  const prevScore = this.calculateFAOfferScore(prev, player);
+                  const currentScore = this.calculateFAOfferScore(current, player);
                   return currentScore > prevScore ? current : prev;
               });
 
               const currentSalary = player.contract?.salary || 1000;
-              // 評価値が前年俸の2.5倍以上なら即決
-              const bestScore = bestOffer.salary * (1 + bestOffer.years * 0.1);
+              // 評価値が前年俸の一定倍率を超える場合に即決
+              // 忠誠度が高いほど即決しづらくする
+              const bestScore = this.calculateFAOfferScore(bestOffer, player);
+              const instantDecisionMultiplier = 2.2 + (this.getTeamLoyalty(player) / 100) * 0.8;
               
-              if (bestScore > currentSalary * 2.5) {
+              if (bestScore > currentSalary * instantDecisionMultiplier) {
                   player.faState.decisionTurn = turn;
               }
           }
@@ -568,8 +646,8 @@ export class ContractManager {
                   // 評価値 = 年俸 * (1 + 年数 * 0.1)
                   // ※ 本来は球団の強さや地元なども考慮するが簡易実装
                   const bestOffer = player.faState.offers.reduce((prev: { teamId: TeamId; salary: number; years: number; date: number }, current: { teamId: TeamId; salary: number; years: number; date: number }) => {
-                      const prevScore = prev.salary * (1 + prev.years * 0.1);
-                      const currentScore = current.salary * (1 + current.years * 0.1);
+                      const prevScore = this.calculateFAOfferScore(prev, player);
+                      const currentScore = this.calculateFAOfferScore(current, player);
                       return currentScore > prevScore ? current : prev;
                   });
 
@@ -653,4 +731,24 @@ export class ContractManager {
 
     return logs;
   }
+
+    private static getTeamLoyalty(player: Player): number {
+        const raw = typeof player.teamLoyalty === 'number' ? player.teamLoyalty : this.DEFAULT_TEAM_LOYALTY;
+        return Math.max(this.MIN_TEAM_LOYALTY, Math.min(this.MAX_TEAM_LOYALTY, raw));
+    }
+
+    private static getFADeclareProbability(loyalty: number): number {
+        const baseProbability = 0.1;
+        const adjusted = baseProbability * (1 + ((this.DEFAULT_TEAM_LOYALTY - loyalty) / 80));
+        return Math.max(0.02, Math.min(0.3, adjusted));
+    }
+
+    private static calculateFAOfferScore(
+        offer: { teamId: TeamId; salary: number; years: number; date: number },
+        player: Player
+    ): number {
+        const loyalty = this.getTeamLoyalty(player);
+        const yearsWeight = 0.08 + (loyalty / 100) * 0.12;
+        return offer.salary * (1 + offer.years * yearsWeight);
+    }
 }

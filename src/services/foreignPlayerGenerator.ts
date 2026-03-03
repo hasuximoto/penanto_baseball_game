@@ -1,6 +1,7 @@
 import { Player, Position, TeamId } from '../types';
 import { RandomUtils } from '../utils/randomUtils';
 import FOREIGN_NAME_MASTER from '../data/foreignNameMaster.json';
+import { CONTRACT_BALANCE_CONSTANTS } from '../utils/constants';
 
 export class ForeignPlayerGenerator {
 
@@ -127,6 +128,7 @@ export class ForeignPlayerGenerator {
         recentForm: [],
         injuryStatus: 'healthy',
         morale: 50,
+        teamLoyalty: CONTRACT_BALANCE_CONSTANTS.DEFAULT_TEAM_LOYALTY,
         pitcherRole: role as any
     };
   }
@@ -187,7 +189,8 @@ export class ForeignPlayerGenerator {
         careerStats: {} as any,
         recentForm: [],
         injuryStatus: 'healthy',
-        morale: 50
+        morale: 50,
+        teamLoyalty: CONTRACT_BALANCE_CONSTANTS.DEFAULT_TEAM_LOYALTY
     };
   }
 }
