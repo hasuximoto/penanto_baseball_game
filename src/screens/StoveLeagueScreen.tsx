@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, SafeAreaView } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,6 +18,10 @@ export const StoveLeagueScreen = () => {
   const gameState = useSelector((state: RootState) => state.game);
   const currentSeason = gameState.season;
   const offSeasonStep = gameState.offSeasonStep || 'draft';
+  const selectedTeamId = gameState.selectedTeamId;
+
+  const [teamPayroll, setTeamPayroll] = useState(0);
+  const [teamBudget, setTeamBudget] = useState<number | null>(null);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,6 +35,43 @@ export const StoveLeagueScreen = () => {
     setModalConfig({ title, message, buttons });
     setModalVisible(true);
   };
+
+  const persistGameProgress = async (updates: Partial<typeof gameState>) => {
+    const nextState = {
+      ...gameState,
+      ...updates,
+    };
+    await dbManager.saveGameState(nextState);
+  };
+
+  const loadTeamFinance = async () => {
+    if (!selectedTeamId) {
+      setTeamPayroll(0);
+      setTeamBudget(null);
+      return;
+    }
+
+    try {
+      const [roster, teams] = await Promise.all([
+        dbManager.getTeamRoster(selectedTeamId),
+        dbManager.getInitialTeams(),
+      ]);
+
+      const payroll = roster.reduce((sum: number, player: any) => sum + (player.contract?.salary || 0), 0);
+      const team = teams.find((t: any) => t.id === selectedTeamId);
+
+      setTeamPayroll(payroll);
+      setTeamBudget(typeof team?.budget === 'number' ? team.budget : null);
+    } catch (error) {
+      console.error('Failed to load team finance:', error);
+      setTeamPayroll(0);
+      setTeamBudget(null);
+    }
+  };
+
+  useEffect(() => {
+    loadTeamFinance();
+  }, [selectedTeamId, offSeasonStep]);
 
   const handleDraft = () => {
     navigation.navigate('Draft' as never);
@@ -47,10 +88,12 @@ export const StoveLeagueScreen = () => {
           onPress: async () => {
             try {
               const logs = await ContractManager.processOffSeasonContracts(gameState.selectedTeamId, currentSeason);
-              
-              // 次のフェーズへ
-              dispatch(setOffSeasonStep('reinforcement'));
-              dispatch(setReinforcementTurn(1));
+
+              if (gameState.selectedTeamId) {
+                dispatch(setOffSeasonStep('contract_user'));
+                dispatch(setReinforcementTurn(0));
+                await persistGameProgress({ offSeasonStep: 'contract_user', reinforcementTurn: 0 });
+              }
 
               // モーダルの開閉タイミングを調整するために少し待つ
               setTimeout(() => {
@@ -67,6 +110,9 @@ export const StoveLeagueScreen = () => {
                     }]
                   );
                 } else {
+                  dispatch(setOffSeasonStep('reinforcement'));
+                  dispatch(setReinforcementTurn(1));
+                  persistGameProgress({ offSeasonStep: 'reinforcement', reinforcementTurn: 1 });
                   showAlert("完了", "契約更改が完了しました。\n\n" + "引退・戦力外はニュースを確認してください。");
                 }
               }, 500);
@@ -119,9 +165,11 @@ export const StoveLeagueScreen = () => {
       
       if (currentTurn >= OFF_SEASON_TURNS) {
           dispatch(setOffSeasonStep('camp'));
+          await persistGameProgress({ offSeasonStep: 'camp' });
           showAlert("期間終了", "戦力補強期間が終了しました。\n次は春季キャンプです。");
       } else {
           dispatch(setReinforcementTurn(currentTurn + 1));
+          await persistGameProgress({ reinforcementTurn: currentTurn + 1 });
           showAlert("ターン経過", `ターン ${currentTurn + 1} になりました。`);
       }
   };
@@ -140,6 +188,7 @@ export const StoveLeagueScreen = () => {
               
               // 次のフェーズへ
               dispatch(setOffSeasonStep('next_season'));
+              await persistGameProgress({ offSeasonStep: 'next_season' });
 
               const changedCount = logs.filter(l => l.includes(':')).length;
               showAlert("完了", `春季キャンプが終了しました。\n${changedCount}人の能力が変動しました。`);
@@ -230,6 +279,20 @@ export const StoveLeagueScreen = () => {
       </View>
 
       <ScrollView contentContainerStyle={styles.menuContainer}>
+        <View style={styles.financeCard}>
+          <Text style={styles.financeLabel}>チーム財務</Text>
+          <View style={styles.financeRow}>
+            <Text style={styles.financeKey}>総年俸</Text>
+            <Text style={styles.financeValue}>{teamPayroll.toLocaleString('ja-JP')}万円</Text>
+          </View>
+          <View style={styles.financeRow}>
+            <Text style={styles.financeKey}>予算</Text>
+            <Text style={styles.financeValue}>
+              {teamBudget !== null ? `${teamBudget.toLocaleString('ja-JP')}万円` : '--'}
+            </Text>
+          </View>
+        </View>
+
         <TouchableOpacity 
             style={[styles.menuButton, offSeasonStep !== 'draft' && styles.disabledButton]} 
             onPress={handleDraft}
@@ -255,7 +318,22 @@ export const StoveLeagueScreen = () => {
           </View>
           <View style={styles.textContainer}>
             <Text style={[styles.menuButtonText, offSeasonStep !== 'contract' && { color: COLORS.textMuted }]}>契約更改</Text>
-            <Text style={styles.menuDescription}>所属選手と契約を更新します</Text>
+            <Text style={styles.menuDescription}>全チームの契約更改と引退処理を行います</Text>
+          </View>
+          {offSeasonStep === 'contract_user' || offSeasonStep === 'reinforcement' || offSeasonStep === 'camp' || offSeasonStep === 'next_season' ? <Text style={styles.completedText}>完了</Text> : null}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+            style={[styles.menuButton, offSeasonStep !== 'contract_user' && styles.disabledButton]}
+            onPress={() => navigation.navigate('ReleasePlayers' as never)}
+            disabled={offSeasonStep !== 'contract_user'}
+        >
+          <View style={styles.iconContainer}>
+              <Ionicons name="person-outline" size={32} color={offSeasonStep === 'contract_user' ? COLORS.primary : COLORS.textMuted} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.menuButtonText, offSeasonStep !== 'contract_user' && { color: COLORS.textMuted }]}>自チーム契約・戦力外</Text>
+            <Text style={styles.menuDescription}>自チームの契約調整と戦力外通知を行います</Text>
           </View>
           {offSeasonStep === 'reinforcement' || offSeasonStep === 'camp' || offSeasonStep === 'next_season' ? <Text style={styles.completedText}>完了</Text> : null}
         </TouchableOpacity>
@@ -370,6 +448,36 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     padding: SPACING.md,
+  },
+  financeCard: {
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  financeLabel: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.bold,
+    fontSize: 12,
+    marginBottom: SPACING.xs,
+  },
+  financeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  financeKey: {
+    color: COLORS.textMain,
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+  },
+  financeValue: {
+    color: COLORS.primary,
+    fontFamily: FONTS.bold,
+    fontSize: 14,
   },
   menuButton: {
     flexDirection: 'row',

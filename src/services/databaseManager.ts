@@ -12,6 +12,7 @@ import INITIAL_SCHEDULE from '../data/initialSchedule.json';
 import NAME_MASTER_DATA from '../data/nameMaster.json';
 import { GameResult, PlayerGameStats, Player, NewsItem, TeamId, YearlyStats, PlayerStats, Title } from '../types';
 import { getGameDateString } from '../utils/dateUtils';
+import { CONTRACT_BALANCE_CONSTANTS } from '../utils/constants';
 import { AwardManager } from './awardManager';
 import { calculateWAR } from '../utils/calculations';
 import { DraftManager } from './draftManager';
@@ -216,6 +217,7 @@ export class DatabaseManager {
   private dbKey = 'simbaseball_db_initialized';
   private dbVersionKey = 'simbaseball_db_version';
   private currentVersion = 14;
+  private readonly defaultTeamLoyalty = CONTRACT_BALANCE_CONSTANTS.DEFAULT_TEAM_LOYALTY;
 
   constructor() {
     if (Platform.OS === 'web') {
@@ -227,6 +229,24 @@ export class DatabaseManager {
         description: 'SimBaseball Database'
       });
     }
+  }
+
+  private normalizeTeamLoyalty(value: unknown): number {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return this.defaultTeamLoyalty;
+    }
+    return Math.max(0, Math.min(100, Math.round(value)));
+  }
+
+  private normalizePlayer(player: Player): Player {
+    return {
+      ...player,
+      teamLoyalty: this.normalizeTeamLoyalty(player.teamLoyalty),
+    };
+  }
+
+  private normalizePlayers(players: Player[]): Player[] {
+    return players.map(player => this.normalizePlayer(player));
   }
 
   /**
@@ -407,6 +427,7 @@ export class DatabaseManager {
       const distributedPlayers = INITIAL_PLAYERS.map((p, index) => ({
         ...p,
         id: p.id || `player_${index}`,
+        teamLoyalty: this.normalizeTeamLoyalty((p as any).teamLoyalty),
         stats: p.stats || {
           average: 0.0,
           homeRuns: 0,
@@ -505,10 +526,11 @@ export class DatabaseManager {
       }
 
       const parsed = JSON.parse(schemaData);
-      return parsed.initialData?.players || INITIAL_PLAYERS;
+      const players = (parsed.initialData?.players || INITIAL_PLAYERS) as Player[];
+      return this.normalizePlayers(players) as typeof INITIAL_PLAYERS;
     } catch (error) {
       console.error('Failed to get initial players:', error);
-      return INITIAL_PLAYERS;
+      return this.normalizePlayers(INITIAL_PLAYERS as Player[]) as typeof INITIAL_PLAYERS;
     }
   }
 
@@ -543,7 +565,8 @@ export class DatabaseManager {
       const currentPlayers = parsed.initialData.players as Player[];
       
       // 更新対象のIDマップを作成
-      const updateMap = new Map(updatedPlayers.map(p => [p.id, p]));
+      const normalizedUpdates = this.normalizePlayers(updatedPlayers);
+      const updateMap = new Map(normalizedUpdates.map(p => [p.id, p]));
       
       const newPlayers = currentPlayers.map(p => {
         if (updateMap.has(p.id)) {
@@ -573,7 +596,8 @@ export class DatabaseManager {
       // 重複チェックはIDで行うのが安全だが、ここでは単純に追加する
       // 必要ならIDチェックを入れる
       
-      const updatedList = [...currentPlayers, ...newPlayersList];
+      const normalizedNewPlayers = this.normalizePlayers(newPlayersList);
+      const updatedList = [...currentPlayers, ...normalizedNewPlayers];
 
       parsed.initialData.players = updatedList;
       await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
@@ -1666,7 +1690,7 @@ export class DatabaseManager {
         const schemaData = await this.getItem('simbaseball_db_schema');
         if (schemaData) {
             const parsed = JSON.parse(schemaData);
-            parsed.initialData.players = players;
+            parsed.initialData.players = this.normalizePlayers(players);
             await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         }
     } catch (error) {
@@ -1864,7 +1888,8 @@ export class DatabaseManager {
         
         // 既存の選手リストに追加
         const currentPlayers = parsed.initialData.players || [];
-        parsed.initialData.players = [...currentPlayers, ...newPlayers];
+        const normalizedNewPlayers = this.normalizePlayers(newPlayers);
+        parsed.initialData.players = [...currentPlayers, ...normalizedNewPlayers];
         
         await this.setItem('simbaseball_db_schema', JSON.stringify(parsed));
         console.log(`Registered ${newPlayers.length} drafted players.`);

@@ -746,6 +746,7 @@ export const DraftScreen = () => {
         
         // 次のフェーズへ進める
         dispatch(setOffSeasonStep('contract'));
+        await dbManager.saveGameState({ ...gameState, offSeasonStep: 'contract', reinforcementTurn: 0 });
         return true;
     } catch (error) {
         console.error("Failed to save draft results:", error);

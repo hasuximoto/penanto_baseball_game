@@ -17,7 +17,7 @@ export type GameStatus = "before" | "during" | "after" | "season_end";
 
 export type SeasonPhase = "regular" | "off_season" | "draft" | "signing";
 
-export type OffSeasonStep = "draft" | "contract" | "reinforcement" | "camp" | "next_season";
+export type OffSeasonStep = "draft" | "contract" | "contract_user" | "reinforcement" | "camp" | "next_season";
 
 export type HandCode = 1 | 2 | 3;
 export type ThrowHandCode = 1 | 2;
@@ -58,6 +58,7 @@ export interface PlayerStats {
   era?: number;                     // 防御率
   wins?: number;                    // 勝利
   losses?: number;                  // 敗北
+  holds?: number;                   // ホールド
   saves?: number;                   // セーブ
   inningsPitched?: number;           // 投球回数
   pitchingInnings?: number;          // 投球回数（別表記）
@@ -191,6 +192,7 @@ export interface Player {
   recentForm: number[];             // 最近のパフォーマンス
   injuryStatus: "healthy" | "injured" | "out";
   morale: number;                   // 士気 (0-100)
+  teamLoyalty?: number;             // チーム忠誠度 (0-100, 未設定時は60扱い)
   fatigue?: number;                 // 疲労
   recovery?: number;                // 疲労回復力
   starter_aptitude?: number;        // 先発適性
